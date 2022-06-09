@@ -8,6 +8,6 @@ TODO
 * [ ] performance mode for lower end computers (2 rings only but same ring size?? idk)
 * [ ] research better methods for disabling sun (if possible, I doubt)
 * [ ] hammer intergration so map makers can specify settings for the csm
-* [ ] MAKE A GODDAMN ICON 
+* [ ] MAKE A GODDAMN ICON FOR THE ENTITY IN THE SPAWNMENU
  
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
