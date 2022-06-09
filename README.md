@@ -9,5 +9,6 @@ TODO
 * [ ] research better methods for disabling sun (if possible, I doubt)
 * [ ] hammer intergration so map makers can specify settings for the csm
 * [ ] MAKE A GODDAMN ICON FOR THE ENTITY IN THE SPAWNMENU
+* [ ] Really shitty and cheap global illumination (probably very hard to do so this is unlikely)
  
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
