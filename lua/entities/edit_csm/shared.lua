@@ -96,7 +96,78 @@ function warn()
 	print(hasLightEnvs)
 end
 function ENT:Initialize()
-	
+	if (CLIENT) then
+		if (file.Read( "csm.txt", "DATA" ) != "one" ) then
+			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
+			local Frame = vgui.Create( "DFrame" )
+			Frame:SetSize( 300, 200 ) 
+			
+			Frame:Center()
+			Frame:SetTitle( "CSM First Time Spawn!" ) 
+			Frame:SetVisible( true ) 
+			Frame:SetDraggable( false ) 
+			Frame:ShowCloseButton( true ) 
+			Frame:MakePopup()
+
+			local label1 = vgui.Create( "DLabel", Frame )
+			label1:SetPos( 15, 40 )
+			label1:SetSize(	300, 20)
+			label1:SetText( "Welcome to the CSM addon!" )
+			local label2 = vgui.Create( "DLabel", Frame )
+			label2:SetPos( 15, 55 )
+			label2:SetSize(	300, 20)
+			label2:SetText( "This is your first time spawning CSM, go set your quality!" )
+			local label3 = vgui.Create( "DLabel", Frame )
+			label3:SetPos( 15, 70 )
+			label3:SetSize(	300, 20)
+			label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+
+			local lowButton = vgui.Create("DButton", Frame)
+			lowButton:SetText( "Low" )
+			lowButton:SetPos( 20, 100 )
+			local mediumButton = vgui.Create("DButton", Frame)
+			mediumButton:SetText( "Medium" )
+			mediumButton:SetPos( 120, 100 )
+			local highButton = vgui.Create("DButton", Frame)
+			highButton:SetText( "High" )
+			highButton:SetPos( 220, 100 )
+			
+			highButton.DoClick = function()
+				RunConsoleCommand("r_flashlightdepthres", "8192")
+			end
+			mediumButton.DoClick = function()
+				RunConsoleCommand("r_flashlightdepthres", "4096")
+			end
+			lowButton.DoClick = function()
+				RunConsoleCommand("r_flashlightdepthres", "2048")
+			end
+
+			local DermaNumSlider = vgui.Create( "DNumSlider", Frame )
+			DermaNumSlider:SetPos( 8, 120 )				-- Set the position
+			DermaNumSlider:SetSize( 300, 30 )			-- Set the size
+			DermaNumSlider:SetText( "Shadow Quality" )	-- Set the text above the slider
+			DermaNumSlider:SetMin( 0 )				 	-- Set the minimum number you can slide to
+			DermaNumSlider:SetMax( 8192 )				-- Set the maximum number you can slide to
+			DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
+			DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
+
+			local Button = vgui.Create("DButton", Frame)
+			Button:SetText( "Continue" )
+			Button:SetPos( 160, 155 )
+			local Button2 = vgui.Create("DButton", Frame)
+			Button2:SetText( "Cancel" )
+			Button2:SetPos( 80, 155 )
+			Button.DoClick = function()
+				file.Write( "csm.txt", "one" )
+				Frame:Close()
+			end
+
+			Button2.DoClick = function()
+				RunConsoleCommand("csm_enabled", "0")
+				Frame:Close()
+			end
+		end
+	end
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	RunConsoleCommand("r_shadows_gamecontrol", "0")
 	shadfiltChanged = true
