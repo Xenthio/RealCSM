@@ -55,13 +55,16 @@ if (CLIENT) then
 			Button:SetPos( 120, 155 )
 			Button.DoClick = function()
 				file.Write( "csm.txt", "one" )
-				RunConsoleCommand("gmod_admin_cleanup")
-				
+				if (GetConVar( "csm_spawnalways" ):GetInt() == 1) then
+					RunConsoleCommand("gmod_admin_cleanup")
+				end
+
 				Frame:Close()
 			end
 		end
 	end
 	
 	--hook.Add( "PlayerFullLoad", "firstieCheck", firstTimeCheck)
-	firstTimeCheck()
+	hook.Add( "InitPostEntity", "Ready", firstTimeCheck)
+	--net.Receive( "PlayerSpawnedFully", firstTimeCheck())
 end

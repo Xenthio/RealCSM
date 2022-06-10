@@ -14,8 +14,9 @@ end )
 
 if (SERVER) then
 
-    
+    util.AddNetworkString( "PlayerSpawnedFully" )
     function spawnCSM() 
+        
         if (GetConVar( "csm_spawnalways" ):GetInt() == 1) then
             if (FindEntity("edit_csm") == nil) then
                 if (table.Count(ents.FindByClass("light_environment")) > 0) then
