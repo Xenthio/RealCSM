@@ -1,5 +1,5 @@
 
-
+CreateClientConVar( "csm_spawnalways", 0,  true, false )
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
