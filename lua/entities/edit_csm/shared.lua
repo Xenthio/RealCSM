@@ -447,34 +447,43 @@ function ENT:Think()
 		end
 	end
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) then
-		if (csmEnabledPrev == true) then
-			csmEnabledPrev = false
+		if (csmEnabledPrev == false) then
+			csmEnabledPrev = true
 			RunConsoleCommand("r_radiosity", "2")
 			if (self:GetHideRTTShadows()) then
 				RunConsoleCommand("r_shadows_gamecontrol", "0")
 			end
-			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-				v:Fire("turnoff")
-				if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
-					self:SetSunBrightness(1000.0)
-				else
-					self:SetSunBrightness(200.0)
-				end
+			if (CLIENT) then
+				self:createlamps()
+			else
+				FindEntity("light_environment"):Fire("turnoff")
 			end
 			
 		end
 	end
 
 	if (GetConVar( "csm_enabled" ):GetInt() == 0) then
-		if (csmEnabledPrev == false) then
-			csmEnabledPrev = true
+		if (csmEnabledPrev == true) then
+			csmEnabledPrev = false
 			RunConsoleCommand("r_radiosity", "3")
 			if (self:GetHideRTTShadows()) then
 				RunConsoleCommand("r_shadows_gamecontrol", "1")
 			end
-			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-				v:Fire("turnon")
-				self:SetSunBrightness(0.0)
+			
+			
+			if (CLIENT) then
+				
+				
+				
+				for i, projectedTexture in pairs(self.ProjectedTextures) do
+					projectedTexture:Remove()
+				end
+				
+				table.Empty(self.ProjectedTextures)
+				
+				--hook.Remove("CsmRenderOverlay")
+			else
+				FindEntity("light_environment"):Fire("turnon")
 			end
 		end
 	end
@@ -641,46 +650,48 @@ function ENT:Think()
 		self.CurrentAppearance = CalculateAppearance(self:GetTime())
 	end
 	if (CLIENT) then
-		local position = GetViewEntity():GetPos() + offset
+		if (GetConVar( "csm_enabled" ):GetInt() == 1) then
+			local position = GetViewEntity():GetPos() + offset
 
-		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
-		
-		if (furtherEnabled) then
-			if (self.ProjectedTextures[4]:IsValid()) then
-				self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
-			end
-		end
-		for i, projectedTexture in pairs(self.ProjectedTextures) do
-			if (shadfiltChanged) then
-				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
-			end
-			--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-			--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
+			self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
+			self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+			self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
 			
-			if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
-				projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
-			else
-				projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+			if (furtherEnabled) then
+				if (self.ProjectedTextures[4]:IsValid()) then
+					self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+				end
 			end
-			--if (sun.direction:Angle().pitch < 360) then
-				--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 340) * 8.5) 
-			--elseif (sun.direction:Angle().pitch < 270) then
-				--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 20) * 8.5)
-			--else
-				--projectedTexture:SetBrightness(self:GetSunBrightness())
-			--end
-			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
-				projectedTexture:SetBrightness(self:GetSunBrightness())
-			else 
-				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
+			for i, projectedTexture in pairs(self.ProjectedTextures) do
+				if (shadfiltChanged) then
+					projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
+				end
+				--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+				--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
+				
+				if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
+					projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
+				else
+					projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+				end
+				--if (sun.direction:Angle().pitch < 360) then
+					--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 340) * 8.5) 
+				--elseif (sun.direction:Angle().pitch < 270) then
+					--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 20) * 8.5)
+				--else
+					--projectedTexture:SetBrightness(self:GetSunBrightness())
+				--end
+				if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
+					projectedTexture:SetBrightness(self:GetSunBrightness())
+				else 
+					projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
+				end
+				projectedTexture:SetPos(position)
+				projectedTexture:SetAngles(angle)
+				projectedTexture:SetNearZ(self:GetSunNearZ())
+				projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
+				projectedTexture:Update()
 			end
-			projectedTexture:SetPos(position)
-			projectedTexture:SetAngles(angle)
-			projectedTexture:SetNearZ(self:GetSunNearZ())
-			projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
-			projectedTexture:Update()
 		end
 	end
 	useskyandfog = self:GetUseSkyFogEffects()
