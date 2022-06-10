@@ -346,6 +346,7 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) then
 		if (csmEnabledPrev == true) then
 			csmEnabledPrev = false
+			RunConsoleCommand("r_radiosity", "2")
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnoff")
 			end
@@ -360,6 +361,7 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 0) then
 		if (csmEnabledPrev == false) then
 			csmEnabledPrev = true
+			RunConsoleCommand("r_radiosity", "3")
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnon")
 			end
