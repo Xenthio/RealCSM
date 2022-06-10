@@ -95,7 +95,28 @@ function warn()
 	end
 	print(hasLightEnvs)
 end
+
+function ENT:createlamps()
+	self.ProjectedTextures = { }
+	
+	for i = 1, 3 do
+		
+		self.ProjectedTextures[i] = ProjectedTexture()
+		--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
+		self.ProjectedTextures[i]:SetEnableShadows(true)
+		
+		if (i == 1) then
+			self.ProjectedTextures[i]:SetTexture("csm/mask_center")
+		else
+			self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
+		end
+
+	end
+end
 function ENT:Initialize()
+	if (SERVER) then	
+		util.AddNetworkString( "PlayerSpawned" )
+	end
 	if (CLIENT) then
 		if (file.Read( "csm.txt", "DATA" ) != "one" ) then
 			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
@@ -211,26 +232,13 @@ function ENT:Initialize()
 		end
 	end
 
+	
 	if (CLIENT) then
-		self.ProjectedTextures = { }
-		
-		for i = 1, 3 do
-			
-			self.ProjectedTextures[i] = ProjectedTexture()
-			--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
-			self.ProjectedTextures[i]:SetEnableShadows(true)
-			
-			if (i == 1) then
-				self.ProjectedTextures[i]:SetTexture("csm/mask_center")
-			else
-				self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
-			end
-
-		end
-		
+		self:createlamps()
+	end
 		--hook.Add("RenderScreenspaceEffects", "CsmRenderOverlay", RenderOverlay)
 		--hook.Add("SetupWorldFog", self, self.SetupWorldFog )
-	end
+	
 	
 	if (SERVER) then
 		--self.EnvSun = FindEntity("env_sun")
@@ -318,6 +326,18 @@ function ENT:SetupDataTables()
 		shadfiltChanged = true
 	end
 end
+
+hook.Add( "PlayerInitialSpawn", "playerspawned", function( ply )
+	net.Start( "PlayerSpawned" )
+	net.Send( ply )	
+end )
+
+
+net.Receive( "PlayerSpawned", function( len, ply )
+    if (CLIENT) then
+		FindEntity("edit_csm"):Initialize()
+	end
+end )
 
 function ENT:UpdateTransmitState()
 	return TRANSMIT_ALWAYS
