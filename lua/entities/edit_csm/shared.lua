@@ -121,7 +121,7 @@ function ENT:Initialize()
 		util.AddNetworkString( "PlayerSpawned" )
 	end
 	if (CLIENT) then
-		if (file.Read( "csm.txt", "DATA" ) != "one" ) then
+		if (file.Read( "csm.txt", "DATA" ) != "two" ) then
 			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 			local Frame = vgui.Create( "DFrame" )
 			Frame:SetSize( 300, 200 ) 
@@ -183,7 +183,7 @@ function ENT:Initialize()
 			Button2:SetText( "Cancel" )
 			Button2:SetPos( 80, 155 )
 			Button.DoClick = function()
-				file.Write( "csm.txt", "one" )
+				file.Write( "csm.txt", "two" )
 				Frame:Close()
 			end
 

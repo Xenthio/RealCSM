@@ -14,6 +14,7 @@ end )
 
 if (SERVER) then
 
+    
     function spawnCSM() 
         if (GetConVar( "csm_spawnalways" ):GetInt() == 1) then
             if (FindEntity("edit_csm") == nil) then
