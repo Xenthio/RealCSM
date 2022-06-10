@@ -341,6 +341,7 @@ net.Receive( "PlayerSpawned", function( len, ply )
     if (CLIENT) then
 		if (FindEntity("edit_csm") != nil) then
 			FindEntity("edit_csm"):Initialize()
+			v:Fire("turnoff")
 		end
 	end
 end )
@@ -374,34 +375,35 @@ function reloadLightmaps()
 end
 
 function ENT:OnRemove()
-	
-	furtherEnabled = false
-	furtherEnabledPrev = false
-	if (self:GetHideRTTShadows()) then
-		RunConsoleCommand("r_shadows_gamecontrol", "1")
-	end
-	RunConsoleCommand("r_projectedtexture_filter", "1")
-		
-	if (self:GetRemoveStaticSun()) then
-		--RunConsoleCommand("sv_cheats", "1")
-		
-		RunConsoleCommand("r_radiosity", "3")
-		
-		
-		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
-			--RunConsoleCommand("mat_reloadallmaterials")
-			--if (CLIENT) then
-			RunConsoleCommand("r_ambientlightingonly", "0")
+	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
+		furtherEnabled = false
+		furtherEnabledPrev = false
+		if (self:GetHideRTTShadows()) then
+			RunConsoleCommand("r_shadows_gamecontrol", "1")
+		end
+		RunConsoleCommand("r_projectedtexture_filter", "1")
 
-			RunConsoleCommand("r_lightstyle", "-1")
-			timer.Create( "reload", 0.1, 1, reloadLightmaps )
-			--timer.Simple(0.0001, function()
+		if (self:GetRemoveStaticSun()) then
+			--RunConsoleCommand("sv_cheats", "1")
+		
+			RunConsoleCommand("r_radiosity", "3")
+		
+		
+			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
+				--RunConsoleCommand("mat_reloadallmaterials")
+				--if (CLIENT) then
+				RunConsoleCommand("r_ambientlightingonly", "0")
+
+				RunConsoleCommand("r_lightstyle", "-1")
+				timer.Create( "reload", 0.1, 1, reloadLightmaps )
+				--timer.Simple(0.0001, function()
 				--render.RedownloadAllLightmaps(true ,true)
-			--end)
-			--end
-		else
-			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-				v:Fire("turnon")
+				--end)
+				--end
+			else
+				for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+					v:Fire("turnon")
+				end
 			end
 		end
 	end
