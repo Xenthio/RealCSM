@@ -347,6 +347,9 @@ function ENT:Think()
 		if (csmEnabledPrev == true) then
 			csmEnabledPrev = false
 			RunConsoleCommand("r_radiosity", "2")
+			if (self:GetHideRTTShadows()) then
+				RunConsoleCommand("r_shadows_gamecontrol", "0")
+			end
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnoff")
 			end
@@ -362,6 +365,9 @@ function ENT:Think()
 		if (csmEnabledPrev == false) then
 			csmEnabledPrev = true
 			RunConsoleCommand("r_radiosity", "3")
+			if (self:GetHideRTTShadows()) then
+				RunConsoleCommand("r_shadows_gamecontrol", "1")
+			end
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnon")
 			end
