@@ -558,13 +558,14 @@ function ENT:Think()
 		--RunConsoleCommand("r_flashlightdepthres", shadres)
 		
 	--end
-
-	local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
-	if (ShadowFilterPrev != shadfilt) then
-		ShadowFilterPrev = shadfilt
-		shadfiltChanged = true
-		RunConsoleCommand("csm_filter", shadfilt)
-		
+	if (CLIENT) then
+		local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
+		if (ShadowFilterPrev != shadfilt) then
+			ShadowFilterPrev = shadfilt
+			shadfiltChanged = true
+			RunConsoleCommand("csm_filter", shadfilt)
+			
+		end
 	end
 	--if (ShadowFilterPrev != GetConVar( "csm_filter" ):GetFloat()) then
 		--shadfiltChanged = true
