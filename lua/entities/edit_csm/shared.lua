@@ -336,7 +336,9 @@ end )
 
 net.Receive( "PlayerSpawned", function( len, ply )
     if (CLIENT) then
-		FindEntity("edit_csm"):Initialize()
+		if (FindEntity("edit_csm") != nil) then
+			FindEntity("edit_csm"):Initialize()
+		end
 	end
 end )
 
