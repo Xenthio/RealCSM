@@ -352,12 +352,13 @@ function ENT:Think()
 			end
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnoff")
+				if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
+					self:SetSunBrightness(1000.0)
+				else
+					self:SetSunBrightness(200.0)
+				end
 			end
-			if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
-				self:SetSunBrightness(1000.0)
-			else
-				self:SetSunBrightness(200.0)
-			end
+			
 		end
 	end
 
@@ -370,8 +371,8 @@ function ENT:Think()
 			end
 			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 				v:Fire("turnon")
+				self:SetSunBrightness(0.0)
 			end
-			self:SetSunBrightness(0.0)
 		end
 	end
 	local removestatsun = self:GetRemoveStaticSun()
