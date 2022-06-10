@@ -2,8 +2,8 @@
 
 CreateConVar( "csm_spawnalways", 0,  true, false )
 
-hook.Add( "PopulateToolMenu", "CustomMenuSettings", function()
-	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM", "#CSM", "", "", function( panel )
+hook.Add( "PopulateToolMenu", "CSMServer", function()
+	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM_Server", "#CSM", "", "", function( panel )
 		panel:ClearControls()
 
 		panel:CheckBox( "CSM Spawn on load (Experimental)", "csm_spawnalways" )

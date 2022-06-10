@@ -1,8 +1,8 @@
 
-CreateClientConVar(	 "csm_spawnalways", 0,  true, false)
 
-hook.Add( "PopulateToolMenu", "CustomMenuSettings", function()
-	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM", "#CSM", "", "", function( panel )
+
+hook.Add( "PopulateToolMenu", "CSMClient", function()
+	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
 		panel:ClearControls()
 		panel:CheckBox( "CSM Enabled", "csm_enabled" )
 		
@@ -12,6 +12,7 @@ hook.Add( "PopulateToolMenu", "CustomMenuSettings", function()
 		-- Add stuff here
 	end )
 end )
+
 if (CLIENT) then
 	hook.Add( "InitPostEntity", "Ready", function()
 		net.Start( "cool_addon_client_ready" )
