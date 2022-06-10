@@ -46,6 +46,7 @@ if (CLIENT) then
 	end
 end
 if (SERVER) then
+	util.AddNetworkString( "PlayerSpawned" )
 	if (table.Count(ents.FindByClass("light_environment")) > 0) then
 		RunConsoleCommand("csm_haslightenv", "1")
 	end
