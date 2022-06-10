@@ -461,7 +461,12 @@ function ENT:Think()
 			if (CLIENT) then
 				self:createlamps()
 			else
-				FindEntity("light_environment"):Fire("turnoff")
+				if (self:GetRemoveStaticSun()) then
+					for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+						v:Fire("turnoff")
+					end
+				end
+				--FindEntity("light_environment"):Fire("turnoff")
 			end
 			
 		end
@@ -488,7 +493,12 @@ function ENT:Think()
 				
 				--hook.Remove("CsmRenderOverlay")
 			else
-				FindEntity("light_environment"):Fire("turnon")
+				if (self:GetRemoveStaticSun()) then
+					for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+						v:Fire("turnon")
+					end
+				end
+				--FindEntity("light_environment"):Fire("turnon")
 			end
 		end
 	end
