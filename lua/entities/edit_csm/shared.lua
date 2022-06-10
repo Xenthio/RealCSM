@@ -115,6 +115,7 @@ function ENT:createlamps()
 	end
 end
 function ENT:Initialize()
+	RunConsoleCommand("csm_enabled", "1")
 	if (SERVER) then	
 		util.AddNetworkString( "PlayerSpawned" )
 	end
@@ -124,13 +125,14 @@ function ENT:Initialize()
 			local Frame = vgui.Create( "DFrame" )
 			Frame:SetSize( 300, 200 ) 
 			
+			RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
+
 			Frame:Center()
 			Frame:SetTitle( "CSM First Time Spawn!" ) 
 			Frame:SetVisible( true ) 
 			Frame:SetDraggable( false ) 
 			Frame:ShowCloseButton( true ) 
 			Frame:MakePopup()
-
 			local label1 = vgui.Create( "DLabel", Frame )
 			label1:SetPos( 15, 40 )
 			label1:SetSize(	300, 20)
