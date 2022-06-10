@@ -1,6 +1,6 @@
 
 
-CreateConVar( "csm_spawnalways", 0,  true, false )
+CreateConVar( "csm_spawnalways", 1,  true, false )
 
 hook.Add( "PopulateToolMenu", "CSMServer", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM_Server", "#CSM", "", "", function( panel )

@@ -116,6 +116,11 @@ function ENT:createlamps()
 	end
 end
 function ENT:Initialize()
+	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
+		if v != self then
+			v:Remove()
+		end
+	end
 	RunConsoleCommand("csm_enabled", "1")
 	if (SERVER) then	
 		util.AddNetworkString( "PlayerSpawned" )
