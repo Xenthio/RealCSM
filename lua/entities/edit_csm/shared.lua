@@ -20,6 +20,7 @@ CreateClientConVar(	 "csm_legacydisablesun", 0,  true, false)
 CreateClientConVar(	 "csm_haslightenv", 0,  false, false)
 CreateClientConVar(	 "csm_hashdr", 0,  false, false)
 CreateClientConVar(	 "csm_enabled", 1,  false, false)
+CreateClientConVar(	 "csm_filter", 0.10,  false, false)
 
 CreateConVar(	 "csm_stormfoxsupport", 0,  true, false)
 CreateConVar(	 "csm_stormfox_brightness_multiplier", 80,  true, false)
@@ -285,8 +286,8 @@ function ENT:SetupDataTables()
 
 	self:NetworkVar("Bool", 3, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
 	self:NetworkVar("Bool", 4, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
-	self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
-	self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
+	--self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
+	--self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
 
 	self:NetworkVar("Bool", 5, "EnableOffsets", { KeyName = "Enable Offsets", Edit = { type = "Bool", order = 21, title = "Enable Offsets"}})
 	self:NetworkVar("Int", 0, "OffsetPitch", { KeyName = "Pitch Offset", Edit = { type = "Float", order = 22, min = -180.0, max = 180.0, title = "Pitch Offset" }})
@@ -319,8 +320,8 @@ function ENT:SetupDataTables()
 		
 		self:SetRemoveStaticSun(true)
 		self:SetHideRTTShadows(true)
-		self:SetShadowFilter(0.1)
-		self:SetShadowRes(8192)
+		--self:SetShadowFilter(0.1)
+		--self:SetShadowRes(8192)
 
 		self:SetEnableOffsets(false)
 		self:SetOffsetPitch(0)
@@ -414,6 +415,10 @@ function ENT:OnRemove()
 		--hook.Remove("CsmRenderOverlay")
 	end
 end
+
+hook.Add( "ShadnowFilterChange", "shadfiltchanged", function()
+	shadfiltChanged = true
+end)
 
 function ENT:Think()
 	shadfiltChanged = false
@@ -530,21 +535,24 @@ function ENT:Think()
 		HideRTTShadowsPrev = hiderttshad
 	end
 
-	local shadres = self:GetShadowRes()
-	if (ShadowResPrev != shadres) then
-		ShadowResPrev = shadres
-		shadfiltChanged = true
-		RunConsoleCommand("r_flashlightdepthres", shadres)
+	--local shadres = self:GetShadowRes()
+	--if (ShadowResPrev != shadres) then
+		--ShadowResPrev = shadres
+		--shadfiltChanged = true
+		--RunConsoleCommand("r_flashlightdepthres", shadres)
 		
-	end
+	--end
 
-	local shadfilt = self:GetShadowFilter()
+	local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
 	if (ShadowFilterPrev != shadfilt) then
 		ShadowFilterPrev = shadfilt
 		shadfiltChanged = true
-		RunConsoleCommand("r_projectedtexture_filter", shadfilt)
+		RunConsoleCommand("csm_filter", shadfilt)
 		
 	end
+	--if (ShadowFilterPrev != GetConVar( "csm_filter" ):GetFloat()) then
+		--shadfiltChanged = true
+	--end
 	--if (temp == nil) then temp = 0.0 end
 	--self:SetTime((temp + (CurTime() * 0.01)) % 1.0)
 
@@ -644,7 +652,7 @@ function ENT:Think()
 		end
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			if (shadfiltChanged) then
-				projectedTexture:SetShadowFilter(shadfilt)
+				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
 			end
 			--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
 			--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
