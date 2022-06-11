@@ -670,7 +670,7 @@ function ENT:Think()
 			local position = GetViewEntity():GetPos() + offset
 
 			if (self.ProjectedTextures[1] == nil) then
-				createlamps()
+				self:createlamps()
 			end
 			self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
 			self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
