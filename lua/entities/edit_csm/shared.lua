@@ -48,6 +48,7 @@ if (CLIENT) then
 end
 if (SERVER) then
 	util.AddNetworkString( "PlayerSpawned" )
+	util.AddNetworkString( "hasLightEnvNet" )
 	if (table.Count(ents.FindByClass("light_environment")) > 0) then
 		RunConsoleCommand("csm_haslightenv", "1")
 	end
@@ -77,7 +78,10 @@ local AppearanceKeys = {
 	{ Position = 0.75, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.03, 0.03), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) }
 }
 
-function warn()
+net.Receive( "hasLightEnvNet", function( len, ply )
+	RunConsoleCommand("csm_haslightenv", "1")
+end)
+function findlight()
 	if (SERVER) then
 		--lightenvs = ents.FindByClass("light_environment")
 		hasLightEnvs = (table.Count(lightenvs) > 0) 
@@ -85,11 +89,16 @@ function warn()
 		--print(table.Count(lightenvs))
 		if (table.Count(ents.FindByClass("light_environment")) > 0) then
 			RunConsoleCommand("csm_haslightenv", "1")
+			net.Start( "hasLightEnvNet" )
+			net.Broadcast()	
 		else
 			RunConsoleCommand("csm_haslightenv", "0")
 			--self:SetRemoveStaticSun(false)
 		end
 	end
+end
+function warn()
+	findlight()
 	if (CLIENT) then
 		if (GetConVar( "csm_haslightenv" ):GetInt() == 0) then
 			Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
@@ -115,7 +124,38 @@ function ENT:createlamps()
 
 	end
 end
+
+function ENT:SUNOff()
+	
+	if (SERVER) then
+		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+			v:Fire("turnoff")
+			--print(v:GetInternalVariable("_light"))
+		end
+		--RunConsoleCommand("r_lightstyle", "-1")
+		--render.RedownloadAllLightmaps(true ,true)
+	end
+	--]]
+end
+function ENT:SUNOn()
+
+	
+	if (SERVER) then
+		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+			v:Fire("turnon")
+			--loop thru players
+		end
+		--RunConsoleCommand("r_lightstyle", "0")
+		--render.RedownloadAllLightmaps(true ,true)
+	end
+	--]]
+end
+
 function ENT:Initialize()
+	
+	RunConsoleCommand("r_projectedtexture_filter", "0.1")
+	RunConsoleCommand("r_shadows_gamecontrol", "0")
+	shadfiltChanged = true
 	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
 		if v != self then
 			v:Remove()
@@ -198,9 +238,6 @@ function ENT:Initialize()
 			end
 		end
 	end
-	RunConsoleCommand("r_projectedtexture_filter", "0.1")
-	RunConsoleCommand("r_shadows_gamecontrol", "0")
-	shadfiltChanged = true
 	if (SERVER) then
 		
 		--lightenvs = ents.FindByClass("light_environment")
@@ -235,9 +272,16 @@ function ENT:Initialize()
 				render.RedownloadAllLightmaps(true ,true)
 			end
 		else
-			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-				v:Fire("turnoff")
-			end
+			self:SUNOff()
+			--for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+				--turn off light_environment
+				--if (CLIENT) then
+					--v:SetKeyValue("light", "0")
+					--v:SetKeyValue("LightEnable", "0")
+					--v:SetKeyValue("_light", "0")
+				--end
+				--v:Fire("turnoff")
+			--end
 		end
 	end
 
@@ -346,7 +390,7 @@ net.Receive( "PlayerSpawned", function( len, ply )
     if (CLIENT) then
 		if (FindEntity("edit_csm") != nil) then
 			FindEntity("edit_csm"):Initialize()
-			v:Fire("turnoff")
+			--v:Fire("turnoff")
 		end
 	end
 end )
@@ -354,24 +398,7 @@ end )
 function ENT:UpdateTransmitState()
 	return TRANSMIT_ALWAYS
 end
-function SUNOff()
-	if (CLIENT) then
-		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-			v:Fire("turnoff")
-		end
-		--RunConsoleCommand("r_lightstyle", "-1")
-		--render.RedownloadAllLightmaps(true ,true)
-	end
-end
-function SUNOn()
-	if (CLIENT) then
-		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-			v:Fire("turnon")
-		end
-		--RunConsoleCommand("r_lightstyle", "0")
-		--render.RedownloadAllLightmaps(true ,true)
-	end
-end
+
 
 function reloadLightmaps()
 	if (CLIENT) then
@@ -406,9 +433,7 @@ function ENT:OnRemove()
 				--end)
 				--end
 			else
-				for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-					v:Fire("turnon")
-				end
+				self:SUNOn()
 			end
 		end
 	end
@@ -462,9 +487,7 @@ function ENT:Think()
 				self:createlamps()
 			else
 				if (self:GetRemoveStaticSun()) then
-					for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-						v:Fire("turnoff")
-					end
+					self:SUNOff()
 				end
 				--FindEntity("light_environment"):Fire("turnoff")
 			end
@@ -494,9 +517,7 @@ function ENT:Think()
 				--hook.Remove("CsmRenderOverlay")
 			else
 				if (self:GetRemoveStaticSun()) then
-					for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-						v:Fire("turnon")
-					end
+					self:SUNOn()
 				end
 				--FindEntity("light_environment"):Fire("turnon")
 			end
@@ -524,9 +545,7 @@ function ENT:Think()
 					timer.Create( "reload", 0.1, 1, reloadLightmaps)
 				end
 			else
-				for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-					v:Fire("turnoff")
-				end
+				self:SUNOff()
 			end
 		else
 			RunConsoleCommand("r_radiosity", "3")
@@ -539,9 +558,7 @@ function ENT:Think()
 					timer.Create( "reload", 0.1, 1, reloadLightmaps)
 				end
 			else
-				for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-					v:Fire("turnon")
-				end
+				self:SUNOn()
 			end
 		end
 		
