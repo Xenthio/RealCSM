@@ -39,5 +39,8 @@ if (SERVER) then
     hook.Add( "PostCleanupMap", "cleanupcsm", spawnCSM)
     hook.Add( "PlayerFullLoad", "autospawn", spawnCSM)
     
+    hook.Add("stormfox2.postinit", "csmstormfoxsupporthook", function()
+        RunConsoleCommand("csm_stormfoxsupport", "1")
+    end)
         
 end
