@@ -1,7 +1,7 @@
 # RealCSM
  a real CSM addon for Garry's Mod
  
-shoutouts to [Wouter Pleizier](https://www.youtube.com/channel/UCgWgnUhgP6HK8tN2Tp85jxw) for the original work
+shoutouts to [Blueberry_pie](https://steamcommunity.com/id/Blueberry_pie) for the original work
 
 TODO
 * [x] seperate csm from the editor into its own entity (allows menu but also keeps editor as i like being able to spawn it in)
