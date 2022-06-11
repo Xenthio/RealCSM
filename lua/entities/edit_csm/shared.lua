@@ -669,6 +669,9 @@ function ENT:Think()
 		if (GetConVar( "csm_enabled" ):GetInt() == 1) then
 			local position = GetViewEntity():GetPos() + offset
 
+			if (self.ProjectedTextures[1] == nil) then
+				createlamps()
+			end
 			self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
 			self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
 			self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
