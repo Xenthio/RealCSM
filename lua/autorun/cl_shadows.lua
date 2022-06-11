@@ -1,3 +1,8 @@
+--[[
+	ddd
+ddd
+sssssssssssss	dd
+--]]
 
 CreateClientConVar( "csm_spawnalways", 0,  true, false )
 
@@ -18,6 +23,7 @@ if (CLIENT) then
 		if (file.Read( "csm.txt", "DATA" ) == "two" ) then
 
 		elseif (file.Read( "csm.txt", "DATA" ) != "one" ) then
+			--if not game.SinglePlayer() then return end
 			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 			local Frame = vgui.Create( "DFrame" )
 			Frame:SetSize( 310, 200 ) 

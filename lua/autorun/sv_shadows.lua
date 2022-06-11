@@ -30,6 +30,8 @@ if (SERVER) then
                 local poop = ents.Create( "edit_csm" )
                 poop:SetPos( Vector( 0, 0, -10000 ) )
                 poop:Spawn()
+
+               
                 --end)
             end
         end
@@ -41,6 +43,17 @@ if (SERVER) then
     
     hook.Add("stormfox2.postinit", "csmstormfoxsupporthook", function()
         RunConsoleCommand("csm_stormfoxsupport", "1")
+        
+        StormFox2.Setting.Set("maplight_dynamic", false)
+        
+        StormFox2.Setting.Set("maplight_lightstyle", false)
+
+        StormFox2.Setting.Set("maplight_lightenv", false)
+
+    
+        for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+            v:Fire("turnoff")
+        end
     end)
         
 end
