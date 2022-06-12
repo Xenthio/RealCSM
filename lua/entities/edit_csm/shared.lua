@@ -467,6 +467,7 @@ function ENT:Think()
 		if (furtherEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[4] = ProjectedTexture()
+				self.ProjectedTextures[4]:SetTexture("csm/mask_ring")
 				
 				if (furtherEnabledShadows) then
 					self.ProjectedTextures[4]:SetEnableShadows(true)
