@@ -261,7 +261,7 @@ function ENT:Initialize()
 		--timer.Create( "reload", 0.1, 1, warn)
 		--RunConsoleCommand("sv_cheats", "1")
 		
-		RunConsoleCommand("r_radiosity", "2")
+		RunConsoleCommand("r_radiosity", "4")
 		
 		
 		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
@@ -468,8 +468,10 @@ function ENT:Think()
 			furtherEnabledPrev = true
 		else
 			if (CLIENT) then
-				if (self.ProjectedTextures[4]:IsValid()) then
-					self.ProjectedTextures[4]:Remove()
+				if (self.ProjectedTextures[4] != nil) then
+					if (self.ProjectedTextures[4]:IsValid()) then
+						self.ProjectedTextures[4]:Remove()
+					end
 				end
 				
 			end
@@ -479,7 +481,7 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) then
 		if (csmEnabledPrev == false) then
 			csmEnabledPrev = true
-			RunConsoleCommand("r_radiosity", "2")
+			RunConsoleCommand("r_radiosity", "4")
 			if (self:GetHideRTTShadows()) then
 				RunConsoleCommand("r_shadows_gamecontrol", "0")
 			end
@@ -532,7 +534,7 @@ function ENT:Think()
 			--RunConsoleCommand("sv_cheats", "1")
 			
 			
-			RunConsoleCommand("r_radiosity", "2")
+			RunConsoleCommand("r_radiosity", "4")
 			
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				--RunConsoleCommand("mat_reloadallmaterials")
@@ -694,8 +696,10 @@ function ENT:Think()
 			self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
 			
 			if (furtherEnabled) then
-				if (self.ProjectedTextures[4]:IsValid()) then
-					self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+				if (self.ProjectedTextures[4] != nil) then
+					if (self.ProjectedTextures[4]:IsValid()) then
+						self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+					end
 				end
 			end
 			for i, projectedTexture in pairs(self.ProjectedTextures) do
