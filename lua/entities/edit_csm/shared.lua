@@ -469,7 +469,7 @@ function ENT:Think()
 		else
 			if (CLIENT) then
 				if (self.ProjectedTextures[4] != nil) then
-					if (self.ProjectedTextures[4]:IsValid()) then
+					if (self.ProjectedTextures[4]:IsValid()) then -- hacky: fix the cause properly
 						self.ProjectedTextures[4]:Remove()
 					end
 				end
@@ -696,7 +696,7 @@ function ENT:Think()
 			self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
 			
 			if (furtherEnabled) then
-				if (self.ProjectedTextures[4] != nil) then
+				if (self.ProjectedTextures[4] != nil) then -- hacky: fix the cause properly
 					if (self.ProjectedTextures[4]:IsValid()) then
 						self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
 					end
