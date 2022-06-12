@@ -602,18 +602,7 @@ function ENT:Think()
 		RemoveStaticSunPrev = removestatsun
 	end
 
-	local hiderttshad = self:GetHideRTTShadows()
-	if (HideRTTShadowsPrev != hiderttshad) then
-		
-		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "0")
-		else
-		
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
 	
-		end
-		HideRTTShadowsPrev = hiderttshad
-	end
 
 	--local shadres = self:GetShadowRes()
 	--if (ShadowResPrev != shadres) then
@@ -623,6 +612,20 @@ function ENT:Think()
 		
 	--end
 	if (CLIENT) then
+		local hiderttshad = self:GetHideRTTShadows()
+		if (HideRTTShadowsPrev != hiderttshad) then
+		
+			if (self:GetHideRTTShadows()) then
+				RunConsoleCommand("r_shadows_gamecontrol", "0")
+			else
+		
+				RunConsoleCommand("r_shadows_gamecontrol", "1")
+	
+			end
+			HideRTTShadowsPrev = hiderttshad
+		end
+
+		sun = util.GetSunInfo()
 		local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
 		if (ShadowFilterPrev != shadfilt) then
 			ShadowFilterPrev = shadfilt
@@ -641,25 +644,27 @@ function ENT:Think()
 	local yaw = 0
 	local roll = 0
 	
-	local usemapangles = false
-	if (self:GetUseMapSunAngles()) then
-		usemapangles = true
-	else 
-		usemapangles = false
-	end
 
-	if (CLIENT) then
-		sun = util.GetSunInfo()
-	else 
-		if (usemapangles) then
+	--local usemapangles = self:GetUseMapSunAngles()
+	--local usemapangles = false
+	--if (self:GetUseMapSunAngles()) then -- what the fuck??
+		--usemapangles = true
+	--else 
+		--usemapangles = false
+	--end
+
+	--if (CLIENT) then
+		
+	--else 
+		--if (usemapangles) then
 			--self:SetTime(0)
 			--self:SetOrientation(0)
-		end
-	end
+		--end
+	--end
 	
 
 
-	if (usemapangles) then
+	if (self:GetUseMapSunAngles()) then
 		pitch = 0
 		yaw = 0
 		roll = 0
