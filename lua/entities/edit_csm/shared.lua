@@ -39,6 +39,9 @@ local csmEnabledPrev = false
 local useskyandfog = false
 local furtherEnabled = false
 local furtherEnabledPrev = false
+local furtherEnabledShadows = false
+local furtherEnabledShadowsPrev = false
+
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
 		RunConsoleCommand("csm_hashdr", "1")
@@ -324,21 +327,22 @@ function ENT:SetupDataTables()
 	
 	self:NetworkVar("Bool", 0, "EnableFurther", { KeyName = "Enable Futher Light", Edit = { type = "Bool", order = 7, title = "Enable further cascade for large maps"}})
 	self:NetworkVar("Float", 4, "SizeFurther",  { KeyName = "Size 4", Edit = { type = "Float", order = 8, min = 0.0, max = 65536.0, title = "Further cascade size" }})
+	self:NetworkVar("Bool", 1, "EnableFurtherShadows", { KeyName = "Enable Futher Shadows", Edit = { type = "Bool", order = 7, title = "Enable shadows on further cascade"}})
 	
 	self:NetworkVar("Float", 5, "Orientation", { KeyName = "Orientation", Edit = { type = "Float", order = 10, min = 0.0, max = 360.0, title = "Sun orientation" }})
-	self:NetworkVar("Bool", 1, "UseMapSunAngles", { KeyName = "Use Map Sun Angles", Edit = { type = "Bool", order = 11, title = "Use the Map Sun angles"}})
-	self:NetworkVar("Bool", 2, "UseSkyFogEffects", { KeyName = "Use Sky and Fog Effects", Edit = { type = "Bool", order = 12, title = "Use Sky and Fog effects"}})
+	self:NetworkVar("Bool", 2, "UseMapSunAngles", { KeyName = "Use Map Sun Angles", Edit = { type = "Bool", order = 11, title = "Use the Map Sun angles"}})
+	self:NetworkVar("Bool", 3, "UseSkyFogEffects", { KeyName = "Use Sky and Fog Effects", Edit = { type = "Bool", order = 12, title = "Use Sky and Fog effects"}})
 	self:NetworkVar("Float", 6, "MaxAltitude", { KeyName = "Maximum altitude", Edit = { type = "Float", order = 13, min = 0.0, max = 90.0, title = "Maximum altitude" }})
 	self:NetworkVar("Float", 7, "Time", { KeyName = "Time", Edit = { type = "Float", order = 14, min = 0.0, max = 1.0, title = "Time of Day" }})
 	self:NetworkVar("Float", 8, "SunNearZ", { KeyName = "NearZ", Edit = { type = "Float", order = 15, min = 0.0, max = 32768.0, title = "Sun NearZ (adjust if issues)" }})
 	self:NetworkVar("Float", 9, "SunFarZ", { KeyName = "FarZ", Edit = { type = "Float", order = 16, min = 0.0, max = 32768.0, title = "Sun FarZ" }})
 
-	self:NetworkVar("Bool", 3, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
-	self:NetworkVar("Bool", 4, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
+	self:NetworkVar("Bool", 4, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
+	self:NetworkVar("Bool", 5, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
 	--self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
 	--self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
 
-	self:NetworkVar("Bool", 5, "EnableOffsets", { KeyName = "Enable Offsets", Edit = { type = "Bool", order = 21, title = "Enable Offsets"}})
+	self:NetworkVar("Bool", 6, "EnableOffsets", { KeyName = "Enable Offsets", Edit = { type = "Bool", order = 21, title = "Enable Offsets"}})
 	self:NetworkVar("Int", 0, "OffsetPitch", { KeyName = "Pitch Offset", Edit = { type = "Float", order = 22, min = -180.0, max = 180.0, title = "Pitch Offset" }})
 	self:NetworkVar("Int", 1, "OffsetYaw", { KeyName = "Yaw Offset", Edit = { type = "Float", order = 23, min = -180.0, max = 180.0, title = "Yaw Offset" }})
 	self:NetworkVar("Int", 2, "OffsetRoll", { KeyName = "Roll Offset", Edit = { type = "Float", order = 24, min = -180.0, max = 180.0, title = "Roll Offset" }})
@@ -357,6 +361,7 @@ function ENT:SetupDataTables()
 		
 		self:SetEnableFurther(false)
 		self:SetSizeFurther(65536.0)
+		self:SetEnableFurtherShadows(true)
 		
 		
 		self:SetUseMapSunAngles(true)
@@ -456,13 +461,18 @@ function ENT:Think()
 	shadfiltChanged = false
 
 	
-
+	
 	furtherEnabled = self:GetEnableFurther()
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[4] = ProjectedTexture()
-				self.ProjectedTextures[4]:SetEnableShadows(false)
+				
+				if (furtherEnabledShadows) then
+					self.ProjectedTextures[4]:SetEnableShadows(true)
+				else
+					self.ProjectedTextures[4]:SetEnableShadows(false)
+				end
 				
 			end
 			furtherEnabledPrev = true
@@ -478,6 +488,30 @@ function ENT:Think()
 			furtherEnabledPrev = false
 		end
 	end
+
+	furtherEnabledShadows = self:GetEnableFurtherShadows()
+	if (furtherEnabledShadowsPrev != furtherEnabledShadows) then
+		if (furtherEnabledShadows) then
+			if (CLIENT) then
+				if (self.ProjectedTextures[4] != nil) then
+					if (self.ProjectedTextures[4]:IsValid()) then
+						self.ProjectedTextures[4]:SetEnableShadows(true)
+						furtherEnabledShadowsPrev = true
+					end
+				end
+			end
+		else
+			if (CLIENT) then
+				if (self.ProjectedTextures[4] != nil) then
+					if (self.ProjectedTextures[4]:IsValid()) then
+						self.ProjectedTextures[4]:SetEnableShadows(false)
+						furtherEnabledShadowsPrev = false
+					end
+				end
+			end
+		end
+	end
+
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) then
 		if (csmEnabledPrev == false) then
 			csmEnabledPrev = true
