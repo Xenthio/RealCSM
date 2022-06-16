@@ -20,6 +20,7 @@ CreateClientConVar(	 "csm_legacydisablesun", 0,  true, false)
 CreateClientConVar(	 "csm_haslightenv", 0,  false, false)
 CreateClientConVar(	 "csm_hashdr", 0,  false, false)
 CreateClientConVar(	 "csm_enabled", 1,  false, false)
+CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.10,  false, false)
 
 CreateConVar(	 "csm_stormfoxsupport", 0,  true, false)
@@ -32,6 +33,7 @@ local PROJECTION_BRIGHTNESS_MULTIPLIER = 70.0 --1000.0
 
 local RemoveStaticSunPrev = false
 local HideRTTShadowsPrev = false
+local BlobShadowsPrev = false
 local ShadowFilterPrev = 1.0
 local ShadowResPrev = 8192.0
 local shadfiltChanged = true
@@ -339,6 +341,7 @@ function ENT:SetupDataTables()
 
 	self:NetworkVar("Bool", 4, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
 	self:NetworkVar("Bool", 5, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
+	
 	--self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
 	--self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
 
@@ -613,9 +616,29 @@ function ENT:Think()
 	--end
 	if (CLIENT) then
 		local hiderttshad = self:GetHideRTTShadows()
+		local BlobShadows = GetConVar( "csm_blobbyao" ):GetBool()
+		
+		if (BlobShadows) then
+			HideRTTShadowsPrev = true
+			hiderttshad = false
+		end
+		
+		if (BlobShadowsPrev != BlobShadows) then
+			BlobShadowsPrev = BlobShadows
+			if (BlobShadows) then
+				HideRTTShadowsPrev = true
+				hiderttshad = false
+				RunConsoleCommand("r_shadowrendertotexture", "0")
+				RunConsoleCommand("r_shadowdist", "20")
+			else
+				RunConsoleCommand("r_shadowrendertotexture", "1")
+				RunConsoleCommand("r_shadowdist", "10000")
+			end
+		end
+
 		if (HideRTTShadowsPrev != hiderttshad) then
 		
-			if (self:GetHideRTTShadows()) then
+			if (hiderttshad) then
 				RunConsoleCommand("r_shadows_gamecontrol", "0")
 			else
 		
@@ -726,51 +749,53 @@ function ENT:Think()
 	end
 	if (CLIENT) then
 		if (GetConVar( "csm_enabled" ):GetInt() == 1) then
-			local position = GetViewEntity():GetPos() + offset
+			if (GetConVar( "csm_update" ):GetInt() == 1) then
+				local position = GetViewEntity():GetPos() + offset
 
-			if (self.ProjectedTextures[1] == nil) then
-				self:createlamps()
-			end
-			self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-			self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-			self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
-			
-			if (furtherEnabled) then
-				if (self.ProjectedTextures[4] != nil) then -- hacky: fix the cause properly
-					if (self.ProjectedTextures[4]:IsValid()) then
-						self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+				if (self.ProjectedTextures[1] == nil) then
+					self:createlamps()
+				end
+				self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
+				self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+				self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
+				
+				if (furtherEnabled) then
+					if (self.ProjectedTextures[4] != nil) then -- hacky: fix the cause properly
+						if (self.ProjectedTextures[4]:IsValid()) then
+							self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+						end
 					end
 				end
-			end
-			for i, projectedTexture in pairs(self.ProjectedTextures) do
-				if (shadfiltChanged) then
-					projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
+				for i, projectedTexture in pairs(self.ProjectedTextures) do
+					if (shadfiltChanged) then
+						projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
+					end
+					--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+					--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
+					
+					if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
+						projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
+					else
+						projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+					end
+					--if (sun.direction:Angle().pitch < 360) then
+						--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 340) * 8.5) 
+					--elseif (sun.direction:Angle().pitch < 270) then
+						--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 20) * 8.5)
+					--else
+						--projectedTexture:SetBrightness(self:GetSunBrightness())
+					--end
+					if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
+						projectedTexture:SetBrightness(self:GetSunBrightness())
+					else 
+						projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
+					end
+					projectedTexture:SetPos(position)
+					projectedTexture:SetAngles(angle)
+					projectedTexture:SetNearZ(self:GetSunNearZ())
+					projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
+					projectedTexture:Update()
 				end
-				--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-				--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
-				
-				if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
-					projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
-				else
-					projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-				end
-				--if (sun.direction:Angle().pitch < 360) then
-					--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 340) * 8.5) 
-				--elseif (sun.direction:Angle().pitch < 270) then
-					--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 20) * 8.5)
-				--else
-					--projectedTexture:SetBrightness(self:GetSunBrightness())
-				--end
-				if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
-					projectedTexture:SetBrightness(self:GetSunBrightness())
-				else 
-					projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
-				end
-				projectedTexture:SetPos(position)
-				projectedTexture:SetAngles(angle)
-				projectedTexture:SetNearZ(self:GetSunNearZ())
-				projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
-				projectedTexture:Update()
 			end
 		end
 	end

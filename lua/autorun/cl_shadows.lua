@@ -5,6 +5,7 @@ sssssssssssss	dd
 --]]
 
 CreateClientConVar( "csm_spawnalways", 0,  true, false )
+CreateClientConVar( "csm_blobbyao", 0,  true, false )
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
@@ -13,6 +14,8 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		
 		panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 8192 )
 		panel:NumSlider( "Shadow Filter", "r_projectedtexture_filter", 0, 10)
+
+		panel:CheckBox( "Enable AO Like Blob Shadows", "csm_blobbyao" )
 
 		-- Add stuff here
 	end )
