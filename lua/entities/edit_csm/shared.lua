@@ -619,8 +619,8 @@ function ENT:Think()
 		local BlobShadows = GetConVar( "csm_blobbyao" ):GetBool()
 		
 		if (BlobShadows) then
-			HideRTTShadowsPrev = true
-			hiderttshad = false
+			--HideRTTShadowsPrev = true
+			--hiderttshad = false
 		end
 		
 		if (BlobShadowsPrev != BlobShadows) then
@@ -630,22 +630,28 @@ function ENT:Think()
 				hiderttshad = false
 				RunConsoleCommand("r_shadowrendertotexture", "0")
 				RunConsoleCommand("r_shadowdist", "20")
+				BlobShadowsPrev = true
 			else
 				RunConsoleCommand("r_shadowrendertotexture", "1")
 				RunConsoleCommand("r_shadowdist", "10000")
+				BlobShadowsPrev = false
+				--HideRTTShadowsPrev = not HideRTTShadowsPrev
 			end
 		end
 
 		if (HideRTTShadowsPrev != hiderttshad) then
-		
-			if (hiderttshad) then
-				RunConsoleCommand("r_shadows_gamecontrol", "0")
-			else
-		
-				RunConsoleCommand("r_shadows_gamecontrol", "1")
-	
+			
+			if !(BlobShadows) then
+
+				if (hiderttshad) then
+					RunConsoleCommand("r_shadows_gamecontrol", "0")
+				else
+					
+					RunConsoleCommand("r_shadows_gamecontrol", "1")
+					
+				end
+				HideRTTShadowsPrev = hiderttshad
 			end
-			HideRTTShadowsPrev = hiderttshad
 		end
 
 		sun = util.GetSunInfo()
