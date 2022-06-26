@@ -33,6 +33,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		
 		panel:NumSlider( "Spread Samples", "csm_spread_samples", 2, 16, 0)
 		panel:ControlHelp( "Alert! This doesn't work above 7 unless you launch gmod with extra shadow maps enabled!!!" )
+		panel:ControlHelp( "Double Alert! Setting this too high may crash your game!" )
 
 		-- Add stuff here
 	end )
