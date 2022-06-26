@@ -29,14 +29,11 @@ CreateConVar(	 "csm_stormfox_brightness_multiplier", 80,  true, false)
 CreateConVar(	 "csm_stormfox_coloured_sun", 0,  true, false)
 local lightenvs = {ents.FindByClass("light_environment")}
 local hasLightEnvs = false
-local PROJECTION_DISTANCE = 32768.0 --327680.0
-local PROJECTION_BRIGHTNESS_MULTIPLIER = 70.0 --1000.0
 
 local RemoveStaticSunPrev = false
 local HideRTTShadowsPrev = false
 local BlobShadowsPrev = false
 local ShadowFilterPrev = 1.0
-local ShadowResPrev = 8192.0
 local shadfiltChanged = true
 local csmEnabledPrev = false
 local useskyandfog = false
@@ -64,20 +61,6 @@ if (SERVER) then
 	end
 end
 local AppearanceKeys = {
-	--{ Position = 0.25, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.02, 0.05), SkyDuskColor = Vector(0.05, 0.22, 0.18), SkySunColor = Vector(0.00, 0.00, 0.00) },
-	--{ Position = 0.30, SunColor = Color(255,  11,   0, 255), SunBrightness = 40.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.31, 0.57), SkyDuskColor = Vector(0.00, 0.00, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00) },
-	--{ Position = 0.35, SunColor = Color(255, 217, 179, 255), SunBrightness = 18.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00) },
-	--{ Position = 0.65, SunColor = Color(255, 217, 179, 255), SunBrightness = 18.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00) },
-	--{ Position = 0.70, SunColor = Color(255,  11,   0, 255), SunBrightness = 40.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.31, 0.57), SkyDuskColor = Vector(0.00, 0.00, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00) },
-	--{ Position = 0.75, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.02, 0.05), SkyDuskColor = Vector(0.05, 0.22, 0.18), SkySunColor = Vector(0.00, 0.00, 0.00) }
-	
-	--{ Position = 0.25, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.02, 0.05), SkyDuskColor = Vector(0.05, 0.22, 0.18), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) },
-	--{ Position = 0.30, SunColor = Color(255,  11,   0, 255), SunBrightness = 40.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
-	--{ Position = 0.35, SunColor = Color(255, 217, 179, 255), SunBrightness = 18.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 94, 148, 199) },
-	--{ Position = 0.65, SunColor = Color(255, 217, 179, 255), SunBrightness = 18.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 94, 148, 199) },
-	--{ Position = 0.70, SunColor = Color(255,  11,   0, 255), SunBrightness = 40.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
-	--{ Position = 0.75, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.02, 0.05), SkyDuskColor = Vector(0.05, 0.22, 0.18), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) }
-	
 	{ Position = 0.00, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.00, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) },
 	{ Position = 0.25, SunColor = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.03, 0.03), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) },
 	{ Position = 0.30, SunColor = Color(255,  11,   0, 255), SunBrightness = 40.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
@@ -93,89 +76,61 @@ net.Receive( "hasLightEnvNet", function( len, ply )
 end)
 function findlight()
 	if (SERVER) then
-		--lightenvs = ents.FindByClass("light_environment")
-		hasLightEnvs = (table.Count(lightenvs) > 0) 
-		--print(hasLightEnvs)
-		--print(table.Count(lightenvs))
+		hasLightEnvs = (table.Count(lightenvs) > 0)
 		if (table.Count(ents.FindByClass("light_environment")) > 0) then
 			RunConsoleCommand("csm_haslightenv", "1")
 			net.Start( "hasLightEnvNet" )
-			net.Broadcast()	
+			net.Broadcast()
 		else
 			RunConsoleCommand("csm_haslightenv", "0")
-			--self:SetRemoveStaticSun(false)
 		end
 	end
 end
 function warn()
 	findlight()
-	if (CLIENT) then
-		if (GetConVar( "csm_haslightenv" ):GetInt() == 0) then
-			Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
-		end
+	if CLIENT and (GetConVar( "csm_haslightenv" ):GetInt() == 0) then
+		Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
 	end
 	print(hasLightEnvs)
 end
 
 function ENT:createlamps()
 	self.ProjectedTextures = { }
-	
 	for i = 1, 3 do
-		
 		self.ProjectedTextures[i] = ProjectedTexture()
-		--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
 		self.ProjectedTextures[i]:SetEnableShadows(true)
-		
 		if (i == 1) then
 			self.ProjectedTextures[i]:SetTexture("csm/mask_center")
 		else
 			self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
 		end
-
 	end
-	if (spreadEnabled) then
-		if (CLIENT) then
-			self.ProjectedTextures[2]:SetTexture("csm/mask_center")
-			for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
-	
-				self.ProjectedTextures[i + 4] = ProjectedTexture()
-				--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
-				self.ProjectedTextures[i + 4]:SetEnableShadows(true)
-				self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
-		
-			end
+	if spreadEnabled and CLIENT then
+		self.ProjectedTextures[2]:SetTexture("csm/mask_center")
+		for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
+			self.ProjectedTextures[i + 4] = ProjectedTexture()
+			self.ProjectedTextures[i + 4]:SetEnableShadows(true)
+			self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
 		end
 	end
 end
 
 function ENT:SUNOff()
-	
-	if (SERVER) then
+	if (SERVER) then -- TODO: make this turn off only on the client
 		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 			v:Fire("turnoff")
-			--print(v:GetInternalVariable("_light"))
 		end
-		--RunConsoleCommand("r_lightstyle", "-1")
-		--render.RedownloadAllLightmaps(true ,true)
 	end
-	--]]
 end
 function ENT:SUNOn()
-
-	
-	if (SERVER) then
+	if (SERVER) then -- TODO: make this turn off only on the client
 		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 			v:Fire("turnon")
-			--loop thru players
 		end
-		--RunConsoleCommand("r_lightstyle", "0")
-		--render.RedownloadAllLightmaps(true ,true)
 	end
-	--]]
 end
 
 function ENT:Initialize()
-	
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	RunConsoleCommand("r_shadows_gamecontrol", "0")
 	shadfiltChanged = true
@@ -185,110 +140,94 @@ function ENT:Initialize()
 		end
 	end
 	RunConsoleCommand("csm_enabled", "1")
-	if (SERVER) then	
-		util.AddNetworkString( "PlayerSpawned" )
-	end
-	if (CLIENT) then
-		if (file.Read( "csm.txt", "DATA" ) != "two" ) then
-			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
-			local Frame = vgui.Create( "DFrame" )
-			Frame:SetSize( 300, 200 ) 
-			
-			RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
+	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
+		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
+		local Frame = vgui.Create( "DFrame" )
+		Frame:SetSize( 300, 200 )
 
-			Frame:Center()
-			Frame:SetTitle( "CSM First Time Spawn!" ) 
-			Frame:SetVisible( true ) 
-			Frame:SetDraggable( false ) 
-			Frame:ShowCloseButton( true ) 
-			Frame:MakePopup()
-			local label1 = vgui.Create( "DLabel", Frame )
-			label1:SetPos( 15, 40 )
-			label1:SetSize(	300, 20)
-			label1:SetText( "Welcome to the CSM addon!" )
-			local label2 = vgui.Create( "DLabel", Frame )
-			label2:SetPos( 15, 55 )
-			label2:SetSize(	300, 20)
-			label2:SetText( "This is your first time spawning CSM, go set your quality!" )
-			local label3 = vgui.Create( "DLabel", Frame )
-			label3:SetPos( 15, 70 )
-			label3:SetSize(	300, 20)
-			label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+		RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
 
-			local lowButton = vgui.Create("DButton", Frame)
-			lowButton:SetText( "Low" )
-			lowButton:SetPos( 20, 100 )
-			local mediumButton = vgui.Create("DButton", Frame)
-			mediumButton:SetText( "Medium" )
-			mediumButton:SetPos( 120, 100 )
-			local highButton = vgui.Create("DButton", Frame)
-			highButton:SetText( "High" )
-			highButton:SetPos( 220, 100 )
-			
-			highButton.DoClick = function()
-				RunConsoleCommand("r_flashlightdepthres", "8192")
-			end
-			mediumButton.DoClick = function()
-				RunConsoleCommand("r_flashlightdepthres", "4096")
-			end
-			lowButton.DoClick = function()
-				RunConsoleCommand("r_flashlightdepthres", "2048")
-			end
+		Frame:Center()
+		Frame:SetTitle( "CSM First Time Spawn!" )
+		Frame:SetVisible( true )
+		Frame:SetDraggable( false )
+		Frame:ShowCloseButton( true )
+		Frame:MakePopup()
+		local label1 = vgui.Create( "DLabel", Frame )
+		label1:SetPos( 15, 40 )
+		label1:SetSize(	300, 20)
+		label1:SetText( "Welcome to the CSM addon!" )
+		local label2 = vgui.Create( "DLabel", Frame )
+		label2:SetPos( 15, 55 )
+		label2:SetSize(	300, 20)
+		label2:SetText( "This is your first time spawning CSM, go set your quality!" )
+		local label3 = vgui.Create( "DLabel", Frame )
+		label3:SetPos( 15, 70 )
+		label3:SetSize(	300, 20)
+		label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+		local lowButton = vgui.Create("DButton", Frame)
+		lowButton:SetText( "Low" )
+		lowButton:SetPos( 20, 100 )
+		local mediumButton = vgui.Create("DButton", Frame)
+		mediumButton:SetText( "Medium" )
+		mediumButton:SetPos( 120, 100 )
+		local highButton = vgui.Create("DButton", Frame)
+		highButton:SetText( "High" )
+		highButton:SetPos( 220, 100 )
+		highButton.DoClick = function()
+			RunConsoleCommand("r_flashlightdepthres", "8192")
+		end
+		mediumButton.DoClick = function()
+			RunConsoleCommand("r_flashlightdepthres", "4096")
+		end
+		lowButton.DoClick = function()
+			RunConsoleCommand("r_flashlightdepthres", "2048")
+		end
 
-			local DermaNumSlider = vgui.Create( "DNumSlider", Frame )
-			DermaNumSlider:SetPos( 8, 120 )				-- Set the position
-			DermaNumSlider:SetSize( 300, 30 )			-- Set the size
-			DermaNumSlider:SetText( "Shadow Quality" )	-- Set the text above the slider
-			DermaNumSlider:SetMin( 0 )				 	-- Set the minimum number you can slide to
-			DermaNumSlider:SetMax( 8192 )				-- Set the maximum number you can slide to
-			DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
-			DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
+		local DermaNumSlider = vgui.Create( "DNumSlider", Frame )
+		DermaNumSlider:SetPos( 8, 120 )				-- Set the position
+		DermaNumSlider:SetSize( 300, 30 )			-- Set the size
+		DermaNumSlider:SetText( "Shadow Quality" )	-- Set the text above the slider
+		DermaNumSlider:SetMin( 0 )				 	-- Set the minimum number you can slide to
+		DermaNumSlider:SetMax( 8192 )				-- Set the maximum number you can slide to
+		DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
+		DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
 
-			local Button = vgui.Create("DButton", Frame)
-			Button:SetText( "Continue" )
-			Button:SetPos( 160, 155 )
-			local Button2 = vgui.Create("DButton", Frame)
-			Button2:SetText( "Cancel" )
-			Button2:SetPos( 80, 155 )
-			Button.DoClick = function()
-				file.Write( "csm.txt", "two" )
-				Frame:Close()
-			end
+		local Button = vgui.Create("DButton", Frame)
+		Button:SetText( "Continue" )
+		Button:SetPos( 160, 155 )
+		local Button2 = vgui.Create("DButton", Frame)
+		Button2:SetText( "Cancel" )
+		Button2:SetPos( 80, 155 )
+		Button.DoClick = function()
+			file.Write( "csm.txt", "two" )
+			Frame:Close()
+		end
 
-			Button2.DoClick = function()
-				RunConsoleCommand("csm_enabled", "0")
-				Frame:Close()
-			end
+		Button2.DoClick = function()
+			RunConsoleCommand("csm_enabled", "0")
+			Frame:Close()
 		end
 	end
+
 	if (SERVER) then
-		
-		--lightenvs = ents.FindByClass("light_environment")
-		hasLightEnvs = (table.Count(lightenvs) > 0) 
+		util.AddNetworkString( "PlayerSpawned" )
+		hasLightEnvs = (table.Count(lightenvs) > 0)
 		if hasLightEnvs then
 			self:SetRemoveStaticSun(true)
-		else 
+		else
 			self:SetRemoveStaticSun(false)
 			timer.Create( "warn", 0.1, 1, warn)
 		end
 	else
 		timer.Create( "warn", 0.1, 1, warn)
 	end
-	--print(hasLightEnvs)
 	BaseClass.Initialize(self)
-
 	self:SetMaterial("gmod/edit_sun")
-	
 	if (self:GetRemoveStaticSun()) then
 		timer.Create( "warn", 0.1, 1, warn)
-		--timer.Create( "reload", 0.1, 1, warn)
-		--RunConsoleCommand("sv_cheats", "1")
-		
 		RunConsoleCommand("r_radiosity", "4")
-		
-		
 		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
-			--RunConsoleCommand("mat_reloadallmaterials")
 			RunConsoleCommand("r_lightstyle", "0")
 			RunConsoleCommand("r_ambientlightingonly", "1")
 			if (CLIENT) then
@@ -296,34 +235,23 @@ function ENT:Initialize()
 			end
 		else
 			self:SUNOff()
-			--for k, v in ipairs(ents.FindByClass( "light_environment" )) do
-				--turn off light_environment
-				--if (CLIENT) then
-					--v:SetKeyValue("light", "0")
-					--v:SetKeyValue("LightEnable", "0")
-					--v:SetKeyValue("_light", "0")
-				--end
-				--v:Fire("turnoff")
-			--end
 		end
 	end
 
-	
 	if (CLIENT) then
 		self:createlamps()
 	end
 		--hook.Add("RenderScreenspaceEffects", "CsmRenderOverlay", RenderOverlay)
 		--hook.Add("SetupWorldFog", self, self.SetupWorldFog )
-	
-	
-	if (SERVER) then
+
+	--if (SERVER) then
 		--self.EnvSun = FindEntity("env_sun")
 		--self.EnvFogController = FindEntity("env_fog_controller")
-	else
+	--else
 		--self.EnvSun = FindEntity("C_Sun")
 		--self.EnvFogController = FindEntity("C_FogController")
-	end
-	
+	--end
+
 	--self.EnvSkyPaint = FindEntity("env_skypaint")
 end
 
@@ -340,15 +268,15 @@ end
 function ENT:SetupDataTables()
 	self:NetworkVar("Vector", 0, "SunColour", { KeyName = "Sun colour", Edit = { type = "VectorColor", order = 2, title = "Sun colour"}})
 	self:NetworkVar("Float", 0, "SunBrightness", { KeyName = "Sun brightness", Edit = { type = "Float", order = 3, min = 0.0, max = 10000.0, title = "Sun brightness"}})
-	
+
 	self:NetworkVar("Float", 1, "SizeNear", { KeyName = "Size 1", Edit = { type = "Float", order = 4, min = 0.0, max = 32768.0, title = "Near cascade size" }})
 	self:NetworkVar("Float", 2, "SizeMid",  { KeyName = "Size 2", Edit = { type = "Float", order = 5, min = 0.0, max = 32768.0, title = "Middle cascade size" }})
 	self:NetworkVar("Float", 3, "SizeFar",  { KeyName = "Size 3", Edit = { type = "Float", order = 6, min = 0.0, max = 32768.0, title = "Far cascade size" }}) --16384
-	
+
 	self:NetworkVar("Bool", 0, "EnableFurther", { KeyName = "Enable Futher Light", Edit = { type = "Bool", order = 7, title = "Enable further cascade for large maps"}})
 	self:NetworkVar("Float", 4, "SizeFurther",  { KeyName = "Size 4", Edit = { type = "Float", order = 8, min = 0.0, max = 65536.0, title = "Further cascade size" }})
 	self:NetworkVar("Bool", 1, "EnableFurtherShadows", { KeyName = "Enable Futher Shadows", Edit = { type = "Bool", order = 7, title = "Enable shadows on further cascade"}})
-	
+
 	self:NetworkVar("Float", 5, "Orientation", { KeyName = "Orientation", Edit = { type = "Float", order = 10, min = 0.0, max = 360.0, title = "Sun orientation" }})
 	self:NetworkVar("Bool", 2, "UseMapSunAngles", { KeyName = "Use Map Sun Angles", Edit = { type = "Bool", order = 11, title = "Use the Map Sun angles"}})
 	self:NetworkVar("Bool", 3, "UseSkyFogEffects", { KeyName = "Use Sky and Fog Effects", Edit = { type = "Bool", order = 12, title = "Use Sky and Fog effects"}})
@@ -359,7 +287,7 @@ function ENT:SetupDataTables()
 
 	self:NetworkVar("Bool", 4, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
 	self:NetworkVar("Bool", 5, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
-	
+
 	--self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
 	--self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
 
@@ -379,12 +307,11 @@ function ENT:SetupDataTables()
 		self:SetSizeNear(128.0)
 		self:SetSizeMid(1024.0)
 		self:SetSizeFar(8192.0)
-		
+
 		self:SetEnableFurther(false)
 		self:SetSizeFurther(65536.0)
 		self:SetEnableFurtherShadows(true)
-		
-		
+
 		self:SetUseMapSunAngles(true)
 		self:SetUseSkyFogEffects(false)
 		self:SetOrientation(135.0)
@@ -392,7 +319,7 @@ function ENT:SetupDataTables()
 		self:SetTime(0.5)
 		self:SetSunNearZ(25000.0)
 		self:SetSunFarZ(32768.0)
-		
+
 		self:SetRemoveStaticSun(true)
 		self:SetHideRTTShadows(true)
 		--self:SetShadowFilter(0.1)
@@ -408,16 +335,13 @@ end
 
 hook.Add( "PlayerInitialSpawn", "playerspawned", function( ply )
 	net.Start( "PlayerSpawned" )
-	net.Send( ply )	
+	net.Send( ply )
 end )
 
 
 net.Receive( "PlayerSpawned", function( len, ply )
-    if (CLIENT) then
-		if (FindEntity("edit_csm") != nil) then
-			FindEntity("edit_csm"):Initialize()
-			--v:Fire("turnoff")
-		end
+	if CLIENT and (FindEntity("edit_csm") != nil) then
+		FindEntity("edit_csm"):Initialize()
 	end
 end )
 
@@ -442,22 +366,14 @@ function ENT:OnRemove()
 		RunConsoleCommand("r_projectedtexture_filter", "1")
 
 		if (self:GetRemoveStaticSun()) then
-			--RunConsoleCommand("sv_cheats", "1")
-		
+
 			RunConsoleCommand("r_radiosity", "3")
-		
-		
+
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
-				--RunConsoleCommand("mat_reloadallmaterials")
-				--if (CLIENT) then
 				RunConsoleCommand("r_ambientlightingonly", "0")
 
 				RunConsoleCommand("r_lightstyle", "-1")
 				timer.Create( "reload", 0.1, 1, reloadLightmaps )
-				--timer.Simple(0.0001, function()
-				--render.RedownloadAllLightmaps(true ,true)
-				--end)
-				--end
 			else
 				self:SUNOn()
 			end
@@ -467,10 +383,8 @@ function ENT:OnRemove()
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			projectedTexture:Remove()
 		end
-		
+
 		table.Empty(self.ProjectedTextures)
-		
-		--hook.Remove("CsmRenderOverlay")
 	end
 end
 
@@ -480,32 +394,22 @@ end)
 
 function ENT:Think()
 	shadfiltChanged = false
-
-	
-	
 	furtherEnabled = self:GetEnableFurther()
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[4] = ProjectedTexture()
 				self.ProjectedTextures[4]:SetTexture("csm/mask_ring")
-				
 				if (furtherEnabledShadows) then
 					self.ProjectedTextures[4]:SetEnableShadows(true)
 				else
 					self.ProjectedTextures[4]:SetEnableShadows(false)
 				end
-				
 			end
 			furtherEnabledPrev = true
 		else
-			if (CLIENT) then
-				if (self.ProjectedTextures[4] != nil) then
-					if (self.ProjectedTextures[4]:IsValid()) then -- hacky: fix the cause properly
-						self.ProjectedTextures[4]:Remove()
-					end
-				end
-				
+			if CLIENT and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then -- hacky: fix the cause properly
+				self.ProjectedTextures[4]:Remove()
 			end
 			furtherEnabledPrev = false
 		end
@@ -520,35 +424,21 @@ function ENT:Think()
 			end
 			table.Empty(self.ProjectedTextures)
 			self:createlamps()
-			
 		end
 		spreadSamplePrev = spreadSample
 
-	end 
+	end
 
 	spreadEnabled = GetConVar( "csm_spread" ):GetBool()
 	if (spreadEnabledPrev != spreadEnabled) then
 		if (spreadEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
-
 				for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
-		
 					self.ProjectedTextures[i + 4] = ProjectedTexture()
-					--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
 					self.ProjectedTextures[i + 4]:SetEnableShadows(true)
 					self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
-			
 				end
-
-				//self.ProjectedTextures[5] = ProjectedTexture()
-				//self.ProjectedTextures[5]:SetTexture("csm/mask_center")
-				//self.ProjectedTextures[6] = ProjectedTexture()
-				//self.ProjectedTextures[6]:SetTexture("csm/mask_center")
-				//self.ProjectedTextures[7] = ProjectedTexture()
-				//self.ProjectedTextures[7]:SetTexture("csm/mask_center")
-				//self.ProjectedTextures[8] = ProjectedTexture()
-				//self.ProjectedTextures[8]:SetTexture("csm/mask_center")
 			end
 			spreadEnabledPrev = true
 		else
@@ -556,7 +446,6 @@ function ENT:Think()
 				for i, projectedTexture in pairs(self.ProjectedTextures) do
 					projectedTexture:Remove()
 				end
-				
 				table.Empty(self.ProjectedTextures)
 				self:createlamps()
 			end
@@ -567,92 +456,62 @@ function ENT:Think()
 	furtherEnabledShadows = self:GetEnableFurtherShadows()
 	if (furtherEnabledShadowsPrev != furtherEnabledShadows) then
 		if (furtherEnabledShadows) then
-			if (CLIENT) then
-				if (self.ProjectedTextures[4] != nil) then
-					if (self.ProjectedTextures[4]:IsValid()) then
-						self.ProjectedTextures[4]:SetEnableShadows(true)
-						furtherEnabledShadowsPrev = true
-					end
-				end
+			if CLIENT and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
+				self.ProjectedTextures[4]:SetEnableShadows(true)
+				furtherEnabledShadowsPrev = true
 			end
 		else
-			if (CLIENT) then
-				if (self.ProjectedTextures[4] != nil) then
-					if (self.ProjectedTextures[4]:IsValid()) then
-						self.ProjectedTextures[4]:SetEnableShadows(false)
-						furtherEnabledShadowsPrev = false
-					end
-				end
+			if CLIENT and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
+				self.ProjectedTextures[4]:SetEnableShadows(false)
+				furtherEnabledShadowsPrev = false
 			end
 		end
 	end
 
-	if (GetConVar( "csm_enabled" ):GetInt() == 1) then
-		if (csmEnabledPrev == false) then
-			csmEnabledPrev = true
-			RunConsoleCommand("r_radiosity", "4")
-			if (self:GetHideRTTShadows()) then
-				RunConsoleCommand("r_shadows_gamecontrol", "0")
+	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
+		csmEnabledPrev = true
+		RunConsoleCommand("r_radiosity", "4")
+		if (self:GetHideRTTShadows()) then
+			RunConsoleCommand("r_shadows_gamecontrol", "0")
+		end
+		if (CLIENT) then
+			self:createlamps()
+		else
+			if (self:GetRemoveStaticSun()) then
+				self:SUNOff()
 			end
-			if (CLIENT) then
-				self:createlamps()
-			else
-				if (self:GetRemoveStaticSun()) then
-					self:SUNOff()
-				end
-				--FindEntity("light_environment"):Fire("turnoff")
-			end
-			
 		end
 	end
 
-	if (GetConVar( "csm_enabled" ):GetInt() == 0) then
-		if (csmEnabledPrev == true) then
-			csmEnabledPrev = false
-			RunConsoleCommand("r_radiosity", "3")
-			if (self:GetHideRTTShadows()) then
-				RunConsoleCommand("r_shadows_gamecontrol", "1")
+	if (GetConVar( "csm_enabled" ):GetInt() == 0) and (csmEnabledPrev == true) then
+		csmEnabledPrev = false
+		RunConsoleCommand("r_radiosity", "3")
+		if (self:GetHideRTTShadows()) then
+			RunConsoleCommand("r_shadows_gamecontrol", "1")
+		end
+		if (CLIENT) then
+			for i, projectedTexture in pairs(self.ProjectedTextures) do
+				projectedTexture:Remove()
 			end
-			
-			
-			if (CLIENT) then
-				
-				
-				
-				for i, projectedTexture in pairs(self.ProjectedTextures) do
-					projectedTexture:Remove()
-				end
-				
-				table.Empty(self.ProjectedTextures)
-				
-				--hook.Remove("CsmRenderOverlay")
-			else
-				if (self:GetRemoveStaticSun()) then
-					self:SUNOn()
-				end
-				--FindEntity("light_environment"):Fire("turnon")
+			table.Empty(self.ProjectedTextures)
+		else
+			if (self:GetRemoveStaticSun()) then
+				self:SUNOn()
 			end
 		end
 	end
+
 	local removestatsun = self:GetRemoveStaticSun()
-	
+
 	if (RemoveStaticSunPrev != removestatsun) then
-		
 		if (self:GetRemoveStaticSun()) then
 			timer.Create( "warn", 0.1, 1, warn)
-			--RunConsoleCommand("sv_cheats", "1")
-			
-			
 			RunConsoleCommand("r_radiosity", "4")
-			
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
-				--RunConsoleCommand("mat_reloadallmaterials")
 				if (CLIENT) then
 					RunConsoleCommand("r_ambientlightingonly", "1")
 					RunConsoleCommand("r_lightstyle", "0")
 					render.RedownloadAllLightmaps(true ,true)
-					--timer.Create( "reload", 0.1, 1, reloadLightmaps )
-					
 					timer.Create( "reload", 0.1, 1, reloadLightmaps)
 				end
 			else
@@ -661,9 +520,7 @@ function ENT:Think()
 		else
 			RunConsoleCommand("r_radiosity", "3")
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
-				--RunConsoleCommand("mat_reloadallmaterials")
 				if (CLIENT) then
-					--render.RedownloadAllLightmaps(true ,true)
 					RunConsoleCommand("r_lightstyle", "-1")
 					RunConsoleCommand("r_ambientlightingonly", "0")
 					timer.Create( "reload", 0.1, 1, reloadLightmaps)
@@ -672,28 +529,12 @@ function ENT:Think()
 				self:SUNOn()
 			end
 		end
-		
 		RemoveStaticSunPrev = removestatsun
 	end
 
-	
-
-	--local shadres = self:GetShadowRes()
-	--if (ShadowResPrev != shadres) then
-		--ShadowResPrev = shadres
-		--shadfiltChanged = true
-		--RunConsoleCommand("r_flashlightdepthres", shadres)
-		
-	--end
 	if (CLIENT) then
 		local hiderttshad = self:GetHideRTTShadows()
 		local BlobShadows = GetConVar( "csm_blobbyao" ):GetBool()
-		
-		if (BlobShadows) then
-			--HideRTTShadowsPrev = true
-			--hiderttshad = false
-		end
-		
 		if (BlobShadowsPrev != BlobShadows) then
 			BlobShadowsPrev = BlobShadows
 			if (BlobShadows) then
@@ -706,71 +547,37 @@ function ENT:Think()
 				RunConsoleCommand("r_shadowrendertotexture", "1")
 				RunConsoleCommand("r_shadowdist", "10000")
 				BlobShadowsPrev = false
-				--HideRTTShadowsPrev = not HideRTTShadowsPrev
 			end
 		end
+		if (HideRTTShadowsPrev != hiderttshad) and !BlobShadows then
 
-		if (HideRTTShadowsPrev != hiderttshad) then
-			
-			if !(BlobShadows) then
-
-				if (hiderttshad) then
-					RunConsoleCommand("r_shadows_gamecontrol", "0")
-				else
-					
-					RunConsoleCommand("r_shadows_gamecontrol", "1")
-					
-				end
-				HideRTTShadowsPrev = hiderttshad
+			if (hiderttshad) then
+				RunConsoleCommand("r_shadows_gamecontrol", "0")
+			else
+				RunConsoleCommand("r_shadows_gamecontrol", "1")
 			end
+			HideRTTShadowsPrev = hiderttshad
 		end
-
 		sun = util.GetSunInfo()
 		local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
 		if (ShadowFilterPrev != shadfilt) then
 			ShadowFilterPrev = shadfilt
 			shadfiltChanged = true
 			RunConsoleCommand("csm_filter", shadfilt)
-			
 		end
 	end
-	--if (ShadowFilterPrev != GetConVar( "csm_filter" ):GetFloat()) then
-		--shadfiltChanged = true
-	--end
-	--if (temp == nil) then temp = 0.0 end
-	--self:SetTime((temp + (CurTime() * 0.01)) % 1.0)
 
 	local pitch = 0
 	local yaw = 0
 	local roll = 0
-	
-
-	--local usemapangles = self:GetUseMapSunAngles()
-	--local usemapangles = false
-	--if (self:GetUseMapSunAngles()) then -- what the fuck??
-		--usemapangles = true
-	--else 
-		--usemapangles = false
-	--end
-
-	--if (CLIENT) then
-		
-	--else 
-		--if (usemapangles) then
-			--self:SetTime(0)
-			--self:SetOrientation(0)
-		--end
-	--end
-	
-
 
 	if (self:GetUseMapSunAngles()) then
 		pitch = 0
 		yaw = 0
 		roll = 0
-		if( sun != nil ) then
-			pitch = sun.direction:Angle().pitch + 90 
-			yaw = sun.direction:Angle().yaw 
+		if ( sun != nil ) then
+			pitch = sun.direction:Angle().pitch + 90
+			yaw = sun.direction:Angle().yaw
 			roll = sun.direction:Angle().roll
 		else
 			if (warnedyet == false) then
@@ -781,14 +588,11 @@ function ENT:Think()
 			yaw = self:GetOrientation()
 			roll = 90.0 - self:GetMaxAltitude()
 		end
-			--print(sun.direction:Angle().pitch)
-			--print(yaw)
-			--print(roll)
 	else
 		pitch = -180.0 + (self:GetTime() * 360.0)
 		yaw = self:GetOrientation()
 		roll = 90.0 - self:GetMaxAltitude()
-	end	
+	end
 
 	if (self:GetEnableOffsets()) then
 		pitch = pitch + self:GetOffsetPitch()
@@ -800,7 +604,7 @@ function ENT:Think()
 	local offset2 = Vector(0, 0, 1)
 	if (usemapangles) then
 		offset:Rotate(Angle(pitch, 0, 0))
-		offset:Rotate(Angle(0, yaw, roll))	
+		offset:Rotate(Angle(0, yaw, roll))
 		offset2:Rotate(Angle(pitch, 0, 0))
 		offset2:Rotate(Angle(0, yaw, roll))
 	else
@@ -809,7 +613,7 @@ function ENT:Think()
 		offset2:Rotate(Angle(pitch, 0, 0))
 		offset2:Rotate(Angle(0, yaw, roll))
 	end
-	
+
 	local angle = Angle()
 	local direction = offset;
 	if (usemapangles) then
@@ -817,149 +621,115 @@ function ENT:Think()
 	else
 		 angle = (vector_origin - offset):Angle()
 	end
-	
+
 	offset = offset * self:GetSunFarZ()
 	if (usemapangles) then
 		self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
 	else
 		self.CurrentAppearance = CalculateAppearance(self:GetTime())
 	end
-	if (CLIENT) then
-		if (GetConVar( "csm_enabled" ):GetInt() == 1) then
-			if (GetConVar( "csm_update" ):GetInt() == 1) then
-				local position = GetViewEntity():GetPos() + offset
+	if CLIENT and (GetConVar( "csm_enabled" ):GetInt() == 1) and (GetConVar( "csm_update" ):GetInt() == 1) then
+		local position = GetViewEntity():GetPos() + offset
 
-				if (self.ProjectedTextures[1] == nil) then
-					self:createlamps()
-				end
-				self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-				self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-				self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
-				
-				if (furtherEnabled) then
-					if (self.ProjectedTextures[4] != nil) then -- hacky: fix the cause properly
-						if (self.ProjectedTextures[4]:IsValid()) then
-							self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
-						end
-					end
-				end
-				if (spreadEnabled) then
-					
-					if (self.ProjectedTextures[1] != nil) then -- hacky: fix the cause properly
-						if (self.ProjectedTextures[1]:IsValid()) then
-							//self.ProjectedTextures[5]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-							self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-						end
-					end
-					for i = 1, GetConVar( "csm_spread_samples" ):GetInt() - 2 do
-						if (self.ProjectedTextures[4 + i] != nil) then -- hacky: fix the cause properly
-							if (self.ProjectedTextures[4 + i]:IsValid()) then
-								//self.ProjectedTextures[5]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-								self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-							end
-						end
-					end
-					
-				end
-				for i, projectedTexture in pairs(self.ProjectedTextures) do
-					if (shadfiltChanged) then
-						projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
-					end
-					--projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-					--projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * PROJECTION_BRIGHTNESS_MULTIPLIER)
-					
-					if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
-						projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
-					else
-						projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-					end
-					--if (sun.direction:Angle().pitch < 360) then
-						--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 340) * 8.5) 
-					--elseif (sun.direction:Angle().pitch < 270) then
-						--projectedTexture:SetBrightness(self:GetSunBrightness() - (pitch + 20) * 8.5)
-					--else
-						--projectedTexture:SetBrightness(self:GetSunBrightness())
-					--end
-					if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
-						if (spreadEnabled) then 
-							if (i == 1) then
-								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
-							elseif (i == 2) then
-								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
-							elseif (i > 4) then
-								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
-							else
-								projectedTexture:SetBrightness(self:GetSunBrightness())
-							end
-						else
-							projectedTexture:SetBrightness(self:GetSunBrightness())
-						end
-					else
-						projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
-					end
-					projectedTexture:SetPos(position)
-					
-					projectedTexture:SetAngles(angle)
-					if (spreadEnabled) then 
-						//angle them all in a pentagon shape
-						FUCK = {}
-						for degrees = 1, 360, 360/GetConVar( "csm_spread_samples" ):GetInt() do --Start at 1, go to 360, and skip forward at even intervals.
-		
-							local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
-							
-							//draw.RoundedBox( 4, x, y, 30, 30, Color(255,255,0) )
-							table.insert(FUCK, Angle(x, y, 0))
-							
-						end
+		if (self.ProjectedTextures[1] == nil) then
+			self:createlamps()
+		end
+		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
+		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
 
-
-						if (i == 1) then
-
-							//projectedTexture:SetPos(position + Vector(5, 5, 5))
-							//projectedTexture:SetAngles(angle + Angle(0.25, 0.25, 0))
-							//projectedTexture:SetAngles(angle + Angle(0, 0, 0))
-							projectedTexture:SetAngles(angle + FUCK[1]) 
-						elseif (i == 2) then
-							//projectedTexture:SetPos(position + Vector(5, 5, 5))
-							//projectedTexture:SetAngles(angle + Angle(0.25, 0.25, 0))
-							//projectedTexture:SetAngles(angle + Angle(0.15, -0.15, 0))
-							projectedTexture:SetAngles(angle + FUCK[2])
-						elseif (i > 4) then
-							//projectedTexture:SetPos(position + Vector(5, 5, 5))
-							//projectedTexture:SetAngles(angle + Angle(-0.15, 0.15, 0))
-							projectedTexture:SetAngles(angle + FUCK[i - 2])
-						end
-					end
-
-					projectedTexture:SetNearZ(self:GetSunNearZ())
-					projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
-					projectedTexture:Update()
+		if furtherEnabled and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
+			self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+		end
+		if (spreadEnabled) then
+			if (self.ProjectedTextures[1] != nil) and (self.ProjectedTextures[1]:IsValid()) then
+				self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+			end
+			for i = 1, GetConVar( "csm_spread_samples" ):GetInt() - 2 do
+				if (self.ProjectedTextures[4 + i] != nil) and (self.ProjectedTextures[4 + i]:IsValid()) then
+					self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
 				end
 			end
+
 		end
+		for i, projectedTexture in pairs(self.ProjectedTextures) do
+			if (shadfiltChanged) then
+				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
+			end
+
+			if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
+				projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
+			else
+				projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+			end
+			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
+				if (spreadEnabled) then
+					if (i == 1) then
+						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+					elseif (i == 2) then
+						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+					elseif (i > 4) then
+						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+					else
+						projectedTexture:SetBrightness(self:GetSunBrightness())
+					end
+				else
+					projectedTexture:SetBrightness(self:GetSunBrightness())
+				end
+			else
+				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
+			end
+			projectedTexture:SetPos(position)
+
+			projectedTexture:SetAngles(angle)
+			if (spreadEnabled) then
+				-- angle them all in a circle shape
+				FUCK = {}
+				for degrees = 1, 360, 360 / GetConVar( "csm_spread_samples" ):GetInt() do
+
+					local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
+					table.insert(FUCK, Angle(x, y, 0))
+				end
+
+
+				if (i == 1) then
+					projectedTexture:SetAngles(angle + FUCK[1])
+				elseif (i == 2) then
+					projectedTexture:SetAngles(angle + FUCK[2])
+				elseif (i > 4) then
+					projectedTexture:SetAngles(angle + FUCK[i - 2])
+				end
+			end
+
+			projectedTexture:SetNearZ(self:GetSunNearZ())
+			projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
+			projectedTexture:Update()
+		end
+
 	end
 	useskyandfog = self:GetUseSkyFogEffects()
-	
+
 	if (useskyandfog) then
 		if (IsValid(self.EnvSun)) then
 			self.EnvSun:SetKeyValue("sun_dir", tostring(direction))
 		end
-		
+
 		if (IsValid(self.EnvSkyPaint)) then
 			self.EnvSkyPaint:SetKeyValue("TopColor", tostring(self.CurrentAppearance.SkyTopColor))
 			self.EnvSkyPaint:SetKeyValue("BottomColor", tostring(self.CurrentAppearance.SkyBottomColor))
 			self.EnvSkyPaint:SetKeyValue("DuskColor", tostring(self.CurrentAppearance.SkyDuskColor))
 			self.EnvSkyPaint:SetKeyValue("SunColor", tostring(self.CurrentAppearance.SkySunColor))
 		end
-		
+
 		if (IsValid(self.EnvFogController)) then
 			self.EnvFogController:SetKeyValue("fogcolor", tostring(self.CurrentAppearance.FogColor))
 		end
 	end
-	
+
 end
 
-function RenderOverlay()
+--[[
+function RenderOverlay() -- unused, if you want this stuff, use stormfox.
 	local shaderParams = {
 		["$pp_colour_addr"] = 0,
 		["$pp_colour_addg"] = 0,
@@ -971,11 +741,12 @@ function RenderOverlay()
 		["$pp_colour_mulg"] = 0,
 		["$pp_colour_mulb"] = 0
 	}
-	
+
 	DrawColorModify(shaderParams)
 end
+--]]
 
-function PointOnCircle( ang, radius, offX, offY ) // ACTUALLY NERD SHIT LMFAO
+function PointOnCircle( ang, radius, offX, offY ) -- ACTUALLY NERD SHIT LMFAO
 	ang =  math.rad( ang )
 	local x = math.cos( ang ) * radius + offX
 	local y = math.sin( ang ) * radius + offY
@@ -985,33 +756,33 @@ end
 
 function CalculateAppearance(position)
 	local from, to
-	
+
 	for i, key in pairs(AppearanceKeys) do
 		if (key.Position == position) then
 			return key
 		end
-		
+
 		if (key.Position < position) then
 			from = key
 		end
-		
+
 		if (key.Position > position) then
 			to = key
 			break
 		end
 	end
-	
+
 	if from == nil then
 		from = AppearanceKeys[#AppearanceKeys]
 	end
-	
+
 	if to == nil then
 		to = AppearanceKeys[1]
 	end
-	
+
 	local t = (position - from.Position) / (to.Position - from.Position)
 	local result = { }
-	
+
 	for i, key in pairs(from) do
 		if type(key) == "table" then
 			result[i] = LerpColor(t, from[i], to[i])
@@ -1019,7 +790,7 @@ function CalculateAppearance(position)
 			result[i] = Lerp(t, from[i], to[i])
 		end
 	end
-	
+
 	return result
 end
 
@@ -1028,7 +799,7 @@ function LerpColor(t, fromColor, toColor)
 	local g = Lerp(t, fromColor.g, toColor.g)
 	local b = Lerp(t, fromColor.b, toColor.b)
 	local a = Lerp(t, fromColor.a, toColor.a)
-	
+
 	return Color(r, g, b, a)
 end
 
@@ -1036,13 +807,13 @@ function HexToRgb(hex)
 	local r = tonumber(string.sub(hex, 1, 2), 16)
 	local g = tonumber(string.sub(hex, 3, 4), 16)
 	local b = tonumber(string.sub(hex, 5, 6), 16)
-	
+
 	return Color(r, g, b, 1.0)
 end
 
 function FindEntity(class)
 	local entities = ents.FindByClass(class)
-	
+
 	if (#entities > 0) then
 		return entities[1]
 	else
