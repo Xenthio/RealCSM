@@ -4,6 +4,12 @@
 AddCSLuaFile()
 DEFINE_BASECLASS("base_edit_csm")
 
+--jit.opt.start(2) -- same as -O2
+--jit.opt.start("-dce")
+--jit.opt.start("hotloop=10", "hotexit=2")
+--jit.on()
+-- Above are some dumb experiments, don't include them 
+
 ENT.Spawnable = true
 ENT.AdminOnly = true
 

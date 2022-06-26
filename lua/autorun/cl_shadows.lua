@@ -6,7 +6,7 @@ sssssssssssss	dd
 
 CreateClientConVar( "csm_spawnalways", 0,  true, false )
 CreateClientConVar( "csm_blobbyao", 0,  true, false )
-CreateClientConVar(	 "csm_spread", 0,  true, false)
+CreateClientConVar(	 "csm_spread", 0,  false, false)
 CreateClientConVar(	 "csm_spread_samples", 7,  true, false)
 CreateClientConVar(	 "csm_spread_radius", 0.5,  true, false)
 
