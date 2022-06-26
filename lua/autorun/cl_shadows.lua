@@ -6,6 +6,9 @@ sssssssssssss	dd
 
 CreateClientConVar( "csm_spawnalways", 0,  true, false )
 CreateClientConVar( "csm_blobbyao", 0,  true, false )
+CreateClientConVar(	 "csm_spread", 0,  true, false)
+CreateClientConVar(	 "csm_spread_samples", 7,  true, false)
+CreateClientConVar(	 "csm_spread_radius", 0.5,  true, false)
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
@@ -13,9 +16,22 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:CheckBox( "CSM Enabled", "csm_enabled" )
 		
 		panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 8192 )
+		panel:ControlHelp( "Shadow map resolution." )
 		panel:NumSlider( "Shadow Filter", "r_projectedtexture_filter", 0, 10)
+		panel:ControlHelp( "Default Source engine shadow filter, It's quite grainy, it's best you leave this at 0.10 unless you know what you're doing." )
 
 		panel:CheckBox( "Enable AO Like Blob Shadows", "csm_blobbyao" )
+		panel:ControlHelp( "Enables blob shadows that are modified to look like AO." )
+
+
+		panel:CheckBox( "Shadow Spread", "csm_spread" )
+		panel:ControlHelp( "Simulates the penumbra of the sun, can also be used for multisampling on shadows." )
+		panel:ControlHelp( "Notice: Enabling spread disables the near ring, shadows may look lower quality closer up." )
+		panel:NumSlider( "Spread Radius", "csm_spread_radius", 0, 2)
+		panel:ControlHelp( "Radius of the spread in degrees, real life value is 0.5, gm_construct uses an unrealistic value of 3, you should use 0.5." )
+		
+		panel:NumSlider( "Spread Samples", "csm_spread_samples", 2, 16, 0)
+		panel:ControlHelp( "Alert! This doesn't work above 7 unless you launch gmod with extra shadow maps enabled!!!" )
 
 		-- Add stuff here
 	end )

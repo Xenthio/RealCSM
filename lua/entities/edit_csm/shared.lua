@@ -20,6 +20,7 @@ CreateClientConVar(	 "csm_legacydisablesun", 0,  true, false)
 CreateClientConVar(	 "csm_haslightenv", 0,  false, false)
 CreateClientConVar(	 "csm_hashdr", 0,  false, false)
 CreateClientConVar(	 "csm_enabled", 1,  false, false)
+
 CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.10,  false, false)
 
@@ -43,6 +44,10 @@ local furtherEnabled = false
 local furtherEnabledPrev = false
 local furtherEnabledShadows = false
 local furtherEnabledShadowsPrev = false
+local spreadEnabled = false
+local spreadEnabledPrev = false
+local spreadSample = 6
+local spreadSamplePrev = 6
 
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
@@ -127,6 +132,19 @@ function ENT:createlamps()
 			self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
 		end
 
+	end
+	if (spreadEnabled) then
+		if (CLIENT) then
+			self.ProjectedTextures[2]:SetTexture("csm/mask_center")
+			for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
+	
+				self.ProjectedTextures[i + 4] = ProjectedTexture()
+				--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
+				self.ProjectedTextures[i + 4]:SetEnableShadows(true)
+				self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
+		
+			end
+		end
 	end
 end
 
@@ -493,6 +511,59 @@ function ENT:Think()
 		end
 	end
 
+
+	spreadSample = GetConVar( "csm_spread_samples" ):GetInt()
+	if (spreadSamplePrev != spreadSample) then
+		if (CLIENT) then
+			for i, projectedTexture in pairs(self.ProjectedTextures) do
+				projectedTexture:Remove()
+			end
+			table.Empty(self.ProjectedTextures)
+			self:createlamps()
+			
+		end
+		spreadSamplePrev = spreadSample
+
+	end 
+
+	spreadEnabled = GetConVar( "csm_spread" ):GetBool()
+	if (spreadEnabledPrev != spreadEnabled) then
+		if (spreadEnabled) then
+			if (CLIENT) then
+				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
+
+				for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
+		
+					self.ProjectedTextures[i + 4] = ProjectedTexture()
+					--self.ProjectedTextures[i]:SetOrthographic(true,1200,1200,1200,1200)
+					self.ProjectedTextures[i + 4]:SetEnableShadows(true)
+					self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
+			
+				end
+
+				//self.ProjectedTextures[5] = ProjectedTexture()
+				//self.ProjectedTextures[5]:SetTexture("csm/mask_center")
+				//self.ProjectedTextures[6] = ProjectedTexture()
+				//self.ProjectedTextures[6]:SetTexture("csm/mask_center")
+				//self.ProjectedTextures[7] = ProjectedTexture()
+				//self.ProjectedTextures[7]:SetTexture("csm/mask_center")
+				//self.ProjectedTextures[8] = ProjectedTexture()
+				//self.ProjectedTextures[8]:SetTexture("csm/mask_center")
+			end
+			spreadEnabledPrev = true
+		else
+			if (CLIENT) then
+				for i, projectedTexture in pairs(self.ProjectedTextures) do
+					projectedTexture:Remove()
+				end
+				
+				table.Empty(self.ProjectedTextures)
+				self:createlamps()
+			end
+			spreadEnabledPrev = false
+		end
+	end
+
 	furtherEnabledShadows = self:GetEnableFurtherShadows()
 	if (furtherEnabledShadowsPrev != furtherEnabledShadows) then
 		if (furtherEnabledShadows) then
@@ -772,6 +843,24 @@ function ENT:Think()
 						end
 					end
 				end
+				if (spreadEnabled) then
+					
+					if (self.ProjectedTextures[1] != nil) then -- hacky: fix the cause properly
+						if (self.ProjectedTextures[1]:IsValid()) then
+							//self.ProjectedTextures[5]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
+							self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+						end
+					end
+					for i = 1, GetConVar( "csm_spread_samples" ):GetInt() - 2 do
+						if (self.ProjectedTextures[4 + i] != nil) then -- hacky: fix the cause properly
+							if (self.ProjectedTextures[4 + i]:IsValid()) then
+								//self.ProjectedTextures[5]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
+								self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+							end
+						end
+					end
+					
+				end
 				for i, projectedTexture in pairs(self.ProjectedTextures) do
 					if (shadfiltChanged) then
 						projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
@@ -792,12 +881,56 @@ function ENT:Think()
 						--projectedTexture:SetBrightness(self:GetSunBrightness())
 					--end
 					if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
-						projectedTexture:SetBrightness(self:GetSunBrightness())
-					else 
+						if (spreadEnabled) then 
+							if (i == 1) then
+								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+							elseif (i == 2) then
+								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+							elseif (i > 4) then
+								projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+							else
+								projectedTexture:SetBrightness(self:GetSunBrightness())
+							end
+						else
+							projectedTexture:SetBrightness(self:GetSunBrightness())
+						end
+					else
 						projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
 					end
 					projectedTexture:SetPos(position)
+					
 					projectedTexture:SetAngles(angle)
+					if (spreadEnabled) then 
+						//angle them all in a pentagon shape
+						FUCK = {}
+						for degrees = 1, 360, 360/GetConVar( "csm_spread_samples" ):GetInt() do --Start at 1, go to 360, and skip forward at even intervals.
+		
+							local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
+							
+							//draw.RoundedBox( 4, x, y, 30, 30, Color(255,255,0) )
+							table.insert(FUCK, Angle(x, y, 0))
+							
+						end
+
+
+						if (i == 1) then
+
+							//projectedTexture:SetPos(position + Vector(5, 5, 5))
+							//projectedTexture:SetAngles(angle + Angle(0.25, 0.25, 0))
+							//projectedTexture:SetAngles(angle + Angle(0, 0, 0))
+							projectedTexture:SetAngles(angle + FUCK[1]) 
+						elseif (i == 2) then
+							//projectedTexture:SetPos(position + Vector(5, 5, 5))
+							//projectedTexture:SetAngles(angle + Angle(0.25, 0.25, 0))
+							//projectedTexture:SetAngles(angle + Angle(0.15, -0.15, 0))
+							projectedTexture:SetAngles(angle + FUCK[2])
+						elseif (i > 4) then
+							//projectedTexture:SetPos(position + Vector(5, 5, 5))
+							//projectedTexture:SetAngles(angle + Angle(-0.15, 0.15, 0))
+							projectedTexture:SetAngles(angle + FUCK[i - 2])
+						end
+					end
+
 					projectedTexture:SetNearZ(self:GetSunNearZ())
 					projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
 					projectedTexture:Update()
@@ -841,6 +974,14 @@ function RenderOverlay()
 	
 	DrawColorModify(shaderParams)
 end
+
+function PointOnCircle( ang, radius, offX, offY ) // ACTUALLY NERD SHIT LMFAO
+	ang =  math.rad( ang )
+	local x = math.cos( ang ) * radius + offX
+	local y = math.sin( ang ) * radius + offY
+	return x, y
+end
+
 
 function CalculateAppearance(position)
 	local from, to
