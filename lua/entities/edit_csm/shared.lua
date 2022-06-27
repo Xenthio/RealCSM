@@ -232,7 +232,7 @@ function ENT:Initialize()
 	self:SetMaterial("gmod/edit_sun")
 	if (self:GetRemoveStaticSun()) then
 		timer.Create( "warn", 0.1, 1, warn)
-		RunConsoleCommand("r_radiosity", "4")
+		RunConsoleCommand("r_radiosity", "2")
 		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 			RunConsoleCommand("r_lightstyle", "0")
 			RunConsoleCommand("r_ambientlightingonly", "1")
@@ -476,7 +476,7 @@ function ENT:Think()
 
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
 		csmEnabledPrev = true
-		RunConsoleCommand("r_radiosity", "4")
+		RunConsoleCommand("r_radiosity", "2")
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "0")
 		end
@@ -512,7 +512,7 @@ function ENT:Think()
 	if (RemoveStaticSunPrev != removestatsun) then
 		if (self:GetRemoveStaticSun()) then
 			timer.Create( "warn", 0.1, 1, warn)
-			RunConsoleCommand("r_radiosity", "4")
+			RunConsoleCommand("r_radiosity", "2")
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				if (CLIENT) then
 					RunConsoleCommand("r_ambientlightingonly", "1")
