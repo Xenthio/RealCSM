@@ -395,6 +395,7 @@ function ENT:OnRemove()
 		end
 		if GetConVar( "csm_blobbyao" ):GetBool() then
 			RunConsoleCommand("r_shadowrendertotexture", "1")
+			RunConsoleCommand("r_shadowdist", "10000")
 		end
 		RunConsoleCommand("r_projectedtexture_filter", "1")
 
@@ -527,6 +528,8 @@ function ENT:Think()
 			BlobShadowsPrev = false
 		end
 		if GetConVar( "csm_blobbyao" ):GetBool() then
+			RunConsoleCommand("r_shadowrendertotexture", "0")
+			RunConsoleCommand("r_shadowdist", "20")
 			RunConsoleCommand("r_shadows_gamecontrol", "1")
 		end
 		if (CLIENT) then
@@ -545,6 +548,7 @@ function ENT:Think()
 			wakeup()
 		end
 		RunConsoleCommand("r_shadowrendertotexture", "1")
+		RunConsoleCommand("r_shadowdist", "10000")
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "1")
 		end
