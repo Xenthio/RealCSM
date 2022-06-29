@@ -1,10 +1,12 @@
 CreateConVar( "csm_spawnalways", 0,  true, false )
+CreateConVar( "csm_allowwakeprops", 1,  true, false )
 hook.Add( "PopulateToolMenu", "CSMServer", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM_Server", "#CSM", "", "", function( panel )
 		panel:ClearControls()
 
 		panel:CheckBox( "CSM Spawn on load (Experimental)", "csm_spawnalways" )
 
+		panel:CheckBox( "Allow clients to wake up all props.", "csm_allowwakeprops" )
 		-- Add stuff here
 	end )
 end )

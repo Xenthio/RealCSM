@@ -64,6 +64,7 @@ end
 if (SERVER) then
 	util.AddNetworkString( "PlayerSpawned" )
 	util.AddNetworkString( "hasLightEnvNet" )
+	util.AddNetworkString( "csmPropWakeup" )
 	if (table.Count(ents.FindByClass("light_environment")) > 0) then
 		RunConsoleCommand("csm_haslightenv", "1")
 	end
@@ -82,6 +83,14 @@ local AppearanceKeys = {
 net.Receive( "hasLightEnvNet", function( len, ply )
 	RunConsoleCommand("csm_haslightenv", "1")
 end)
+function wakeup()
+	if SERVER and GetConVar("csm_allowwakeprops"):GetBool() then
+		print("[Real CSM] - Radiosity changed, waking up all props. (csm_wakeprops = 1)")
+		for k, v in ipairs(ents.FindByClass( "prop_physics" )) do
+			v:Fire("wake")
+		end
+	end
+end
 function findlight()
 	if (SERVER) then
 		hasLightEnvs = (table.Count(lightenvs) > 0)
@@ -235,6 +244,9 @@ function ENT:Initialize()
 	if (self:GetRemoveStaticSun()) then
 		timer.Create( "warn", 0.1, 1, warn)
 		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			wakeup()
+		end
 		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 			RunConsoleCommand("r_lightstyle", "0")
 			RunConsoleCommand("r_ambientlightingonly", "1")
@@ -353,6 +365,12 @@ net.Receive( "PlayerSpawned", function( len, ply )
 	end
 end )
 
+net.Receive( "csmPropWakeup", function( len, ply )
+	if SERVER then
+		wakeup()
+	end
+end )
+
 function ENT:UpdateTransmitState()
 	return TRANSMIT_ALWAYS
 end
@@ -375,8 +393,11 @@ function ENT:OnRemove()
 
 		if (self:GetRemoveStaticSun()) then
 
-			RunConsoleCommand("r_radiosity", "3")
 
+			RunConsoleCommand("r_radiosity", "3")
+			if (GetConVar( "csm_wakeprops" ):GetBool()) then
+				wakeup()
+			end
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				RunConsoleCommand("r_ambientlightingonly", "0")
 
@@ -405,6 +426,10 @@ function ENT:Think()
 	propradiosity = GetConVar( "csm_propradiosity" ):GetString()
 	if CLIENT and (propradiosityPrev != propradiosity) and GetConVar( "csm_enabled" ):GetBool() then
 		RunConsoleCommand("r_radiosity", propradiosity)
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			net.Start( "csmPropWakeup" )
+			net.SendToServer()
+		end
 		propradiosityPrev = propradiosity
 	end
 
@@ -487,6 +512,9 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
 		csmEnabledPrev = true
 		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			wakeup()
+		end
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "0")
 			BlobShadowsPrev = false
@@ -506,6 +534,10 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 0) and (csmEnabledPrev == true) then
 		csmEnabledPrev = false
 		RunConsoleCommand("r_radiosity", "3")
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			net.Start( "csmPropWakeup" )
+			net.SendToServer()
+		end
 		RunConsoleCommand("r_shadowrendertotexture", "1")
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "1")
@@ -530,6 +562,9 @@ function ENT:Think()
 		if (self:GetRemoveStaticSun()) then
 			timer.Create( "warn", 0.1, 1, warn)
 			RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
+			if (GetConVar( "csm_wakeprops" ):GetBool()) then
+				wakeup()
+			end
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				if (CLIENT) then
 					RunConsoleCommand("r_ambientlightingonly", "1")
@@ -542,6 +577,9 @@ function ENT:Think()
 			end
 		else
 			RunConsoleCommand("r_radiosity", "3")
+			if (GetConVar( "csm_wakeprops" ):GetBool()) then
+				wakeup()
+			end
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				if (CLIENT) then
 					RunConsoleCommand("r_lightstyle", "-1")
