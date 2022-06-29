@@ -448,7 +448,7 @@ function ENT:Think()
 	spreadEnabled = GetConVar( "csm_spread" ):GetBool()
 	if (spreadEnabledPrev != spreadEnabled) and GetConVar( "csm_enabled" ):GetBool() then
 		if (spreadEnabled) then
-			if (CLIENT) then
+			if CLIENT and (self.ProjectedTextures[2] != nil) and (self.ProjectedTextures[2]:IsValid()) then
 				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
 				for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
 					self.ProjectedTextures[i + 4] = ProjectedTexture()
