@@ -535,8 +535,7 @@ function ENT:Think()
 		csmEnabledPrev = false
 		RunConsoleCommand("r_radiosity", "3")
 		if (GetConVar( "csm_wakeprops" ):GetBool()) then
-			net.Start( "csmPropWakeup" )
-			net.SendToServer()
+			wakeup()
 		end
 		RunConsoleCommand("r_shadowrendertotexture", "1")
 		if (self:GetHideRTTShadows()) then
