@@ -149,7 +149,11 @@ end
 
 function ENT:Initialize()
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
-	RunConsoleCommand("r_shadows_gamecontrol", "0")
+	if !GetConVar( "csm_blobbyao" ):GetBool() then
+		RunConsoleCommand("r_shadows_gamecontrol", "0")
+	else
+		BlobShadowsPrev = false
+	end
 	shadfiltChanged = true
 	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
 		if v != self then
@@ -388,6 +392,9 @@ function ENT:OnRemove()
 		furtherEnabledPrev = false
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "1")
+		end
+		if GetConVar( "csm_blobbyao" ):GetBool() then
+			RunConsoleCommand("r_shadowrendertotexture", "1")
 		end
 		RunConsoleCommand("r_projectedtexture_filter", "1")
 
