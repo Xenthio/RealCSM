@@ -4,7 +4,7 @@ CreateConVar( "csm_debug_pseudoplayer", 0,  false, false )
 AddCSLuaFile()
 DEFINE_BASECLASS( "base_anim" )
 
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminOnly = false
 
 local debug = false
@@ -17,6 +17,7 @@ local pseudoweapon
 function ENT:Initialize()
 
     if (CLIENT) then
+        RunConsoleCommand("r_flashlightnear", "45")
         self:SetModel(LocalPlayer():GetModel())
         self:SetPos(LocalPlayer():GetPos())
         self:SetPredictable( true )
@@ -130,7 +131,8 @@ function ENT:Think()
 end
 
 function ENT:OnRemove()
-    if CLIENT then
+    if CLIENT and pseudoweapon:IsValid() then
+        RunConsoleCommand("r_flashlightnear", "4")
         pseudoweapon:Remove()
     end
     --pseudoweapon:Remove()
