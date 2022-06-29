@@ -51,6 +51,8 @@ local spreadEnabled = false
 local spreadEnabledPrev = false
 local spreadSample = 6
 local spreadSamplePrev = 6
+local propradiosity = 4
+local propradiosityPrev = 4
 
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
@@ -232,7 +234,7 @@ function ENT:Initialize()
 	self:SetMaterial("gmod/edit_sun")
 	if (self:GetRemoveStaticSun()) then
 		timer.Create( "warn", 0.1, 1, warn)
-		RunConsoleCommand("r_radiosity", "2")
+		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
 		if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 			RunConsoleCommand("r_lightstyle", "0")
 			RunConsoleCommand("r_ambientlightingonly", "1")
@@ -399,6 +401,14 @@ hook.Add( "ShadnowFilterChange", "shadfiltchanged", function()
 end)
 
 function ENT:Think()
+
+	propradiosity = GetConVar( "csm_propradiosity" ):GetString()
+	if CLIENT and (propradiosityPrev != propradiosity) and GetConVar( "csm_enabled" ):GetBool() then
+		RunConsoleCommand("r_radiosity", propradiosity)
+		propradiosityPrev = propradiosity
+	end
+
+
 	shadfiltChanged = false
 	furtherEnabled = self:GetEnableFurther()
 	if (furtherEnabledPrev != furtherEnabled) then
@@ -476,7 +486,7 @@ function ENT:Think()
 
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
 		csmEnabledPrev = true
-		RunConsoleCommand("r_radiosity", "2")
+		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "0")
 		end
@@ -509,10 +519,12 @@ function ENT:Think()
 
 	local removestatsun = self:GetRemoveStaticSun()
 
+
+
 	if (RemoveStaticSunPrev != removestatsun) then
 		if (self:GetRemoveStaticSun()) then
 			timer.Create( "warn", 0.1, 1, warn)
-			RunConsoleCommand("r_radiosity", "2")
+			RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
 				if (CLIENT) then
 					RunConsoleCommand("r_ambientlightingonly", "1")
