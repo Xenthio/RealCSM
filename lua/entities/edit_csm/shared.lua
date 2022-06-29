@@ -53,6 +53,7 @@ local spreadSample = 6
 local spreadSamplePrev = 6
 local propradiosity = 4
 local propradiosityPrev = 4
+local fpshadowcontroller
 
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
@@ -148,6 +149,7 @@ function ENT:SUNOn()
 end
 
 function ENT:Initialize()
+
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	if !GetConVar( "csm_blobbyao" ):GetBool() then
 		RunConsoleCommand("r_shadows_gamecontrol", "0")
@@ -232,6 +234,10 @@ function ENT:Initialize()
 	end
 
 	if (SERVER) then
+		if GetConVar( "csm_allowfpshadows" ):GetBool() then
+			fpshadowcontroller = ents.Create( "csm_pseudoplayer" )
+			fpshadowcontroller:Spawn()
+		end
 		util.AddNetworkString( "PlayerSpawned" )
 		hasLightEnvs = (table.Count(lightenvs) > 0)
 		if hasLightEnvs then
@@ -364,7 +370,7 @@ end )
 
 
 net.Receive( "PlayerSpawned", function( len, ply )
-	if CLIENT and (FindEntity("edit_csm") != nil) then
+	if CLIENT and (FindEntity("edit_csm") != nil) and (GetConVar( "csm_spawnalways" ):GetBool()) then
 		FindEntity("edit_csm"):Initialize()
 	end
 end )
@@ -416,6 +422,11 @@ function ENT:OnRemove()
 			end
 		end
 	end
+	if (SERVER) then
+		if fpshadowcontroller:IsValid() then
+			fpshadowcontroller:Remove()
+		end
+	end
 	if (CLIENT) then
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			projectedTexture:Remove()
@@ -443,6 +454,17 @@ function ENT:Think()
 
 
 	shadfiltChanged = false
+
+	--fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
+	--if CLIENT and (furtherEnabledPrev != furtherEnabled) then
+		--if (fpShadows) then
+			--fpshadowcontroller = ents.Create( "csm_pseudoplayer" )
+			--fpShadowsPrev = true
+		--else
+			--fpShadowsPrev = false
+		--end
+	--end
+
 	furtherEnabled = self:GetEnableFurther()
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then

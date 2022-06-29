@@ -1,5 +1,6 @@
 CreateConVar( "csm_spawnalways", 0,  true, false )
 CreateConVar( "csm_allowwakeprops", 1,  true, false )
+CreateConVar( "csm_allowfpshadows", 1,  true, false )
 hook.Add( "PopulateToolMenu", "CSMServer", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM_Server", "#CSM", "", "", function( panel )
 		panel:ClearControls()
@@ -8,6 +9,7 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 
 		panel:CheckBox( "Allow clients to wake up all props.", "csm_allowwakeprops" )
 		-- Add stuff here
+		panel:CheckBox( "Allow clients to use experimental firstperson shadows", "csm_allowfpshadows" )
 	end )
 end )
 if (SERVER) then

@@ -8,9 +8,10 @@ CreateClientConVar( "csm_spawnalways", 0,  true, false )
 CreateClientConVar( "csm_propradiosity", 4,  true, false )
 CreateClientConVar( "csm_blobbyao", 0,  true, false )
 CreateClientConVar( "csm_wakeprops", 1,  true, false )
-CreateClientConVar(	 "csm_spread", 0,  false, false)
-CreateClientConVar(	 "csm_spread_samples", 7,  true, false)
-CreateClientConVar(	 "csm_spread_radius", 0.5,  true, false)
+CreateClientConVar(	"csm_spread", 0,  false, false)
+CreateClientConVar(	"csm_spread_samples", 7,  true, false)
+CreateClientConVar(	"csm_spread_radius", 0.5,  true, false)
+CreateClientConVar(	"csm_localplayershadow", 0,  true, false)
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
@@ -36,6 +37,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:ControlHelp( "Enables blob shadows that are modified to look like AO." )
 
 
+
 		panel:CheckBox( "Shadow Spread", "csm_spread" )
 		panel:ControlHelp( "Simulates the penumbra of the sun, can also be used for multisampling on shadows." )
 		panel:ControlHelp( "Notice: Enabling spread disables the near ring, shadows may look lower quality closer up." )
@@ -46,6 +48,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:NumSlider( "Spread Samples", "csm_spread_samples", 2, 16, 0)
 		panel:ControlHelp( "Alert! This doesn't work above 7 unless you launch gmod with extra shadow maps enabled!!!" )
 		panel:ControlHelp( "Double Alert! Setting this too high may crash your game!" )
+
+		panel:CheckBox( "Draw Firstperson Shadows (Experimental)", "csm_localplayershadow" )
+		panel:ControlHelp( "See your own shadows in firstperson" )
 
 		-- Add stuff here
 	end )
