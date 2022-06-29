@@ -446,7 +446,7 @@ function ENT:Think()
 	end
 
 	spreadEnabled = GetConVar( "csm_spread" ):GetBool()
-	if (spreadEnabledPrev != spreadEnabled) then
+	if (spreadEnabledPrev != spreadEnabled) and GetConVar( "csm_enabled" ):GetBool() then
 		if (spreadEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
@@ -489,6 +489,10 @@ function ENT:Think()
 		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "0")
+			BlobShadowsPrev = false
+		end
+		if GetConVar( "csm_blobbyao" ):GetBool() then
+			RunConsoleCommand("r_shadows_gamecontrol", "1")
 		end
 		if (CLIENT) then
 			self:createlamps()
@@ -502,6 +506,7 @@ function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 0) and (csmEnabledPrev == true) then
 		csmEnabledPrev = false
 		RunConsoleCommand("r_radiosity", "3")
+		RunConsoleCommand("r_shadowrendertotexture", "1")
 		if (self:GetHideRTTShadows()) then
 			RunConsoleCommand("r_shadows_gamecontrol", "1")
 		end
@@ -553,20 +558,7 @@ function ENT:Think()
 	if (CLIENT) then
 		local hiderttshad = self:GetHideRTTShadows()
 		local BlobShadows = GetConVar( "csm_blobbyao" ):GetBool()
-		if (BlobShadowsPrev != BlobShadows) then
-			BlobShadowsPrev = BlobShadows
-			if (BlobShadows) then
-				HideRTTShadowsPrev = true
-				hiderttshad = false
-				RunConsoleCommand("r_shadowrendertotexture", "0")
-				RunConsoleCommand("r_shadowdist", "20")
-				BlobShadowsPrev = true
-			else
-				RunConsoleCommand("r_shadowrendertotexture", "1")
-				RunConsoleCommand("r_shadowdist", "10000")
-				BlobShadowsPrev = false
-			end
-		end
+
 		if (HideRTTShadowsPrev != hiderttshad) and !BlobShadows then
 
 			if (hiderttshad) then
@@ -582,6 +574,26 @@ function ENT:Think()
 			ShadowFilterPrev = shadfilt
 			shadfiltChanged = true
 			RunConsoleCommand("csm_filter", shadfilt)
+		end
+		if (BlobShadowsPrev != BlobShadows) and GetConVar( "csm_enabled" ):GetBool() then
+			BlobShadowsPrev = BlobShadows
+			if (BlobShadows) then
+				HideRTTShadowsPrev = true
+				hiderttshad = false
+				RunConsoleCommand("r_shadowrendertotexture", "0")
+				RunConsoleCommand("r_shadowdist", "20")
+				RunConsoleCommand("r_shadows_gamecontrol", "1")
+				BlobShadowsPrev = true
+			else
+				RunConsoleCommand("r_shadowrendertotexture", "1")
+				RunConsoleCommand("r_shadowdist", "10000")
+				if (hiderttshad) then
+					RunConsoleCommand("r_shadows_gamecontrol", "0")
+				else
+					RunConsoleCommand("r_shadows_gamecontrol", "1")
+				end
+				BlobShadowsPrev = false
+			end
 		end
 	end
 
