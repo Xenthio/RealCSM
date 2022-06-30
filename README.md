@@ -13,6 +13,6 @@ TODO
 * [ ] Really shitty and cheap global illumination (probably very hard to do so this is unlikely)
 * [x] Shadow spread in the closest ring (maybe second ring too, yknow for insane people)
 * [ ] Weapon self shadowing
-* [ ] Firstperson player shadow
+* [x] Firstperson player shadow
  
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
