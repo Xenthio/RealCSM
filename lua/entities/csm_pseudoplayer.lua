@@ -61,7 +61,7 @@ function ENT:Initialize()
     else
 
         self:UseClientSideAnimation()
-        for i = 0, 15 do
+        for i = 0, 16 do
             self:AddLayeredSequence( 0, 0 )
         end
 
@@ -73,11 +73,23 @@ function ENT:Think()
     if CLIENT then
         if GetConVar( "csm_localplayershadow" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
 
-            if LocalPlayer():GetActiveWeapon():IsValid() then
+            if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil then
                 pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
                 pseudoweapon:SetNoDraw( false )
+            elseif pseudoweapon == nil then
+                weaponmodel = "models/weapons/w_pistol.mdl"
+                if LocalPlayer():GetActiveWeapon():IsValid() then
+                    weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
+                end
+                pseudoweapon = ClientsideModel(weaponmodel)
+                pseudoweapon:SetPos(self:GetPos())
+                pseudoweapon:SetupBones()
+                pseudoweapon:SetMoveType(MOVETYPE_NONE)
+                pseudoweapon:SetPredictable( true )
+                pseudoweapon:SetParent( self )
+                pseudoweapon:AddEffects( 1 )
+                print("uh oh")
             end
-
 
             --pseudoweapon:SetSkin(LocalPlayer():GetActiveWeapon():GetSkin()) -- why do i need this for shadow casting????
             --pseudoweapon:SetPos(LocalPlayer():GetActiveWeapon():GetPos())
