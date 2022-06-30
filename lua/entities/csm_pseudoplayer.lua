@@ -141,7 +141,7 @@ end
 function ENT:OnRemove()
     if CLIENT then
         RunConsoleCommand("r_flashlightnear", "4")
-        if LocalPlayer():GetActiveWeapon():IsValid() then
+        if LocalPlayer():IsValid() and LocalPlayer():GetActiveWeapon():IsValid() then
             pseudoweapon:Remove()
         end
     end
