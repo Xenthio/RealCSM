@@ -12,6 +12,8 @@ CreateClientConVar(	"csm_spread", 0,  false, false)
 CreateClientConVar(	"csm_spread_samples", 7,  true, false)
 CreateClientConVar(	"csm_spread_radius", 0.5,  true, false)
 CreateClientConVar(	"csm_localplayershadow", 0,  true, false)
+CreateClientConVar(	"csm_further", 0,  true, false)
+CreateClientConVar(	"csm_furthershadows", 1,  true, false)
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
@@ -51,6 +53,11 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		panel:CheckBox( "Draw Firstperson Shadows (Experimental)", "csm_localplayershadow" )
 		panel:ControlHelp( "See your own shadows in firstperson" )
+
+		panel:CheckBox( "Enable further cascade for large maps", "csm_further")
+		panel:ControlHelp( "Add a further cascade to increase shadow draw distance without sacrificing quality" )
+		panel:CheckBox( "Enable shadows on further cascade", "csm_furthershadows")
+		panel:ControlHelp( "Enable shadows on the further cascade, ")
 
 		-- Add stuff here
 	end )

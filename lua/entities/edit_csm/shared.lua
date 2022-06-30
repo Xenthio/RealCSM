@@ -303,9 +303,9 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Float", 2, "SizeMid",  { KeyName = "Size 2", Edit = { type = "Float", order = 5, min = 0.0, max = 32768.0, title = "Middle cascade size" }})
 	self:NetworkVar("Float", 3, "SizeFar",  { KeyName = "Size 3", Edit = { type = "Float", order = 6, min = 0.0, max = 32768.0, title = "Far cascade size" }}) --16384
 
-	self:NetworkVar("Bool", 0, "EnableFurther", { KeyName = "Enable Futher Light", Edit = { type = "Bool", order = 7, title = "Enable further cascade for large maps"}})
+	--self:NetworkVar("Bool", 0, "EnableFurther", { KeyName = "Enable Futher Light", Edit = { type = "Bool", order = 7, title = "Enable further cascade for large maps"}})
 	self:NetworkVar("Float", 4, "SizeFurther",  { KeyName = "Size 4", Edit = { type = "Float", order = 8, min = 0.0, max = 65536.0, title = "Further cascade size" }})
-	self:NetworkVar("Bool", 1, "EnableFurtherShadows", { KeyName = "Enable Futher Shadows", Edit = { type = "Bool", order = 7, title = "Enable shadows on further cascade"}})
+	--self:NetworkVar("Bool", 1, "EnableFurtherShadows", { KeyName = "Enable Futher Shadows", Edit = { type = "Bool", order = 7, title = "Enable shadows on further cascade"}})
 
 	self:NetworkVar("Float", 5, "Orientation", { KeyName = "Orientation", Edit = { type = "Float", order = 10, min = 0.0, max = 360.0, title = "Sun orientation" }})
 	self:NetworkVar("Bool", 2, "UseMapSunAngles", { KeyName = "Use Map Sun Angles", Edit = { type = "Bool", order = 11, title = "Use the Map Sun angles"}})
@@ -338,9 +338,9 @@ function ENT:SetupDataTables()
 		self:SetSizeMid(1024.0)
 		self:SetSizeFar(8192.0)
 
-		self:SetEnableFurther(false)
+		--self:SetEnableFurther(false)
 		self:SetSizeFurther(65536.0)
-		self:SetEnableFurtherShadows(true)
+		--self:SetEnableFurtherShadows(true)
 
 		self:SetUseMapSunAngles(true)
 		self:SetUseSkyFogEffects(false)
@@ -463,8 +463,8 @@ function ENT:Think()
 			--fpShadowsPrev = false
 		--end
 	--end
-
-	furtherEnabled = self:GetEnableFurther()
+	furtherEnabledShadows = GetConVar( "csm_furthershadows" ):GetBool()
+	furtherEnabled =  GetConVar( "csm_further" ):GetBool()
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
@@ -523,7 +523,7 @@ function ENT:Think()
 		end
 	end
 
-	furtherEnabledShadows = self:GetEnableFurtherShadows()
+	furtherEnabledShadows = GetConVar( "csm_furthershadows" ):GetBool()
 	if (furtherEnabledShadowsPrev != furtherEnabledShadows) then
 		if (furtherEnabledShadows) then
 			if CLIENT and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
