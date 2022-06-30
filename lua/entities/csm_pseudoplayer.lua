@@ -22,7 +22,15 @@ function ENT:Initialize()
         self:SetPos(LocalPlayer():GetPos())
         self:SetPredictable( true )
 
-        pseudoweapon = ClientsideModel(LocalPlayer():GetActiveWeapon():GetModel())
+        weaponmodel = "models/weapons/w_pistol.mdl"
+        if LocalPlayer():GetActiveWeapon():IsValid() then
+            weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
+        end
+        pseudoweapon = ClientsideModel(weaponmodel)
+
+        if !LocalPlayer():GetActiveWeapon():IsValid() then
+            pseudoweapon:SetNoDraw( true )
+        end
         pseudoweapon:SetPos(self:GetPos())
         pseudoweapon:SetupBones()
         --pseudoweapon:SetAngles(self:GetAngles())
@@ -64,12 +72,10 @@ end
 function ENT:Think()
     if CLIENT then
         if GetConVar( "csm_localplayershadow" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
-            pseudoweapon:SetNoDraw( false )
+
             if LocalPlayer():GetActiveWeapon():IsValid() then
                 pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
                 pseudoweapon:SetNoDraw( false )
-            else
-                pseudoweapon:SetNoDraw( true )
             end
 
 
@@ -78,8 +84,10 @@ function ENT:Think()
             --pseudoweapon:SetAngles(LocalPlayer():GetActiveWeapon():GetAngles())
             self:SetNoDraw( false )
             if !(debug or GetConVar("csm_debug_pseudoplayer"):GetBool()) then
-                pseudoweapon:SetRenderMode(2)
-                pseudoweapon:SetColor(Color(255,255,255,0))
+                if LocalPlayer():GetActiveWeapon():IsValid() then
+                    pseudoweapon:SetRenderMode(2)
+                    pseudoweapon:SetColor(Color(255,255,255,0))
+                end
                 self:SetRenderMode(2)
                 self:SetColor(Color(255,255,255,0))
                 self:SetPos(LocalPlayer():GetPos())
@@ -131,9 +139,11 @@ function ENT:Think()
 end
 
 function ENT:OnRemove()
-    if CLIENT and pseudoweapon:IsValid() then
+    if CLIENT then
         RunConsoleCommand("r_flashlightnear", "4")
-        pseudoweapon:Remove()
+        if LocalPlayer():GetActiveWeapon():IsValid() then
+            pseudoweapon:Remove()
+        end
     end
     --pseudoweapon:Remove()
 end
