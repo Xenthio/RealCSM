@@ -422,10 +422,9 @@ function ENT:OnRemove()
 			end
 		end
 	end
-	if (SERVER) then
-		if fpshadowcontroller:IsValid() then
-			fpshadowcontroller:Remove()
-		end
+	if SERVER and fpshadowcontroller:IsValid() then
+		fpshadowcontroller:Remove()
+
 	end
 	if (CLIENT) then
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
