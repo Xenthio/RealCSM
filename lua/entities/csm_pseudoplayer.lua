@@ -89,6 +89,8 @@ function ENT:Think()
                 pseudoweapon:SetParent( self )
                 pseudoweapon:AddEffects( 1 )
                 print("uh oh")
+            elseif !LocalPlayer():GetActiveWeapon():IsValid() then
+                pseudoweapon:SetNoDraw( true )
             end
 
             --pseudoweapon:SetSkin(LocalPlayer():GetActiveWeapon():GetSkin()) -- why do i need this for shadow casting????
@@ -159,3 +161,52 @@ function ENT:OnRemove()
     end
     --pseudoweapon:Remove()
 end
+
+
+-- https://github.com/Facepunch/garrysmod-issues/issues/861
+-- eat shit
+
+local parentLookup = {}
+local function cacheParents()
+    parentLookup = {}
+    local tbl = ents.GetAll()
+    for i = 1, #tbl do
+        local v = tbl[i]
+        if v:EntIndex() == -1 then
+            local parent = v:GetInternalVariable("m_hNetworkMoveParent")
+            local children = parentLookup[parent]
+            if !children then children = {}; parentLookup[parent] = children end
+            children[#children + 1] = v
+        end
+    end
+end
+
+local function fixChildren(parent, transmit)
+    local tbl = parentLookup[parent]
+    if tbl then
+        for i = 1, #tbl do
+            local child = tbl[i]
+            if transmit then
+                --print("parented " .. tostring(child) .. " to " .. tostring(parent))
+                child:SetNoDraw(false)
+                child:SetParent(parent)
+                fixChildren(child, transmit)
+            else
+                --print("parent " .. tostring(parent) .. " is dorment. hiding " .. tostring(child))
+                child:SetNoDraw(true)
+                fixChildren(child, transmit)
+            end
+        end
+    end
+end
+
+local lastTime = 0
+hook.Add("NotifyShouldTransmit", "testCSMfixCSSS", function(ent, transmit)
+    local time = RealTime()
+    if lastTime < time then
+        cacheParents()
+        lastTime = time
+    end
+
+    fixChildren(ent, transmit)
+end)
