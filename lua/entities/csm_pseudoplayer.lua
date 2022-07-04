@@ -146,7 +146,7 @@ function ENT:Think()
                 --self:SetBonePosition(i, LocalPlayer():GetBonePosition(i))
             --end
         else
-            pseudoweapon:SetNoDraw( true )
+            pcall(function() pseudoweapon:SetNoDraw( true ) end)
             self:SetNoDraw( true )
         end
     end
