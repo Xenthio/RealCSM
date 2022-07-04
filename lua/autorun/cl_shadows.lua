@@ -22,6 +22,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:ClearControls()
 		panel:CheckBox( "CSM Enabled", "csm_enabled" )
 
+		panel:CheckBox( "Performance mode.", "csm_perfmode")
+		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce perceived quality of nearby shadows." )
+
 		panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 8192 )
 		panel:ControlHelp( "Shadow map resolution." )
 		panel:NumSlider( "Shadow Filter", "r_projectedtexture_filter", 0, 10)
@@ -64,8 +67,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:CheckBox( "Enable shadows on further cascade", "csm_furthershadows")
 		panel:ControlHelp( "Enable shadows on the further cascade, ")
 
-		panel:CheckBox( "Performance mode.", "csm_perfmode")
-		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce nearby perceived shadow quality." )
+
 		-- Add stuff here
 	end )
 end )
@@ -73,6 +75,7 @@ end )
 if (CLIENT) then
 	function firstTimeCheck()
 		if !(file.Read( "csm.txt", "DATA" ) == "two" ) and (file.Read( "csm.txt", "DATA" ) != "one" ) then
+		--if true then
 			--if not game.SinglePlayer() then return end
 			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 			local Frame = vgui.Create( "DFrame" )
@@ -98,6 +101,13 @@ if (CLIENT) then
 			label3:SetPos( 15, 70 )
 			label3:SetSize(	300, 20)
 			label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+
+			local DermaCheckbox2 = vgui.Create( "DCheckBoxLabel", Frame )
+			DermaCheckbox2:SetText("Performance Mode")
+			DermaCheckbox2:SetPos( 8, 100 )				-- Set the position
+			DermaCheckbox2:SetSize( 300, 30 )			-- Set the size
+
+			DermaCheckbox2:SetConVar( "csm_perfmode" )
 
 			local DermaCheckbox = vgui.Create( "DCheckBoxLabel", Frame )
 			DermaCheckbox:SetText("Spawn on load")

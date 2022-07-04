@@ -176,7 +176,7 @@ function ENT:Initialize()
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 		local Frame = vgui.Create( "DFrame" )
-		Frame:SetSize( 300, 200 )
+		Frame:SetSize( 300, 240 )
 
 		RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
 
@@ -226,12 +226,29 @@ function ENT:Initialize()
 		DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
 		DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
 
+		--local DermaNumSlider2 = vgui.Create( "DNumSlider", Frame )
+		--DermaNumSlider2:SetPos( 8, 140 )				-- Set the position
+		--DermaNumSlider2:SetSize( 300, 30 )			-- Set the size
+		--DermaNumSlider2:SetText( "Shadow Filter" )	-- Set the text above the slider
+		--DermaNumSlider2:SetMin( 0 )				 	-- Set the minimum number you can slide to
+		--DermaNumSlider2:SetMax( 10 )				-- Set the maximum number you can slide to
+		--DermaNumSlider2:SetDecimals( 2 )				-- Decimal places - zero for whole number
+		--DermaNumSlider2:SetConVar( "r_projectedtexture_filter" )	-- Changes the ConVar when you slide
+
+		local DermaCheckbox2 = vgui.Create( "DCheckBoxLabel", Frame )
+		DermaCheckbox2:SetText("Performance Mode (for better framerate / less lag)")
+		--DermaCheckbox2:SetPos( 8, 164 )				-- Set the position
+		DermaCheckbox2:SetPos( 8, 150 )				-- Set the position
+		DermaCheckbox2:SetSize( 300, 30 )			-- Set the size
+
+		DermaCheckbox2:SetConVar( "csm_perfmode" )
+
 		local Button = vgui.Create("DButton", Frame)
 		Button:SetText( "Continue" )
-		Button:SetPos( 160, 155 )
+		Button:SetPos( 160, 195 )
 		local Button2 = vgui.Create("DButton", Frame)
 		Button2:SetText( "Cancel" )
-		Button2:SetPos( 80, 155 )
+		Button2:SetPos( 80, 195 )
 		Button.DoClick = function()
 			file.Write( "csm.txt", "two" )
 			Frame:Close()
