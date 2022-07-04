@@ -65,7 +65,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:ControlHelp( "Enable shadows on the further cascade, ")
 
 		panel:CheckBox( "Performance mode.", "csm_perfmode")
-		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce nearby shadow quality." )
+		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce nearby perceived shadow quality." )
 		-- Add stuff here
 	end )
 end )
