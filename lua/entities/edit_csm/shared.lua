@@ -53,7 +53,10 @@ local spreadSample = 6
 local spreadSamplePrev = 6
 local propradiosity = 4
 local propradiosityPrev = 4
+local perfMode = false
+local perfModePrev = false
 local fpshadowcontroller
+
 
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
@@ -498,6 +501,25 @@ function ENT:Think()
 		spreadSamplePrev = spreadSample
 
 	end
+	perfMode = GetConVar( "csm_perfmode" ):GetBool()
+	if (perfModePrev != perfMode) and GetConVar( "csm_enabled" ):GetBool() then
+		if (perfMode) then
+			if CLIENT and (self.ProjectedTextures[1] != nil) and (self.ProjectedTextures[1]:IsValid()) then
+				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
+				self.ProjectedTextures[1]:Remove()
+			end
+			perfModePrev = true
+		else
+			if (CLIENT) then
+				for i, projectedTexture in pairs(self.ProjectedTextures) do
+					projectedTexture:Remove()
+				end
+				table.Empty(self.ProjectedTextures)
+				self:createlamps()
+			end
+			perfModePrev = false
+		end
+	end
 
 	spreadEnabled = GetConVar( "csm_spread" ):GetBool()
 	if (spreadEnabledPrev != spreadEnabled) and GetConVar( "csm_enabled" ):GetBool() then
@@ -730,23 +752,23 @@ function ENT:Think()
 	if CLIENT and (GetConVar( "csm_enabled" ):GetInt() == 1) and (GetConVar( "csm_update" ):GetInt() == 1) then
 		local position = GetViewEntity():GetPos() + offset
 
-		if (self.ProjectedTextures[1] == nil) then
+		if (self.ProjectedTextures[1] == nil) and !perfMode then
 			self:createlamps()
 		end
-		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear(), self:GetSizeNear())
-		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
-		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar(),  self:GetSizeFar())
+		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() )
+		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
+		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() )
 
 		if furtherEnabled and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
-			self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther(),  self:GetSizeFurther())
+			self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() )
 		end
 		if (spreadEnabled) then
 			if (self.ProjectedTextures[1] != nil) and (self.ProjectedTextures[1]:IsValid()) then
-				self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+				self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
 			end
 			for i = 1, GetConVar( "csm_spread_samples" ):GetInt() - 2 do
 				if (self.ProjectedTextures[4 + i] != nil) and (self.ProjectedTextures[4 + i]:IsValid()) then
-					self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid(),  self:GetSizeMid())
+					self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
 				end
 			end
 
