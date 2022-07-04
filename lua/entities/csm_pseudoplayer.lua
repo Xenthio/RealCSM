@@ -73,7 +73,7 @@ function ENT:Think()
     if CLIENT then
         if GetConVar( "csm_localplayershadow" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
 
-            if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil then
+            if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil and pseudoweapon.IsValid() then
                 pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
                 pseudoweapon:SetNoDraw( false )
             elseif pseudoweapon == nil then
@@ -98,7 +98,7 @@ function ENT:Think()
             --pseudoweapon:SetAngles(LocalPlayer():GetActiveWeapon():GetAngles())
             self:SetNoDraw( false )
             if !(debug or GetConVar("csm_debug_pseudoplayer"):GetBool()) then
-                if LocalPlayer():GetActiveWeapon():IsValid() then
+                if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil then
                     pseudoweapon:SetRenderMode(2)
                     pseudoweapon:SetColor(Color(255,255,255,0))
                 end
