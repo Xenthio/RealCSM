@@ -339,11 +339,12 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Bool", 3, "UseSkyFogEffects", { KeyName = "Use Sky and Fog Effects", Edit = { type = "Bool", order = 12, title = "Use Sky and Fog effects"}})
 	self:NetworkVar("Float", 6, "MaxAltitude", { KeyName = "Maximum altitude", Edit = { type = "Float", order = 13, min = 0.0, max = 90.0, title = "Maximum altitude" }})
 	self:NetworkVar("Float", 7, "Time", { KeyName = "Time", Edit = { type = "Float", order = 14, min = 0.0, max = 1.0, title = "Time of Day" }})
-	self:NetworkVar("Float", 8, "SunNearZ", { KeyName = "NearZ", Edit = { type = "Float", order = 15, min = 0.0, max = 32768.0, title = "Sun NearZ (adjust if issues)" }})
-	self:NetworkVar("Float", 9, "SunFarZ", { KeyName = "FarZ", Edit = { type = "Float", order = 16, min = 0.0, max = 32768.0, title = "Sun FarZ" }})
+	self:NetworkVar("Float", 9, "Height", { KeyName = "Height", Edit = { type = "Float", order = 15, min = 0.0, max = 50000.0, title = "Sun Height" }})
+	self:NetworkVar("Float", 10, "SunNearZ", { KeyName = "NearZ", Edit = { type = "Float", order = 16, min = 0.0, max = 32768.0, title = "Sun NearZ (adjust if issues)" }})
+	self:NetworkVar("Float", 11, "SunFarZ", { KeyName = "FarZ", Edit = { type = "Float", order = 17, min = 0.0, max = 50000.0, title = "Sun FarZ" }})
 
-	self:NetworkVar("Bool", 4, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 17, title = "Remove vanilla static Sun"}})
-	self:NetworkVar("Bool", 5, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 18, title = "Hide RTT Shadows"}})
+	self:NetworkVar("Bool", 4, "RemoveStaticSun", { KeyName = "Remove Vanilla Static Sun", Edit = { type = "Bool", order = 18, title = "Remove vanilla static Sun"}})
+	self:NetworkVar("Bool", 5, "HideRTTShadows", { KeyName = "Hide RTT Shadows", Edit = { type = "Bool", order = 19, title = "Hide RTT Shadows"}})
 
 	--self:NetworkVar("Float", 10, "ShadowFilter", { KeyName = "ShadowFilter", Edit = { type = "Float", order = 19, min = 0.0, max = 10.0, title = "Shadow filter"}})
 	--self:NetworkVar("Int", 3, "ShadowRes", { KeyName = "ShadowRes", Edit = { type = "Float", order = 20, min = 0.0, max = 8192.0, title = "Shadow resolution"}})
@@ -356,9 +357,9 @@ function ENT:SetupDataTables()
 	if (SERVER) then
 		self:SetSunColour(Vector(1.0, 0.90, 0.80, 1.0))
 		if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
-			self:SetSunBrightness(1000.0)
+			self:SetSunBrightness(300.0)
 		else
-			self:SetSunBrightness(200.0)
+			self:SetSunBrightness(64.0)
 		end
 
 		self:SetSizeNear(128.0)
@@ -368,14 +369,16 @@ function ENT:SetupDataTables()
 		--self:SetEnableFurther(false)
 		self:SetSizeFurther(65536.0)
 		--self:SetEnableFurtherShadows(true)
+		
 
 		self:SetUseMapSunAngles(true)
 		self:SetUseSkyFogEffects(false)
 		self:SetOrientation(135.0)
 		self:SetMaxAltitude(50.0)
 		self:SetTime(0.5)
+		self:SetHeight(32768)
 		self:SetSunNearZ(25000.0)
-		self:SetSunFarZ(32768.0)
+		self:SetSunFarZ(49152.0)
 
 		self:SetRemoveStaticSun(true)
 		self:SetHideRTTShadows(true)
@@ -671,6 +674,7 @@ function ENT:Think()
 	end
 
 	if (CLIENT) then
+
 		local hiderttshad = self:GetHideRTTShadows()
 		local BlobShadows = GetConVar( "csm_blobbyao" ):GetBool()
 
@@ -767,7 +771,7 @@ function ENT:Think()
 		 angle = (vector_origin - offset):Angle()
 	end
 
-	offset = offset * self:GetSunFarZ()
+	offset = offset * self:GetHeight() --self:GetSunFarZ()
 	if (usemapangles) then
 		self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
 	else
@@ -779,6 +783,7 @@ function ENT:Think()
 		if (self.ProjectedTextures[1] == nil) and !perfMode then
 			self:createlamps()
 		end
+		
 		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() )
 		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
 		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() )
@@ -810,16 +815,16 @@ function ENT:Think()
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
 				if (spreadEnabled) then
 					if (i == 1) then
-						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i == 2) then
-						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i > 4) then
-						projectedTexture:SetBrightness(self:GetSunBrightness() / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
 					else
-						projectedTexture:SetBrightness(self:GetSunBrightness())
+						projectedTexture:SetBrightness(self:GetSunBrightness() / 100)
 					end
 				else
-					projectedTexture:SetBrightness(self:GetSunBrightness())
+					projectedTexture:SetBrightness(self:GetSunBrightness() / 100)
 				end
 			else
 				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
@@ -847,7 +852,8 @@ function ENT:Think()
 			end
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
-			projectedTexture:SetFarZ(self:GetSunFarZ() + 16384)
+			projectedTexture:SetFarZ(self:GetSunFarZ()) -- + 16384)
+			projectedTexture:SetConstantAttenuation(1)
 			projectedTexture:Update()
 		end
 
