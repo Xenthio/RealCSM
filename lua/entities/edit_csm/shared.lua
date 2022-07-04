@@ -122,8 +122,15 @@ function ENT:createlamps()
 		self.ProjectedTextures[i]:SetEnableShadows(true)
 		if (i == 1) then
 			self.ProjectedTextures[i]:SetTexture("csm/mask_center")
+			if perfMode then
+				self.ProjectedTextures[i]:Remove()
+			end
 		else
-			self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
+			if (i == 2) and perfMode then
+				self.ProjectedTextures[i]:SetTexture("csm/mask_center")
+			else
+				self.ProjectedTextures[i]:SetTexture("csm/mask_ring")
+			end
 		end
 	end
 	if spreadEnabled and CLIENT then
