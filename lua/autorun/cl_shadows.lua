@@ -17,9 +17,26 @@ CreateClientConVar(	"csm_furthershadows", 1,  true, false)
 CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 
+local ConVarsDefault = {
+	csm_spawnalways = "0",
+	csm_propradiosity = "4",
+	csm_blobbyao = "0",
+	csm_wakeprops = "1",
+	csm_spread = "0",
+	csm_spread_samples = "7",
+	csm_spread_radius = "0.5",
+	csm_localplayershadow = "0",
+	csm_further = "0",
+	csm_furthershadows = "1",
+	csm_sizescale = "1",
+	csm_perfmode = "0",
+}
+
 hook.Add( "PopulateToolMenu", "CSMClient", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "User", "CSM_Client", "#CSM", "", "", function( panel )
 		panel:ClearControls()
+		panel:AddControl( "ComboBox", { MenuButton = 1, Folder = "presetCSM", Options = { [ "#preset.default" ] = ConVarsDefault }, CVars = table.GetKeys( ConVarsDefault ) } )
+
 		panel:CheckBox( "CSM Enabled", "csm_enabled" )
 
 		panel:CheckBox( "Performance mode.", "csm_perfmode")
