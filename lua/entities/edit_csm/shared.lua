@@ -22,10 +22,10 @@ local sun = {
 	obstruction = 0,
 }
 local warnedyet = false
-CreateClientConVar(	 "csm_legacydisablesun", 0,  true, false)
-CreateClientConVar(	 "csm_haslightenv", 0,  false, false)
-CreateClientConVar(	 "csm_hashdr", 0,  false, false)
-CreateClientConVar(	 "csm_enabled", 1,  false, false)
+cvar_csm_legacydisablesun = CreateClientConVar(	 "csm_legacydisablesun", 0,  true, false)
+cvar_csm_haslightenv = CreateClientConVar(	 "csm_haslightenv", 0,  false, false)
+cvar_csm_hashdr = CreateClientConVar(	 "csm_hashdr", 0,  false, false)
+cvar_csm_enabled = CreateClientConVar(	 "csm_enabled", 1,  false, false)
 
 CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.10,  false, false)
@@ -357,9 +357,9 @@ function ENT:SetupDataTables()
 	if (SERVER) then
 		self:SetSunColour(Vector(1.0, 0.90, 0.80, 1.0))
 		if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
-			self:SetSunBrightness(300.0)
+			self:SetSunBrightness(1000)
 		else
-			self:SetSunBrightness(64.0)
+			self:SetSunBrightness(200)
 		end
 
 		self:SetSizeNear(128.0)
@@ -815,16 +815,16 @@ function ENT:Think()
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
 				if (spreadEnabled) then
 					if (i == 1) then
-						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i == 2) then
-						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i > 4) then
-						projectedTexture:SetBrightness((self:GetSunBrightness() / 100) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
 					else
-						projectedTexture:SetBrightness(self:GetSunBrightness() / 100)
+						projectedTexture:SetBrightness(self:GetSunBrightness())
 					end
 				else
-					projectedTexture:SetBrightness(self:GetSunBrightness() / 100)
+					projectedTexture:SetBrightness(self:GetSunBrightness())
 				end
 			else
 				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
@@ -834,26 +834,82 @@ function ENT:Think()
 			projectedTexture:SetAngles(angle)
 			if (spreadEnabled) then
 				-- angle them all in a circle shape
+				SHIT = {}
 				FUCK = {}
-				for degrees = 1, 360, 360 / GetConVar( "csm_spread_samples" ):GetInt() do
+				--yikes = 1
+
+				-- 
+				for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
+					beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
+					if i2 == 1 then
+						beans = math.ceil(beans)
+					else
+						beans = math.floor(beans)
+					end
+					for degrees = 1, 360, 360 / beans do
+
+						local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat() / i2, 0, 0 )
+						table.insert(FUCK, Angle(x, y, 0))
+						--yikes = yikes + 1
+					end
+				end
+				--]]
+				--[[
+				for i2 = 1, GetConVar( "csm_spread_samples" ):GetInt() do
+					--for degrees = 1, 360, 360 / (2 / 5 * GetConVar( "csm_spread_samples" ):GetInt()) do
+
+					local x, y = PointOnCircle( i * ( 360 / GetConVar( "csm_spread_samples" ):GetInt() ), GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
+					table.insert(FUCK, Angle(x, y, 0))
+					--yikes = yikes + 1
+					--end
+				end
+				--]]
+
+				for degrees = 1, 360, 360 / (GetConVar( "csm_spread_samples" ):GetInt()) do
 
 					local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
-					table.insert(FUCK, Angle(x, y, 0))
+					table.insert(FUCK, Angle(y, x, 0))
+					--yikes = yikes + 1
 				end
+				--]]
+				--print(angle)
 
+				--TODO: FIX GIMBAL LOCK
 
 				if (i == 1) then
-					projectedTexture:SetAngles(angle + FUCK[1])
+					--angle:Add(Angle(FUCK[1].x, FUCK[1].y, 0))
+					chuck = FUCK[1]
+
+					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
+					projectedTexture:SetAngles(angle + offset3)
+					--projectedTexture:SetAngles(angle + FUCK[1])
+					--p rojectedTexture:SetAngles((Angle(angle.Up * , angle.y, 0)) + FUCK[1])
 				elseif (i == 2) then
-					projectedTexture:SetAngles(angle + FUCK[2])
+					--angle:Add(Angle(FUCK[2].x, FUCK[2].y, 0))
+					--angle:Normalize()
+
+					chuck = FUCK[2]
+					--print(angle:Forward() * chuck.x)
+					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
+					projectedTexture:SetAngles(angle + offset3)
+					--projectedTexture:SetAngles(angle + FUCK[2])
+					--projectedTexture:SetAngles(angle + FUCK[2])
 				elseif (i > 4) then
-					projectedTexture:SetAngles(angle + FUCK[i - 2])
+					--angle:Add(Angle(FUCK[i - 2].x, FUCK[i - 2].y, 0))
+					--angle:Normalize()
+					chuck = FUCK[i - 2]
+					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
+					projectedTexture:SetAngles(angle + offset3)
+					--projectedTexture:SetAngles(angle + FUCK[i - 2])
+					--projectedTexture:SetAngles(angle + FUCK[i - 2])
+					--print(offset3)
 				end
+
 			end
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
 			projectedTexture:SetFarZ(self:GetSunFarZ()) -- + 16384)
-			projectedTexture:SetConstantAttenuation(1)
+			--projectedTexture:SetConstantAttenuation(1) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
 			projectedTexture:Update()
 		end
 
@@ -897,10 +953,10 @@ function RenderOverlay() -- unused, if you want this stuff, use stormfox.
 end
 --]]
 
-function PointOnCircle( ang, radius, offX, offY ) -- ACTUALLY NERD SHIT LMFAO
-	ang =  math.rad( ang )
-	local x = math.cos( ang ) * radius + offX
-	local y = math.sin( ang ) * radius + offY
+function PointOnCircle( angle, radius, offsetX, offsetY ) -- ACTUALLY NERD SHIT LMFAO
+	angle =  math.rad( angle )
+	local x = math.cos( angle ) * radius + offsetX
+	local y = math.sin( angle ) * radius + offsetY
 	return x, y
 end
 
