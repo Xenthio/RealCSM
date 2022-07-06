@@ -23,7 +23,7 @@ function ENT:Initialize()
         self:SetPredictable( true )
 
         weaponmodel = "models/weapons/w_pistol.mdl"
-        if LocalPlayer():GetActiveWeapon():IsValid() then
+        if LocalPlayer():GetActiveWeapon():IsValid() and (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() != "") then
             weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
         end
         pseudoweapon = ClientsideModel(weaponmodel)
@@ -73,12 +73,9 @@ function ENT:Think()
     if CLIENT then
         if GetConVar( "csm_localplayershadow" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
 
-            if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil then
-                pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
-                pseudoweapon:SetNoDraw( false )
-            elseif pseudoweapon == nil then
+            if pseudoweapon == nil then
                 weaponmodel = "models/weapons/w_pistol.mdl"
-                if LocalPlayer():GetActiveWeapon():IsValid() then
+                if LocalPlayer():GetActiveWeapon():IsValid() and (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() != "") then
                     weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
                 end
                 pseudoweapon = ClientsideModel(weaponmodel)
@@ -89,6 +86,10 @@ function ENT:Think()
                 pseudoweapon:SetParent( self )
                 pseudoweapon:AddEffects( 1 )
                 print("uh oh")
+            end
+            if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil then
+                pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
+                pseudoweapon:SetNoDraw( false )
             end
             if !LocalPlayer():GetActiveWeapon():IsValid() or (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() == "") then
                 pseudoweapon:SetNoDraw( true )
