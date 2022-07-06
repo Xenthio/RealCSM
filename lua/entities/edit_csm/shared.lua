@@ -996,8 +996,8 @@ function ENT:allocLights()
 			table.insert(lightPoints, Angle(0, 0, 0))
 		end
 	end
-	PrintTable(lightAlloc)
-	PrintTable(lightPoints)
+	--PrintTable(lightAlloc)
+	--PrintTable(lightPoints)
 end
 
 function PointOnCircle( angle, radius, offsetX, offsetY ) -- ACTUALLY NERD SHIT LMFAO
