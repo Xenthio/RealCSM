@@ -89,7 +89,8 @@ function ENT:Think()
                 pseudoweapon:SetParent( self )
                 pseudoweapon:AddEffects( 1 )
                 print("uh oh")
-            elseif !LocalPlayer():GetActiveWeapon():IsValid() then
+            end
+            if !LocalPlayer():GetActiveWeapon():IsValid() or (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() == "") then
                 pseudoweapon:SetNoDraw( true )
             end
 
