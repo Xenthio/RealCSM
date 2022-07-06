@@ -836,9 +836,10 @@ function ENT:Think()
 				-- angle them all in a circle shape
 				SHIT = {}
 				FUCK = {}
+				local PISS = {}
 				--yikes = 1
 
-				-- 
+				-- csm_spread_layer_density
 				for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
 					beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
 					if i2 == 1 then
@@ -846,9 +847,48 @@ function ENT:Think()
 					else
 						beans = math.floor(beans)
 					end
+					table.insert(PISS, beans)
+
+				end
+
+				sum = 0
+				failsafe = 0
+
+				while (sum != GetConVar( "csm_spread_samples" ):GetInt()) and failsafe != 2 do -- Division can be fucky so this is here, we need perfect division
+					failsafe = 1 + failsafe
+					sum = 0
+					for k,v in pairs(PISS) do
+						sum = sum + v
+					end
+
+					if (sum > GetConVar( "csm_spread_samples" ):GetInt()) then
+						--print(PISS[GetConVar( "csm_spread_layers" ):GetInt()])
+						PISS[GetConVar( "csm_spread_layers" ):GetInt()] = PISS[GetConVar( "csm_spread_layers" ):GetInt()] - 1
+						--PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] = PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] - 1
+
+					elseif (sum < GetConVar( "csm_spread_samples" ):GetInt()) then
+
+						PISS[failsafe] = PISS[failsafe] + 1
+
+					end
+				end
+				--print(sum)
+				--PrintTable(PISS)
+
+				for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
+					beans = PISS[i2]
+					--[[
+					beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
+					if i2 == 1 then
+						beans = math.ceil(beans)
+					else
+						beans = math.floor(beans)
+					end
+					--]]
+					i2r = GetConVar( "csm_spread_layers" ):GetInt() - (i2 - 1)
 					for degrees = 1, 360, 360 / beans do
 
-						local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat() / i2, 0, 0 )
+						local x, y = PointOnCircle( degrees, ((i2r - ((GetConVar("csm_spread_layer_density"):GetFloat() * - 1) * (i2 - 1))) / GetConVar( "csm_spread_layers" ):GetInt()) * GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
 						table.insert(FUCK, Angle(x, y, 0))
 						--yikes = yikes + 1
 					end
