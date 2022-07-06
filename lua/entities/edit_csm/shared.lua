@@ -369,7 +369,7 @@ function ENT:SetupDataTables()
 		--self:SetEnableFurther(false)
 		self:SetSizeFurther(65536.0)
 		--self:SetEnableFurtherShadows(true)
-		
+
 
 		self:SetUseMapSunAngles(true)
 		self:SetUseSkyFogEffects(false)
@@ -783,7 +783,7 @@ function ENT:Think()
 		if (self.ProjectedTextures[1] == nil) and !perfMode then
 			self:createlamps()
 		end
-		
+
 		self.ProjectedTextures[1]:SetOrthographic(true, self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() , self:GetSizeNear() * GetConVar( "csm_sizescale" ):GetFloat() )
 		self.ProjectedTextures[2]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
 		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() )
