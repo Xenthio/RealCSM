@@ -29,7 +29,7 @@ cvar_csm_enabled = CreateClientConVar(	 "csm_enabled", 1,  false, false)
 
 CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.10,  false, false)
-CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false) 
+CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false)
 CreateClientConVar(	 "csm_spread_layer_reservemiddle", 1,  false, false)
 
 CreateConVar(	 "csm_stormfoxsupport", 0,  true, false)
@@ -53,12 +53,18 @@ local spreadEnabled = false
 local spreadEnabledPrev = false
 local spreadSample = 6
 local spreadSamplePrev = 6
+local spreadLayer = 1
+local spreadLayerPrev = 0
 local propradiosity = 4
 local propradiosityPrev = 4
 local perfMode = false
 local perfModePrev = false
+
 local fpshadowcontroller
 
+local lightAlloc = {} -- var PISS
+--local SHIT = {} -- var SHIT
+local lightPoints = {} -- var FUCK
 
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
@@ -136,6 +142,7 @@ function ENT:createlamps()
 		end
 	end
 	if spreadEnabled and CLIENT then
+		self:allocLights()
 		self.ProjectedTextures[2]:SetTexture("csm/mask_center")
 		for i = 1, GetConVar( "csm_spread_samples"):GetInt() - 2 do
 			self.ProjectedTextures[i + 4] = ProjectedTexture()
@@ -530,6 +537,16 @@ function ENT:Think()
 		spreadSamplePrev = spreadSample
 
 	end
+
+	spreadLayer = GetConVar( "csm_spread_layers" ):GetInt()
+	if (spreadLayerPrev != spreadLayer) then
+		if (CLIENT) then
+			self:allocLights()
+		end
+		spreadLayerPrev = spreadLayer
+
+	end
+
 	perfMode = GetConVar( "csm_perfmode" ):GetBool()
 	if (perfModePrev != perfMode) and GetConVar( "csm_enabled" ):GetBool() then
 		if (perfMode) then
@@ -791,9 +808,9 @@ function ENT:Think()
 		self.ProjectedTextures[3]:SetOrthographic(true, self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFar() * GetConVar( "csm_sizescale" ):GetFloat() )
 
 
-		local lightAlloc = {} -- var PISS
+		--local lightAlloc = {} -- var PISS
 		--local SHIT = {} -- var SHIT
-		local lightPoints = {} -- var FUCK
+		--local lightPoints = {} -- var FUCK
 		if furtherEnabled and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then
 			self.ProjectedTextures[4]:SetOrthographic(true, self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeFurther() * GetConVar( "csm_sizescale" ):GetFloat() )
 		end
@@ -806,106 +823,7 @@ function ENT:Think()
 					self.ProjectedTextures[4 + i]:SetOrthographic(true, self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() ,  self:GetSizeMid() * GetConVar( "csm_sizescale" ):GetFloat() )
 				end
 			end
-
-			--yikes = 1
-
-			-- csm_spread_layer_density
-			for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
-				beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
-				if i2 == 1 then
-					beans = math.ceil(beans)
-				else
-					beans = math.floor(beans)
-				end
-				table.insert(lightAlloc, beans)
-
-			end
-
-			sum = 0
-			failsafe = 0
-
-			while (sum != GetConVar( "csm_spread_samples" ):GetInt()) and failsafe != 2 do -- Division can be fucky so this is here, we need perfect division
-				failsafe = 1 + failsafe
-				sum = 0
-				for k,v in pairs(lightAlloc) do
-					sum = sum + v
-				end
-
-				if (sum > GetConVar( "csm_spread_samples" ):GetInt()) then
-					--print(PISS[GetConVar( "csm_spread_layers" ):GetInt()])
-					lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
-					--PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] = PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] - 1
-
-				elseif (sum < GetConVar( "csm_spread_samples" ):GetInt()) then
-
-					lightAlloc[failsafe] = lightAlloc[failsafe] + 1
-
-				end
-			end
-
-
-
-
-			alloctype = GetConVar( "csm_spread_layer_alloctype" ):GetInt()
-			if alloctype == 1 and GetConVar( "csm_spread_layers" ):GetInt() > 2 then
-				for k,v in pairs(lightAlloc) do
-					if lightAlloc[k] > 2 then
-						lightAlloc[k] = lightAlloc[k] - (k - 2)
-					end
-				end
-			elseif GetConVar( "csm_spread_layers" ):GetInt() > 1 and lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 3 then
-				lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
-				lightAlloc[1] = lightAlloc[1] + 1
-			end
-
-			if lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 2 and GetConVar( "csm_spread_layers" ):GetInt() > 1 and GetConVar( "csm_spread_layer_reservemiddle" ):GetBool() then
-				lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
-			end
-
-			for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
-				beans = lightAlloc[i2]
-				--[[
-				beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
-				if i2 == 1 then
-					beans = math.ceil(beans)
-				else
-					beans = math.floor(beans)
-				end
-				--]]
-				i2r = GetConVar( "csm_spread_layers" ):GetInt() - (i2 - 1)
-				for degrees = 1, 360, 360 / beans do
-
-					local x, y = PointOnCircle( degrees, ((i2r - ((GetConVar("csm_spread_layer_density"):GetFloat() * - 1) * (i2 - 1))) / GetConVar( "csm_spread_layers" ):GetInt()) * GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
-					table.insert(lightPoints, Angle(x, y, 0))
-					--yikes = yikes + 1
-				end
-				if GetConVar( "csm_spread_layers" ):GetInt() > 1 and lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 1 and i2 == GetConVar( "csm_spread_layers" ):GetInt() and GetConVar( "csm_spread_layer_reservemiddle" ):GetBool() then
-					table.insert(lightPoints, Angle(0, 0, 0))
-				end
-			end
-			PrintTable(lightAlloc)
-			PrintTable(lightPoints)
-			--]]
-			--[[
-			for i2 = 1, GetConVar( "csm_spread_samples" ):GetInt() do
-				--for degrees = 1, 360, 360 / (2 / 5 * GetConVar( "csm_spread_samples" ):GetInt()) do
-
-				local x, y = PointOnCircle( i * ( 360 / GetConVar( "csm_spread_samples" ):GetInt() ), GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
-				table.insert(FUCK, Angle(x, y, 0))
-				--yikes = yikes + 1
-				--end
-			end
-			--]]
-			--[[
-			for degrees = 1, 360, 360 / (GetConVar( "csm_spread_samples" ):GetInt()) do
-
-				local x, y = PointOnCircle( degrees, GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
-				table.insert(lightPoints, Angle(y, x, 0))
-				--yikes = yikes + 1
-			end
-			--]]
 		end
-		
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			if (shadfiltChanged) then
 				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
@@ -938,16 +856,6 @@ function ENT:Think()
 			projectedTexture:SetAngles(angle)
 			if (spreadEnabled) then
 				-- angle them all in a circle shape
-				
-				
-
-
-				--print(sum)
-				--PrintTable(PISS)
-
-
-				--]]
-				--print(angle)
 				mtest = Matrix()
 				mtest:SetAngles(angle)
 				chuck = Angle(0, 0, 0)
@@ -1009,6 +917,88 @@ function RenderOverlay() -- unused, if you want this stuff, use stormfox.
 	DrawColorModify(shaderParams)
 end
 --]]
+
+function ENT:allocLights()
+--yikes = 1
+	lightAlloc = {}
+	lightPoints = {}
+	-- csm_spread_layer_density
+	for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
+		beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
+		if i2 == 1 then
+			beans = math.ceil(beans)
+		else
+			beans = math.floor(beans)
+		end
+		table.insert(lightAlloc, beans)
+
+	end
+
+	sum = 0
+	failsafe = 0
+
+	while (sum != GetConVar( "csm_spread_samples" ):GetInt()) and failsafe != 2 do -- Division can be fucky so this is here, we need perfect division
+		failsafe = 1 + failsafe
+		sum = 0
+		for k,v in pairs(lightAlloc) do
+			sum = sum + v
+		end
+
+		if (sum > GetConVar( "csm_spread_samples" ):GetInt()) then
+			--print(PISS[GetConVar( "csm_spread_layers" ):GetInt()])
+			lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
+			--PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] = PISS[GetConVar( "csm_spread_layers" ):GetInt() - 1] - 1
+
+		elseif (sum < GetConVar( "csm_spread_samples" ):GetInt()) then
+
+			lightAlloc[failsafe] = lightAlloc[failsafe] + 1
+
+		end
+	end
+
+
+
+
+	alloctype = GetConVar( "csm_spread_layer_alloctype" ):GetInt()
+	if alloctype == 1 and GetConVar( "csm_spread_layers" ):GetInt() > 2 then
+		for k,v in pairs(lightAlloc) do
+			if lightAlloc[k] > 2 then
+				lightAlloc[k] = lightAlloc[k] - (k - 2)
+			end
+		end
+	elseif GetConVar( "csm_spread_layers" ):GetInt() > 1 and lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 3 then
+		lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
+		lightAlloc[1] = lightAlloc[1] + 1
+	end
+
+	if lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 3 and GetConVar( "csm_spread_layers" ):GetInt() > 1 and GetConVar( "csm_spread_layer_reservemiddle" ):GetBool() then
+		lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] = lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] - 1
+	end
+
+	for i2 = 1, GetConVar( "csm_spread_layers" ):GetInt() do
+		beans = lightAlloc[i2]
+		--[[
+		beans = (GetConVar( "csm_spread_samples" ):GetInt() / GetConVar( "csm_spread_layers" ):GetInt()) --/ (GetConVar( "csm_spread_layers" ):GetInt())) * 
+		if i2 == 1 then
+			beans = math.ceil(beans)
+		else
+			beans = math.floor(beans)
+		end
+		--]]
+		i2r = GetConVar( "csm_spread_layers" ):GetInt() - (i2 - 1)
+		for degrees = 1, 360, 360 / beans do
+
+			local x, y = PointOnCircle( degrees, ((i2r - ((GetConVar("csm_spread_layer_density"):GetFloat() * - 1) * (i2 - 1))) / GetConVar( "csm_spread_layers" ):GetInt()) * GetConVar( "csm_spread_radius" ):GetFloat(), 0, 0 )
+			table.insert(lightPoints, Angle(x, y, 0))
+			--yikes = yikes + 1
+		end
+		if GetConVar( "csm_spread_layers" ):GetInt() > 1 and lightAlloc[GetConVar( "csm_spread_layers" ):GetInt()] > 1 and i2 == GetConVar( "csm_spread_layers" ):GetInt() and GetConVar( "csm_spread_layer_reservemiddle" ):GetBool() then
+			table.insert(lightPoints, Angle(0, 0, 0))
+		end
+	end
+	PrintTable(lightAlloc)
+	PrintTable(lightPoints)
+end
 
 function PointOnCircle( angle, radius, offsetX, offsetY ) -- ACTUALLY NERD SHIT LMFAO
 	angle =  math.rad( angle )
