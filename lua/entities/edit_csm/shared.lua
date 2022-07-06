@@ -873,38 +873,21 @@ function ENT:Think()
 				end
 				--]]
 				--print(angle)
-
+				mtest = Matrix()
+				mtest:SetAngles(angle)
 				--TODO: FIX GIMBAL LOCK
-
+				chuck = Angle(0, 0, 0)
 				if (i == 1) then
-					--angle:Add(Angle(FUCK[1].x, FUCK[1].y, 0))
 					chuck = FUCK[1]
-
-					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
-					projectedTexture:SetAngles(angle + offset3)
-					--projectedTexture:SetAngles(angle + FUCK[1])
-					--p rojectedTexture:SetAngles((Angle(angle.Up * , angle.y, 0)) + FUCK[1])
 				elseif (i == 2) then
-					--angle:Add(Angle(FUCK[2].x, FUCK[2].y, 0))
-					--angle:Normalize()
-
 					chuck = FUCK[2]
-					--print(angle:Forward() * chuck.x)
-					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
-					projectedTexture:SetAngles(angle + offset3)
-					--projectedTexture:SetAngles(angle + FUCK[2])
-					--projectedTexture:SetAngles(angle + FUCK[2])
 				elseif (i > 4) then
-					--angle:Add(Angle(FUCK[i - 2].x, FUCK[i - 2].y, 0))
-					--angle:Normalize()
 					chuck = FUCK[i - 2]
-					offset3 = Angle(chuck.x, chuck.y, 0) //+ Angle(angle:Right().x * chuck.x, angle:Right().y * chuck.y, 0)
-					projectedTexture:SetAngles(angle + offset3)
-					--projectedTexture:SetAngles(angle + FUCK[i - 2])
-					--projectedTexture:SetAngles(angle + FUCK[i - 2])
-					--print(offset3)
 				end
-
+				offset3 = Angle(chuck.x, 0, 0)
+				offset4 = Angle(0, chuck.y, 0)
+				mtest:Rotate(offset3 + offset4)
+				projectedTexture:SetAngles(mtest:GetAngles())
 			end
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
