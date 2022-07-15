@@ -77,6 +77,7 @@ if (SERVER) then
 	util.AddNetworkString( "PlayerSpawned" )
 	util.AddNetworkString( "hasLightEnvNet" )
 	util.AddNetworkString( "csmPropWakeup" )
+	util.AddNetworkString( "ReloadLightMapsCSM" )
 	if (table.Count(ents.FindByClass("light_environment")) > 0) then
 		RunConsoleCommand("csm_haslightenv", "1")
 	end
@@ -164,6 +165,8 @@ function ENT:SUNOn()
 		for k, v in ipairs(ents.FindByClass( "light_environment" )) do
 			v:Fire("turnon")
 		end
+		net.Start( "ReloadLightMapsCSM" )
+		net.Broadcast()
 	end
 end
 
@@ -297,7 +300,7 @@ function ENT:Initialize()
 			RunConsoleCommand("r_lightstyle", "0")
 			RunConsoleCommand("r_ambientlightingonly", "1")
 			if (CLIENT) then
-				render.RedownloadAllLightmaps(true ,true)
+				timer.Create( "reload", 0.1, 1, reloadLightmaps)
 			end
 		else
 			self:SUNOff()
@@ -414,6 +417,12 @@ net.Receive( "PlayerSpawned", function( len, ply )
 	end
 end )
 
+net.Receive( "ReloadLightMapsCSM", function( len, ply )
+	if CLIENT then
+		render.RedownloadAllLightmaps(false ,true)
+	end
+end )
+
 net.Receive( "csmPropWakeup", function( len, ply )
 	if SERVER then
 		wakeup()
@@ -427,7 +436,7 @@ end
 
 function reloadLightmaps()
 	if (CLIENT) then
-		render.RedownloadAllLightmaps(true ,true)
+		render.RedownloadAllLightmaps(false ,true)
 	end
 end
 
@@ -480,6 +489,66 @@ end)
 
 function ENT:Think()
 
+	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
+		csmEnabledPrev = true
+		if (self:GetRemoveStaticSun()) then
+			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
+				RunConsoleCommand("r_ambientlightingonly", "1")
+
+				RunConsoleCommand("r_lightstyle", "1")
+				timer.Create( "reload", 0.1, 1, reloadLightmaps )
+			else
+				self:SUNOff()
+			end
+		end
+		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			wakeup()
+		end
+		if (self:GetHideRTTShadows()) then
+			RunConsoleCommand("r_shadows_gamecontrol", "0")
+			BlobShadowsPrev = false
+		end
+		if GetConVar( "csm_blobbyao" ):GetBool() then
+			RunConsoleCommand("r_shadowrendertotexture", "0")
+			RunConsoleCommand("r_shadowdist", "20")
+			RunConsoleCommand("r_shadows_gamecontrol", "1")
+		end
+		if (CLIENT) then
+			self:createlamps()
+		end
+	end
+
+	if (GetConVar( "csm_enabled" ):GetInt() == 0) and (csmEnabledPrev == true) then
+		csmEnabledPrev = false
+		if (self:GetRemoveStaticSun()) then
+			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
+				RunConsoleCommand("r_ambientlightingonly", "0")
+
+				RunConsoleCommand("r_lightstyle", "-1")
+				timer.Create( "reload", 0.1, 1, reloadLightmaps )
+			else
+				self:SUNOn()
+			end
+		end
+		RunConsoleCommand("r_radiosity", "3")
+		if (GetConVar( "csm_wakeprops" ):GetBool()) then
+			wakeup()
+		end
+		RunConsoleCommand("r_shadowrendertotexture", "1")
+		RunConsoleCommand("r_shadowdist", "10000")
+		if (self:GetHideRTTShadows()) then
+			RunConsoleCommand("r_shadows_gamecontrol", "1")
+		end
+		if (CLIENT) then
+			for i, projectedTexture in pairs(self.ProjectedTextures) do
+				projectedTexture:Remove()
+			end
+			table.Empty(self.ProjectedTextures)
+		end
+	end
+	
+	
 	propradiosity = GetConVar( "csm_propradiosity" ):GetString()
 	if CLIENT and (propradiosityPrev != propradiosity) and GetConVar( "csm_enabled" ):GetBool() then
 		RunConsoleCommand("r_radiosity", propradiosity)
@@ -489,8 +558,8 @@ function ENT:Think()
 		end
 		propradiosityPrev = propradiosity
 	end
-
-
+	if (GetConVar( "csm_enabled" ):GetInt() != 1) then return end
+	print("hi")
 	shadfiltChanged = false
 
 	--fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
@@ -606,52 +675,7 @@ function ENT:Think()
 		end
 	end
 
-	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
-		csmEnabledPrev = true
-		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
-		if (GetConVar( "csm_wakeprops" ):GetBool()) then
-			wakeup()
-		end
-		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "0")
-			BlobShadowsPrev = false
-		end
-		if GetConVar( "csm_blobbyao" ):GetBool() then
-			RunConsoleCommand("r_shadowrendertotexture", "0")
-			RunConsoleCommand("r_shadowdist", "20")
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
-		end
-		if (CLIENT) then
-			self:createlamps()
-		else
-			if (self:GetRemoveStaticSun()) then
-				self:SUNOff()
-			end
-		end
-	end
 
-	if (GetConVar( "csm_enabled" ):GetInt() == 0) and (csmEnabledPrev == true) then
-		csmEnabledPrev = false
-		RunConsoleCommand("r_radiosity", "3")
-		if (GetConVar( "csm_wakeprops" ):GetBool()) then
-			wakeup()
-		end
-		RunConsoleCommand("r_shadowrendertotexture", "1")
-		RunConsoleCommand("r_shadowdist", "10000")
-		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
-		end
-		if (CLIENT) then
-			for i, projectedTexture in pairs(self.ProjectedTextures) do
-				projectedTexture:Remove()
-			end
-			table.Empty(self.ProjectedTextures)
-		else
-			if (self:GetRemoveStaticSun()) then
-				self:SUNOn()
-			end
-		end
-	end
 
 	local removestatsun = self:GetRemoveStaticSun()
 
@@ -668,7 +692,6 @@ function ENT:Think()
 				if (CLIENT) then
 					RunConsoleCommand("r_ambientlightingonly", "1")
 					RunConsoleCommand("r_lightstyle", "0")
-					render.RedownloadAllLightmaps(true ,true)
 					timer.Create( "reload", 0.1, 1, reloadLightmaps)
 				end
 			else
