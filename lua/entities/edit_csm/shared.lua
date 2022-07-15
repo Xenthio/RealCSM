@@ -559,7 +559,7 @@ function ENT:Think()
 		propradiosityPrev = propradiosity
 	end
 	if (GetConVar( "csm_enabled" ):GetInt() != 1) then return end
-	print("hi")
+	--print("hi")
 	shadfiltChanged = false
 
 	--fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
