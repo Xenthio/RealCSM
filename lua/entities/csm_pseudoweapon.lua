@@ -23,7 +23,7 @@ function ENT:Initialize()
     print("[Real CSM] - Pseudoweapon Initialised.")
     self:SetParent(LocalPlayer():GetActiveWeapon())
     self:AddEffects( EF_BONEMERGE )
-    self:SetNoDraw(false)
+    self:SetNoDraw(true)
     self:SetMoveType( MOVETYPE_NONE )
 
     pseudoweapon = ClientsideModel("error.mdl")
