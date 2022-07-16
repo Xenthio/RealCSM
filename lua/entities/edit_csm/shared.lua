@@ -59,8 +59,10 @@ local propradiosity = 4
 local propradiosityPrev = 4
 local perfMode = false
 local perfModePrev = false
+local fpShadowsPrev = false
 
 local fpshadowcontroller
+local fpshadowcontrollerCLIENT
 
 local lightAlloc = {} -- var PISS
 --local SHIT = {} -- var SHIT
@@ -273,8 +275,8 @@ function ENT:Initialize()
 	end
 
 	if (SERVER) then
-		if GetConVar( "csm_allowfpshadows" ):GetBool() then
-			fpshadowcontroller = ents.Create( "csm_pseudoplayer" )
+		if GetConVar( "csm_allowfpshadows_old" ):GetBool() then
+			fpshadowcontroller = ents.Create( "csm_pseudoplayer_old" )
 			fpshadowcontroller:Spawn()
 		end
 		util.AddNetworkString( "PlayerSpawned" )
@@ -286,8 +288,10 @@ function ENT:Initialize()
 			timer.Create( "warn", 0.1, 1, warn)
 		end
 	else
+		fpShadowsPrev = !GetConVar( "csm_localplayershadow" ):GetBool()
 		timer.Create( "warn", 0.1, 1, warn)
 	end
+
 	BaseClass.Initialize(self)
 	self:SetMaterial("gmod/edit_sun")
 	if (self:GetRemoveStaticSun()) then
@@ -470,7 +474,7 @@ function ENT:OnRemove()
 			end
 		end
 	end
-	if SERVER and fpshadowcontroller:IsValid() then
+	if SERVER and fpshadowcontroller and fpshadowcontroller:IsValid() then
 		fpshadowcontroller:Remove()
 
 	end
@@ -480,6 +484,9 @@ function ENT:OnRemove()
 		end
 
 		table.Empty(self.ProjectedTextures)
+		if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
+			fpshadowcontrollerCLIENT:Remove()
+		end
 	end
 end
 
@@ -547,8 +554,8 @@ function ENT:Think()
 			table.Empty(self.ProjectedTextures)
 		end
 	end
-	
-	
+
+
 	propradiosity = GetConVar( "csm_propradiosity" ):GetString()
 	if CLIENT and (propradiosityPrev != propradiosity) and GetConVar( "csm_enabled" ):GetBool() then
 		RunConsoleCommand("r_radiosity", propradiosity)
@@ -562,15 +569,22 @@ function ENT:Think()
 	--print("hi")
 	shadfiltChanged = false
 
-	--fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
-	--if CLIENT and (furtherEnabledPrev != furtherEnabled) then
-		--if (fpShadows) then
-			--fpshadowcontroller = ents.Create( "csm_pseudoplayer" )
-			--fpShadowsPrev = true
-		--else
-			--fpShadowsPrev = false
-		--end
-	--end
+	fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
+	if CLIENT and (fpShadowsPrev != fpShadows) then
+		if (fpShadows) then
+			print("MAKING")
+			fpshadowcontrollerCLIENT = ents.CreateClientside( "csm_pseudoplayer" )
+			fpshadowcontrollerCLIENT:Spawn()
+			fpShadowsPrev = true
+		else
+			print("REMOVING")
+			if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
+				fpshadowcontrollerCLIENT:Remove()
+			end
+			fpShadowsPrev = false
+		end
+	end
+
 	furtherEnabledShadows = GetConVar( "csm_furthershadows" ):GetBool()
 	furtherEnabled =  GetConVar( "csm_further" ):GetBool()
 	if (furtherEnabledPrev != furtherEnabled) then
