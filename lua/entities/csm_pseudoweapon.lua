@@ -23,7 +23,8 @@ function ENT:Initialize()
     print("[Real CSM] - Pseudoweapon Initialised.")
     self:SetParent(LocalPlayer():GetActiveWeapon())
     self:AddEffects( EF_BONEMERGE )
-    self:SetNoDraw(true)
+    self:SetNoDraw(false)
+    self:SetMoveType( MOVETYPE_NONE )
 
     pseudoweapon = ClientsideModel("error.mdl")
     pseudoweapon:SetParent(self)
@@ -42,16 +43,36 @@ function ENT:Think()
     end
 
     if LocalPlayer():GetActiveWeapon():IsValid() and pseudoweapon != nil and LocalPlayer():Alive() then
-        --if prevclassname != LocalPlayer():GetActiveWeapon():GetClass() or LocalPlayer():GetActiveWeapon():GetModel() != self:GetModel() then
-        prevclassname = LocalPlayer():GetActiveWeapon():GetClass()
-        self:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
-        self:RemoveEffects( EF_BONEMERGE )
-        self:SetParent(LocalPlayer():GetActiveWeapon())
-        self:AddEffects( EF_BONEMERGE )
-        pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
-        pseudoweapon:RemoveEffects( EF_BONEMERGE )
-        pseudoweapon:SetParent(self)
-        pseudoweapon:AddEffects( EF_BONEMERGE )
+        pcall(function() LocalPlayer():GetActiveWeapon():DrawWorldModel() end)
+        if prevclassname != LocalPlayer():GetActiveWeapon():GetClass() or LocalPlayer():GetActiveWeapon():GetModel() != self:GetModel() then
+            prevclassname = LocalPlayer():GetActiveWeapon():GetClass()
+            self:RemoveEffects( EF_BONEMERGE )
+            self:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
+            self:SetParent(LocalPlayer():GetActiveWeapon():GetParent(), LocalPlayer():GetActiveWeapon():GetParentAttachment())
+
+            --self:SetPos(LocalPlayer():GetActiveWeapon():GetPos())
+            --self:SetAngles(LocalPlayer():GetActiveWeapon():GetAngles())
+            --self:SetupBones()
+
+            self:AddEffects( EF_BONEMERGE )
+
+            pseudoweapon:RemoveEffects( EF_BONEMERGE )
+            pseudoweapon:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
+            pseudoweapon:SetParent(self)
+            pseudoweapon:AddEffects( EF_BONEMERGE )
+        end
+        self:SetRenderOrigin(LocalPlayer():GetActiveWeapon():GetRenderOrigin())
+        self:SetRenderAngles(LocalPlayer():GetActiveWeapon():GetRenderAngles())
+        self:SetModelScale(LocalPlayer():GetActiveWeapon():GetModelScale())
+
+        
+        pcall(function() -- Customisable Weaponry Fix.
+            self:SetRenderOrigin(LocalPlayer():GetActiveWeapon().WMEnt:GetRenderOrigin())
+            self:SetRenderAngles(LocalPlayer():GetActiveWeapon().WMEnt:GetRenderAngles())
+        end)
+
+
+        pseudoweapon:SetModelScale(LocalPlayer():GetActiveWeapon():GetModelScale())
         pseudoweapon:SetNoDraw( false )
     else
         pseudoweapon:SetNoDraw( true )
@@ -85,3 +106,4 @@ hook.Add("OnReloaded", "RealCSMOnAutoReloadPseudoplayer", function()
     end
     ENT:Remove()
 end)
+

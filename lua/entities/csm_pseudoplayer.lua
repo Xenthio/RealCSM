@@ -58,6 +58,21 @@ function ENT:Think()
     else
         pseudoplayer:SetNoDraw( true )
     end
+    if pseudoplayer:GetModel() != LocalPlayer():GetModel() then
+        print("[Real CSM] - Pseudoplayer model changed.")
+        self:RemoveEffects( EF_BONEMERGE )
+        self:SetModel(LocalPlayer():GetModel())
+        self:SetParent(LocalPlayer())
+        self:AddEffects( EF_BONEMERGE )
+
+        pseudoplayer:RemoveEffects( EF_BONEMERGE )
+        pseudoplayer:SetModel(LocalPlayer():GetModel())
+        pseudoplayer:SetParent(self)
+        pseudoplayer:AddEffects( EF_BONEMERGE )
+    end
+    for k = 1, LocalPlayer():GetNumBodyGroups() do
+        pseudoplayer:SetBodygroup(k, LocalPlayer():GetBodygroup(k))
+    end
 end
 
 function ENT:OnRemove()

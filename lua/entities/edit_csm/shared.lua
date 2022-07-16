@@ -123,7 +123,7 @@ function warn()
 	if CLIENT and (GetConVar( "csm_haslightenv" ):GetInt() == 0) then
 		Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
 	end
-	print(hasLightEnvs)
+	--print(hasLightEnvs)
 end
 
 function ENT:createlamps()
@@ -572,12 +572,12 @@ function ENT:Think()
 	fpShadows = GetConVar( "csm_localplayershadow" ):GetBool()
 	if CLIENT and (fpShadowsPrev != fpShadows) then
 		if (fpShadows) then
-			print("MAKING")
+			--print("MAKING")
 			fpshadowcontrollerCLIENT = ents.CreateClientside( "csm_pseudoplayer" )
 			fpshadowcontrollerCLIENT:Spawn()
 			fpShadowsPrev = true
 		else
-			print("REMOVING")
+			--print("REMOVING")
 			if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
 				fpshadowcontrollerCLIENT:Remove()
 			end
