@@ -74,7 +74,7 @@ end
 
 function ENT:Think()
     if CLIENT then
-        if GetConVar( "csm_localplayershadow" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
+        if GetConVar( "csm_localplayershadow_old" ):GetBool() and LocalPlayer():IsValid() and LocalPlayer():Alive() then
 
             if pseudoweapon == nil then
                 weaponmodel = "models/weapons/w_pistol.mdl"

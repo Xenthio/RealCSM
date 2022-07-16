@@ -28,6 +28,8 @@ function ENT:Initialize()
     self:AddEffects( EF_BONEMERGE )
     self:SetPos(LocalPlayer():GetPos())
 
+    self:SetNoDraw( true )
+
     pseudoplayer = ClientsideModel(LocalPlayer():GetModel())
     pseudoplayer:SetMoveType(MOVETYPE_NONE)
     pseudoplayer:SetParent(self)
