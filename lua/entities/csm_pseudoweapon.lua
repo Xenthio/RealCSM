@@ -19,10 +19,10 @@ function ENT:Initialize()
     end
 
     print("[Real CSM] - Pseudoweapon Initialised.")
-    self:SetModel(LocalPlayer():GetActiveWeapon():GetModel())
+    self:SetModel("models/weapons/w_pistol.mdl")
     self:SetParent(LocalPlayer():GetActiveWeapon())
     self:AddEffects( EF_BONEMERGE )
-    self:SetPos(LocalPlayer():GetActiveWeapon():GetPos())
+    --self:SetPos(LocalPlayer():GetActiveWeapon():GetPos())
 
     pseudoweapon = ClientsideModel("models/weapons/w_pistol.mdl")
     pseudoweapon:SetMoveType(MOVETYPE_NONE)
@@ -47,7 +47,7 @@ function ENT:Think()
         pseudoweapon:SetNoDraw( true )
     end
 
-    if !LocalPlayer():GetActiveWeapon():IsValid() or (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() == "") then
+    if (LocalPlayer():GetActiveWeapon():IsValid() and LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() == "") then
         pseudoweapon:SetNoDraw( true )
         self:SetNoDraw( true )
     end
