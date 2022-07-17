@@ -455,7 +455,7 @@ function reloadLightmaps()
 end
 
 function ENT:OnRemove()
-	print("Removed")
+	--print("Removed")
 	if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
 		fpshadowcontrollerCLIENT:Remove()
 	end
