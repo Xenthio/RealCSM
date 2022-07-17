@@ -376,7 +376,7 @@ function ENT:SetupDataTables()
 
 	if (SERVER) then
 		-- Yeah I hardcoded the construct sun colour, the env_suns one is shit
-		if GetConVar( "csm_getENVSUNcolour"):GetBool() and game.GetMap() != "gm_construct" then
+		if GetConVar( "csm_getENVSUNcolour"):GetBool() and game.GetMap() != "gm_construct" and FindEntity("env_sun") != nil then
 			self:SetSunColour(FindEntity("env_sun"):GetColor():ToVector()) --Vector(1.0, 0.90, 0.80, 1.0))
 		else
 			self:SetSunColour(Vector(1.0, 0.90, 0.80, 1.0))
