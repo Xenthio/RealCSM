@@ -45,6 +45,12 @@ if (SERVER) then
 				actualSpawn()
 			end
 		end
+
+		if (GetConVar( "csm_stormfoxsupport" ):GetBool() == true) and (spawnEnabled:GetBool() == false) then
+			for k, v in ipairs(ents.FindByClass( "light_environment" )) do
+				v:Fire("turnon")
+			end
+		end
 	end
 	util.AddNetworkString( "cool_addon_client_ready" )
 
