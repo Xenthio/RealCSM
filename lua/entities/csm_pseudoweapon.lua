@@ -35,7 +35,7 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-    if not pseudoweapon:IsValid() then
+    if not pseudoweapon or not pseudoweapon:IsValid() then
         pseudoweapon = ClientsideModel("error.mdl")
         pseudoweapon:SetParent(self)
         pseudoweapon:AddEffects( EF_BONEMERGE )
