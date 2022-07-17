@@ -65,7 +65,6 @@ function ENT:Think()
         self:SetRenderAngles(LocalPlayer():GetActiveWeapon():GetRenderAngles())
         self:SetModelScale(LocalPlayer():GetActiveWeapon():GetModelScale())
 
-        
         pcall(function() -- Customisable Weaponry Fix.
             self:SetRenderOrigin(LocalPlayer():GetActiveWeapon().WMEnt:GetRenderOrigin())
             self:SetRenderAngles(LocalPlayer():GetActiveWeapon().WMEnt:GetRenderAngles())
@@ -79,6 +78,9 @@ function ENT:Think()
     end
 
     if (LocalPlayer():GetActiveWeapon():IsValid() and LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() == "") then
+        pseudoweapon:SetNoDraw( true )
+    end
+    if LocalPlayer():GetObserverMode() != OBS_MODE_NONE or (LocalPlayer():GetViewEntity() != LocalPlayer()) or LocalPlayer():ShouldDrawLocalPlayer() then
         pseudoweapon:SetNoDraw( true )
     end
    -- LocalPlayer():GetActiveWeapon():AddEFlags(EFL_FORCE_CHECK_TRANSMIT)

@@ -54,9 +54,12 @@ function ENT:Think()
         end
         self:Remove()
     end
-    if LocalPlayer():Alive() then
+    if LocalPlayer():Alive()  then
         pseudoplayer:SetNoDraw( false )
     else
+        pseudoplayer:SetNoDraw( true )
+    end
+    if LocalPlayer():GetObserverMode() != OBS_MODE_NONE or (LocalPlayer():GetViewEntity() != LocalPlayer()) or LocalPlayer():ShouldDrawLocalPlayer() then
         pseudoplayer:SetNoDraw( true )
     end
     if pseudoplayer:GetModel() != LocalPlayer():GetModel() then
