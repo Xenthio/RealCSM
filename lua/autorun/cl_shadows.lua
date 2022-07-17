@@ -20,6 +20,7 @@ CreateClientConVar(	"csm_further", 0,  true, false)
 CreateClientConVar(	"csm_furthershadows", 1,  true, false)
 CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
+CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
 
 local ConVarsDefault = {
 	csm_spawnalways = "0",

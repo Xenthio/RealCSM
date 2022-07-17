@@ -431,7 +431,7 @@ net.Receive( "PlayerSpawned", function( len, ply )
 end )
 
 net.Receive( "ReloadLightMapsCSM", function( len, ply )
-	if CLIENT then
+	if CLIENT and GetConVar("csm_redownloadonremove"):GetBool() then
 		render.RedownloadAllLightmaps(false ,true)
 	end
 end )
