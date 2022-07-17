@@ -41,7 +41,7 @@ if (SERVER) then
 				if lightEnvExists == true then
 					actualSpawn()
 				end
-			elseif lightEnvExists == false then
+			elseif envCheckToggle:GetBool() == false then
 				actualSpawn()
 			end
 		end
