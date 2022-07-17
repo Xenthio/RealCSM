@@ -173,7 +173,12 @@ function ENT:SUNOn()
 end
 
 function ENT:Initialize()
-
+	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
+		if v != self then
+			v:Remove()
+			self:Remove()
+		end
+	end
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	if !GetConVar( "csm_blobbyao" ):GetBool() then
 		RunConsoleCommand("r_shadows_gamecontrol", "0")
@@ -181,12 +186,9 @@ function ENT:Initialize()
 		BlobShadowsPrev = false
 	end
 	shadfiltChanged = true
-	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
-		if v != self then
-			v:Remove()
-		end
-	end
+
 	RunConsoleCommand("csm_enabled", "1")
+	RunConsoleCommand("r_farz", "50000")
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 		local Frame = vgui.Create( "DFrame" )
@@ -445,6 +447,7 @@ function reloadLightmaps()
 end
 
 function ENT:OnRemove()
+	RunConsoleCommand("r_farz", "-1")
 	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
 		furtherEnabled = false
 		furtherEnabledPrev = false
@@ -495,7 +498,6 @@ hook.Add( "ShadnowFilterChange", "shadfiltchanged", function()
 end)
 
 function ENT:Think()
-
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
 		csmEnabledPrev = true
 		if (self:GetRemoveStaticSun()) then
