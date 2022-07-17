@@ -5,6 +5,7 @@ sssssssssssss	dd
 --]]
 
 CreateClientConVar( "csm_spawnalways", 0,  true, false )
+CreateClientConVar( "csm_spawnwithlightenv", 0,  true, false )
 CreateClientConVar( "csm_propradiosity", 4,  true, false )
 CreateClientConVar( "csm_blobbyao", 0,  true, false )
 CreateClientConVar( "csm_wakeprops", 1,  true, false )
@@ -22,6 +23,7 @@ CreateClientConVar(	"csm_perfmode", 0,  true, false)
 
 local ConVarsDefault = {
 	csm_spawnalways = "0",
+	csm_spawnwithlightenv = "0",
 	csm_propradiosity = "4",
 	csm_blobbyao = "0",
 	csm_wakeprops = "1",
