@@ -15,6 +15,7 @@ local pseudoweapon
 local pseudoplayer
 
 function ENT:Initialize()
+    RunConsoleCommand("r_flashlightnear", "50")
     if pseudoplayer and pseudoplayer.IsValid() then
         pseudoplayer:Remove()
     end
@@ -76,6 +77,7 @@ function ENT:Think()
 end
 
 function ENT:OnRemove()
+    RunConsoleCommand("r_flashlightnear", "4")
     if pseudoplayer then
         pseudoplayer:Remove()
     end
