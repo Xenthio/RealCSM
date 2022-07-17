@@ -35,6 +35,13 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
+    if not pseudoweapon:IsValid() then
+        pseudoweapon = ClientsideModel("error.mdl")
+        pseudoweapon:SetParent(self)
+        pseudoweapon:AddEffects( EF_BONEMERGE )
+        pseudoweapon:SetRenderMode(2)
+        pseudoweapon:SetColor(Color(255,255,255,0))
+    end
     if GetConVar( "csm_localplayershadow" ):GetBool() == false then
         if pseudoweapon then
             pseudoweapon:Remove()
@@ -93,7 +100,7 @@ function ENT:Think()
     --self:AddEFlags(EFL_FORCE_CHECK_TRANSMIT)
     --self:AddEFlags(EFL_IN_SKYBOX)
 
-    
+
 end
 
 function ENT:OnRemove()

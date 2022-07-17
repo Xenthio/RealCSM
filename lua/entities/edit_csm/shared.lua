@@ -76,6 +76,7 @@ if (CLIENT) then
 	end
 end
 if (SERVER) then
+	util.AddNetworkString( "killCLientShadowsCSM" )
 	util.AddNetworkString( "PlayerSpawned" )
 	util.AddNetworkString( "hasLightEnvNet" )
 	util.AddNetworkString( "csmPropWakeup" )
@@ -174,9 +175,10 @@ end
 
 function ENT:Initialize()
 	for k, v in ipairs(ents.FindByClass( "edit_csm" )) do
-		if v != self then
+		if v != self and SERVER then
+			net.Start( "killCLientShadowsCSM" )
+			net.Broadcast()
 			v:Remove()
-			self:Remove()
 		end
 	end
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
@@ -435,6 +437,12 @@ net.Receive( "csmPropWakeup", function( len, ply )
 	end
 end )
 
+net.Receive( "killCLientShadowsCSM", function( len, ply )
+	if CLIENT and fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
+		fpshadowcontrollerCLIENT:Remove()
+	end
+end )
+
 function ENT:UpdateTransmitState()
 	return TRANSMIT_ALWAYS
 end
@@ -447,6 +455,10 @@ function reloadLightmaps()
 end
 
 function ENT:OnRemove()
+	print("Removed")
+	if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
+		fpshadowcontrollerCLIENT:Remove()
+	end
 	RunConsoleCommand("r_farz", "-1")
 	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
 		furtherEnabled = false
@@ -487,9 +499,6 @@ function ENT:OnRemove()
 		end
 
 		table.Empty(self.ProjectedTextures)
-		if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
-			fpshadowcontrollerCLIENT:Remove()
-		end
 	end
 end
 

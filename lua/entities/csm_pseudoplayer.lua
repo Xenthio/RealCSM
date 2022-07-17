@@ -15,13 +15,10 @@ local pseudoweapon
 local pseudoplayer
 
 function ENT:Initialize()
-    RunConsoleCommand("r_flashlightnear", "50")
-    if pseudoplayer and pseudoplayer.IsValid() then
+    if pseudoplayer then
         pseudoplayer:Remove()
     end
-    if pseudoweapon and pseudoweapon.IsValid() then
-        pseudoweapon:Remove()
-    end
+    RunConsoleCommand("r_flashlightnear", "50")
 
     print("[Real CSM] - Pseudoplayer Initialised.")
     self:SetModel(LocalPlayer():GetModel())
@@ -44,7 +41,19 @@ function ENT:Initialize()
 
 end
 function ENT:Think()
+    if not pseudoplayer or not pseudoplayer:IsValid() or pseudoplayer == nil then
+        pseudoplayer = ClientsideModel(LocalPlayer():GetModel())
+        pseudoplayer:SetMoveType(MOVETYPE_NONE)
+        pseudoplayer:SetParent(self)
+        pseudoplayer:AddEffects( EF_BONEMERGE )
 
+        pseudoplayer:SetRenderMode(2)
+        pseudoplayer:SetColor(Color(255,255,255,0))
+    end
+    if not (pseudoweapon or pseudoweapon:IsValid()) then
+        pseudoweapon = ents.CreateClientside( "csm_pseudoweapon" )
+        pseudoweapon:Spawn()
+    end
     if GetConVar( "csm_localplayershadow" ):GetBool() == false then
         if pseudoplayer then
             pseudoplayer:Remove()
@@ -54,7 +63,7 @@ function ENT:Think()
         end
         self:Remove()
     end
-    if LocalPlayer():Alive()  then
+    if LocalPlayer():Alive() then
         pseudoplayer:SetNoDraw( false )
     else
         pseudoplayer:SetNoDraw( true )
@@ -81,20 +90,8 @@ end
 
 function ENT:OnRemove()
     RunConsoleCommand("r_flashlightnear", "4")
-    if pseudoplayer then
-        pseudoplayer:Remove()
-    end
-    if pseudoweapon then
+    pseudoplayer:Remove()
+    if pseudoweapon and pseudoweapon:IsValid() then
         pseudoweapon:Remove()
     end
 end
--- remove on auto refresh
-hook.Add("OnReloaded", "RealCSMOnAutoReloadPseudoplayer", function()
-    if pseudoplayer then
-        pseudoplayer:Remove()
-    end
-    if pseudoweapon then
-        pseudoweapon:Remove()
-    end
-    ENT:Remove()
-end)

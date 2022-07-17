@@ -18,6 +18,7 @@ end )
 if (SERVER) then
 	util.AddNetworkString( "PlayerSpawnedFully" )
 	function actualSpawn()
+		-- damn they renamed it from poo to csm_ent this is so sad
 		local csm_ent = ents.Create( "edit_csm" )
 		csm_ent:SetPos( Vector( 0, 0, -10000 ) )
 		csm_ent:Spawn()
