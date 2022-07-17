@@ -23,7 +23,7 @@ if (SERVER) then
 		csm_ent:Spawn()
 	end
 
-	function spawnCSM() -- TODO: find out why the spawn with lightenv convar resets every game reload (not cleanup) ~starundrscre
+	function spawnCSM()
 		local spawnEnabled = GetConVar( "csm_spawnalways" )
 		local envCheckToggle = GetConVar( "csm_spawnwithlightenv" )
 		local lightEnvExists
