@@ -1,4 +1,5 @@
 CreateConVar( "csm_spawnalways", 0,  true, false )
+CreateConVar( "csm_spawnwithlightenv", 0,  true, false )
 CreateConVar( "csm_allowwakeprops", 1,  true, false )
 CreateConVar( "csm_allowfpshadows_old", 0,  true, false )
 hook.Add( "PopulateToolMenu", "CSMServer", function()
@@ -7,6 +8,8 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 
 		panel:CheckBox( "CSM Spawn on load (Experimental)", "csm_spawnalways" )
 
+		panel:CheckBox( "Spawn if light_environment exists (Experimental)", "csm_spawnwithlightenv" )
+
 		panel:CheckBox( "Allow clients to wake up all props.", "csm_allowwakeprops" )
 		-- Add stuff here
 		panel:CheckBox( "Allow clients to use legacy firstperson shadow method", "csm_allowfpshadows_old" )
@@ -14,16 +17,33 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 end )
 if (SERVER) then
 	util.AddNetworkString( "PlayerSpawnedFully" )
-	function spawnCSM()
-		if (GetConVar( "csm_spawnalways" ):GetInt() == 1) and (FindEntity("edit_csm") == nil) then
-			if (table.Count(ents.FindByClass("light_environment")) > 0) then
-				RunConsoleCommand("csm_haslightenv", "1")
-			else
-				RunConsoleCommand("csm_haslightenv", "0")
+	function actualSpawn()
+		local csm_ent = ents.Create( "edit_csm" )
+		csm_ent:SetPos( Vector( 0, 0, -10000 ) )
+		csm_ent:Spawn()
+	end
+
+	function spawnCSM() -- TODO: find out why the spawn with lightenv convar resets every game reload (not cleanup) ~starundrscre
+		local spawnEnabled = GetConVar( "csm_spawnalways" )
+		local envCheckToggle = GetConVar( "csm_spawnwithlightenv" )
+		local lightEnvExists
+
+		if (table.Count(ents.FindByClass("light_environment")) > 0) then
+			RunConsoleCommand("csm_haslightenv", "1")
+			lightEnvExists = true
+		else
+			RunConsoleCommand("csm_haslightenv", "0")
+			lightEnvExists = false
+		end
+
+		if spawnEnabled:GetBool() == true and (FindEntity("edit_csm") == nil) then
+			if envCheckToggle:GetBool() == true then
+				if lightEnvExists == true then
+					actualSpawn()
+				end
+			elseif lightEnvExists == false then
+				actualSpawn()
 			end
-			local poop = ents.Create( "edit_csm" )
-			poop:SetPos( Vector( 0, 0, -10000 ) )
-			poop:Spawn()
 		end
 	end
 	util.AddNetworkString( "cool_addon_client_ready" )
