@@ -375,7 +375,12 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", 2, "OffsetRoll", { KeyName = "Roll Offset", Edit = { type = "Float", order = 24, min = -180.0, max = 180.0, title = "Roll Offset" }})
 
 	if (SERVER) then
-		self:SetSunColour(Vector(1.0, 0.90, 0.80, 1.0))
+		-- Yeah I hardcoded the construct sun colour, the env_suns one is shit
+		if GetConVar( "csm_getENVSUNcolour"):GetBool() and game.GetMap() != "gm_construct" then
+			self:SetSunColour(FindEntity("env_sun"):GetColor():ToVector()) --Vector(1.0, 0.90, 0.80, 1.0))
+		else
+			self:SetSunColour(Vector(1.0, 0.90, 0.80, 1.0))
+		end
 		if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
 			self:SetSunBrightness(1000)
 		else

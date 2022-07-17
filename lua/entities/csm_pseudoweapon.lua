@@ -20,13 +20,19 @@ function ENT:Initialize()
         pseudoweapon:Remove()
     end
 
+    weaponmodel = "models/weapons/w_pistol.mdl"
+    if LocalPlayer():GetActiveWeapon():IsValid() and (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() != "") then
+        weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
+    end
+
     print("[Real CSM] - Pseudoweapon Initialised.")
+    self:SetModel(weaponmodel)
     self:SetParent(LocalPlayer():GetActiveWeapon())
     self:AddEffects( EF_BONEMERGE )
     self:SetNoDraw(true)
     self:SetMoveType( MOVETYPE_NONE )
 
-    pseudoweapon = ClientsideModel("error.mdl")
+    pseudoweapon = ClientsideModel(weaponmodel)
     pseudoweapon:SetParent(self)
     pseudoweapon:AddEffects( EF_BONEMERGE )
 
@@ -36,7 +42,11 @@ end
 
 function ENT:Think()
     if not pseudoweapon or not pseudoweapon:IsValid() then
-        pseudoweapon = ClientsideModel("error.mdl")
+        weaponmodel = "models/weapons/w_pistol.mdl"
+        if LocalPlayer():GetActiveWeapon():IsValid() and (LocalPlayer():GetActiveWeapon():GetWeaponWorldModel() != "") then
+            weaponmodel = LocalPlayer():GetActiveWeapon():GetModel()
+        end
+        pseudoweapon = ClientsideModel(weaponmodel)
         pseudoweapon:SetParent(self)
         pseudoweapon:AddEffects( EF_BONEMERGE )
         pseudoweapon:SetRenderMode(2)
