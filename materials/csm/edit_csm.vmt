@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$baseTexture"			"csm/edit_csm"
+	"$bumpmap"				"null-bumpmap"
+	"$model"				"1"	
+	"$phong"				"1"
+	"$phongexponent"		"20"
+	"$phongboost"			"5"	
+	"$phongfresnelranges"	"[0.0 0.5 1]"
+	"$rimlight"             "1"
+	"$rimlightboost"        "0.2"
+}

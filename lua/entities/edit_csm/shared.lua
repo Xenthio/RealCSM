@@ -297,7 +297,7 @@ function ENT:Initialize()
 	end
 
 	BaseClass.Initialize(self)
-	self:SetMaterial("gmod/edit_sun")
+	self:SetMaterial( "csm/edit_csm" )
 	if (self:GetRemoveStaticSun()) then
 		timer.Create( "warn", 0.1, 1, warn)
 		RunConsoleCommand("r_radiosity", GetConVar( "csm_propradiosity" ):GetString())
