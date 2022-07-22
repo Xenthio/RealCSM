@@ -18,6 +18,7 @@ CreateClientConVar(	"csm_localplayershadow", 0,  true, false)
 CreateClientConVar(	"csm_localplayershadow_old", 0,  false, false)
 CreateClientConVar(	"csm_further", 0,  true, false)
 CreateClientConVar(	"csm_furthershadows", 1,  true, false)
+CreateClientConVar(	"csm_farshadows", 1,  true, false)
 CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
@@ -47,6 +48,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		panel:CheckBox( "Performance mode.", "csm_perfmode")
 		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce perceived quality of nearby shadows." )
+
+		panel:CheckBox( "Super performance mode", "csm_farshadows")
+		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
 
 		panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 8192 )
 		panel:ControlHelp( "Shadow map resolution." )
@@ -89,6 +93,8 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		panel:NumSlider( "Size / Distance Scale", "csm_sizescale", 0, 5)
 		panel:ControlHelp( "Cascade size multiplier to lower / raise view distance, this affects the perceived quality." )
+		
+
 
 		panel:CheckBox( "Enable further cascade for large maps", "csm_further")
 		panel:ControlHelp( "Add a further cascade to increase shadow draw distance without sacrificing perceived quality" )

@@ -49,6 +49,8 @@ local furtherEnabled = false
 local furtherEnabledPrev = false
 local furtherEnabledShadows = false
 local furtherEnabledShadowsPrev = false
+local farEnabledShadows = true
+local farEnabledShadowsPrev = true
 local spreadEnabled = false
 local spreadEnabledPrev = false
 local spreadSample = 6
@@ -705,6 +707,20 @@ function ENT:Think()
 		end
 	end
 
+	farEnabledShadows = GetConVar( "csm_farshadows" ):GetBool()
+	if (farEnabledShadowsPrev != farEnabledShadows) then
+		if (farEnabledShadows) then
+			if CLIENT and (self.ProjectedTextures[3] != nil) and (self.ProjectedTextures[3]:IsValid()) then
+				self.ProjectedTextures[3]:SetEnableShadows(false)
+				farEnabledShadowsPrev = true
+			end
+		else
+			if CLIENT and (self.ProjectedTextures[3] != nil) and (self.ProjectedTextures[3]:IsValid()) then
+				self.ProjectedTextures[3]:SetEnableShadows(true)
+				farEnabledShadowsPrev = false
+			end
+		end
+	end
 
 
 	local removestatsun = self:GetRemoveStaticSun()
