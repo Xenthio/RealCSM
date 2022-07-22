@@ -9,7 +9,7 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 
 		panel:CheckBox( "CSM Spawn on load (Experimental)", "csm_spawnalways" )
 
-		panel:CheckBox( "Spawn if light_environment exists (Experimental)", "csm_spawnwithlightenv" )
+		panel:CheckBox( "Spawn only if map is supported (light_environment is named) (Experimental)", "csm_spawnwithlightenv" )
 
 		panel:CheckBox( "Allow clients to wake up all props.", "csm_allowwakeprops" )
 		-- Add stuff here

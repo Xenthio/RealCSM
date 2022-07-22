@@ -64,7 +64,7 @@ local fpShadowsPrev = false
 local fpshadowcontroller
 local fpshadowcontrollerCLIENT
 
-local lightAlloc = {} -- var PISS
+local lightAlloc = {} -- var PISS --old name for reference, maybe stop using dumb names
 --local SHIT = {} -- var SHIT
 local lightPoints = {} -- var FUCK
 
