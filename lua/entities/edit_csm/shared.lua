@@ -897,7 +897,7 @@ function ENT:Think()
 			if (shadfiltChanged) then
 				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
 			end
-
+			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
 				projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
 			else
@@ -906,16 +906,16 @@ function ENT:Think()
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
 				if (spreadEnabled) then
 					if (i == 1) then
-						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i == 2) then
-						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
 					elseif (i > 4) then
-						projectedTexture:SetBrightness((self:GetSunBrightness()) / GetConVar( "csm_spread_samples" ):GetInt())
+						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
 					else
-						projectedTexture:SetBrightness(self:GetSunBrightness())
+						projectedTexture:SetBrightness(sunBright)
 					end
 				else
-					projectedTexture:SetBrightness(self:GetSunBrightness())
+					projectedTexture:SetBrightness(sunBright)
 				end
 			else
 				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetInt())
@@ -943,7 +943,7 @@ function ENT:Think()
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
 			projectedTexture:SetFarZ(self:GetSunFarZ()) -- + 16384)
-			--projectedTexture:SetConstantAttenuation(1) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
+			projectedTexture:SetConstantAttenuation(10000000000000000000) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
 			projectedTexture:Update()
 		end
 
