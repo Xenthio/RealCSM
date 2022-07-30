@@ -946,8 +946,10 @@ function ENT:Think()
 			end
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
-			projectedTexture:SetFarZ(self:GetSunFarZ()) -- + 16384)
-			projectedTexture:SetConstantAttenuation(10000000000000000000) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
+			projectedTexture:SetFarZ(self:GetSunFarZ() * 4)
+			projectedTexture:SetQuadraticAttenuation(0)
+			projectedTexture:SetLinearAttenuation(0)
+			projectedTexture:SetConstantAttenuation(1) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
 			projectedTexture:Update()
 		end
 
