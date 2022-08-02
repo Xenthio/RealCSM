@@ -23,7 +23,7 @@ CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
 
-CreateClientConVar(	"csm_debug_cascade", 1,  true, false)
+CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
 
 local ConVarsDefault = {
 	csm_spawnalways = "0",
