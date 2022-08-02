@@ -865,6 +865,17 @@ function ENT:Think()
 	else
 		self.CurrentAppearance = CalculateAppearance(self:GetTime())
 	end
+
+	-- for csm_debug_cascade
+	debugColours = {}
+	debugColours[1] = Color(0, 255, 0, 255)
+	debugColours[2] = Color(255, 0, 0, 255)
+	debugColours[3] = Color(255, 255, 0, 255)
+	debugColours[4] = Color(0, 0, 255, 255)
+	debugColours[5] = Color(0, 255, 255, 255)
+	debugColours[6] = Color(255, 0, 255, 255)
+	debugColours[7] = Color(255, 255, 255, 255)
+
 	if CLIENT and (GetConVar( "csm_enabled" ):GetInt() == 1) and (GetConVar( "csm_update" ):GetInt() == 1) then
 		local position = GetViewEntity():GetPos() + offset
 
@@ -898,13 +909,6 @@ function ENT:Think()
 				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
 			end
 			sunBright = (self:GetSunBrightness()) / 400
-			if (GetConVar( "csm_stormfox_coloured_sun" ):GetInt() == 0) then
-				projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
-			else
-				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
-				--print(self.CurrentAppearance.SunColour)
-				projectedTexture:SetColor(self.CurrentAppearance.SunColour)
-			end
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
 				if (spreadEnabled) then
 					if (i == 1) then
@@ -923,6 +927,18 @@ function ENT:Think()
 				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
 				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat())
 				--print((self.CurrentAppearance.SunBrightness) )
+			end
+			if GetConVar("csm_debug_cascade"):GetBool() then
+				for i2, projectedTexture2 in pairs(self.ProjectedTextures) do
+					projectedTexture2:SetColor(debugColours[i])
+					--projectedTexture2:SetBrightness(2)
+				end
+			elseif (GetConVar( "csm_stormfox_coloured_sun" ):GetBool()) then
+				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
+				--print(self.CurrentAppearance.SunColour)
+				projectedTexture:SetColor(self.CurrentAppearance.SunColour)
+			else
+				projectedTexture:SetColor(self:GetSunColour():ToColor()) --csm_stormfox_coloured_sun
 			end
 			projectedTexture:SetPos(position)
 

@@ -23,6 +23,8 @@ CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
 
+CreateClientConVar(	"csm_debug_cascade", 1,  true, false)
+
 local ConVarsDefault = {
 	csm_spawnalways = "0",
 	csm_spawnwithlightenv = "0",
@@ -93,13 +95,16 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		panel:NumSlider( "Size / Distance Scale", "csm_sizescale", 0, 5)
 		panel:ControlHelp( "Cascade size multiplier to lower / raise view distance, this affects the perceived quality." )
-		
+
 
 
 		panel:CheckBox( "Enable further cascade for large maps", "csm_further")
 		panel:ControlHelp( "Add a further cascade to increase shadow draw distance without sacrificing perceived quality" )
 		panel:CheckBox( "Enable shadows on further cascade", "csm_furthershadows")
 		panel:ControlHelp( "Enable shadows on the further cascade, ")
+
+		panel:CheckBox( "Cascade Debug", "csm_debug_cascade")
+		panel:ControlHelp( "Each cascade is drawn in a different colour, this is useful for debugging." )
 
 
 		-- Add stuff here
