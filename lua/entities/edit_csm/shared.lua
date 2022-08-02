@@ -515,6 +515,8 @@ end)
 
 function ENT:Think()
 	if (GetConVar( "csm_enabled" ):GetInt() == 1) and (csmEnabledPrev == false) then
+		furtherEnabledShadowsPrev = !GetConVar( "csm_furthershadows" ):GetBool()
+		furtherEnabledPrev = !GetConVar( "csm_further" ):GetBool()
 		csmEnabledPrev = true
 		if (self:GetRemoveStaticSun()) then
 			if (GetConVar( "csm_legacydisablesun" ):GetInt() == 1) then
@@ -604,7 +606,7 @@ function ENT:Think()
 	end
 
 	furtherEnabledShadows = GetConVar( "csm_furthershadows" ):GetBool()
-	furtherEnabled =  GetConVar( "csm_further" ):GetBool()
+	furtherEnabled = GetConVar( "csm_further" ):GetBool()
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
