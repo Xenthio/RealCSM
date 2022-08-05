@@ -9,7 +9,7 @@ TODO
 * [ ] partition the frustum into subfrusta (like normal csm implementations, better on performance)
 * [x] research better methods for disabling sun (if possible, I doubt)
 * [ ] hammer integration so map makers can specify settings for the csm
-* [ ] MAKE A GODDAMN ICON FOR THE ENTITY IN THE SPAWNMENU
+* [x] MAKE A GODDAMN ICON FOR THE ENTITY IN THE SPAWNMENU
 * [ ] Really shitty and cheap global illumination (probably very hard to do so this is unlikely)
 * [x] Shadow spread in the closest ring (maybe second ring too, yknow for insane people)
 * [ ] Weapon self shadowing
