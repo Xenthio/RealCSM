@@ -170,6 +170,6 @@ if (CLIENT) then
 	end
 
 	--hook.Add( "PlayerFullLoad", "firstieCheck", firstTimeCheck)
-	hook.Add( "InitPostEntity", "Ready", firstTimeCheck)
+	hook.Add( "InitPostEntity", "RealCSMReady", firstTimeCheck)
 	--net.Receive( "PlayerSpawnedFully", firstTimeCheck())
 end

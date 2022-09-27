@@ -19,7 +19,7 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 	end )
 end )
 if (SERVER) then
-	util.AddNetworkString( "PlayerSpawnedFully" )
+	util.AddNetworkString( "RealCSMPlayerSpawnedFully" )
 	function actualSpawn()
 		-- damn they renamed it from poo to csm_ent this is so sad
 		local csm_ent = ents.Create( "edit_csm" )
@@ -58,10 +58,10 @@ if (SERVER) then
 	end
 	util.AddNetworkString( "cool_addon_client_ready" )
 
-	hook.Add( "PostCleanupMap", "cleanupcsm", spawnCSM)
-	hook.Add( "PlayerFullLoad", "autospawn", spawnCSM)
+	hook.Add( "PostCleanupMap", "RealCSMcleanupcsm", spawnCSM)
+	hook.Add( "RealCSMPlayerFullLoad", "RealCSMautospawn", spawnCSM)
 
-	hook.Add("stormfox2.postinit", "csmstormfoxsupporthook", function()
+	hook.Add("stormfox2.postinit", "RealCSMstormfoxsupporthook", function()
 		RunConsoleCommand("csm_stormfoxsupport", "1")
 		StormFox2.Setting.Set("maplight_dynamic", false)
 		StormFox2.Setting.Set("maplight_lightstyle", false)
