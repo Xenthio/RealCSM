@@ -32,9 +32,9 @@ CreateClientConVar(	 "csm_filter", 0.10,  false, false)
 CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false)
 CreateClientConVar(	 "csm_spread_layer_reservemiddle", 1,  false, false)
 
-CreateConVar(	 "csm_stormfoxsupport", 0,  true, false)
-CreateConVar(	 "csm_stormfox_brightness_multiplier", 1,  true, false)
-CreateConVar(	 "csm_stormfox_coloured_sun", 0,  true, false)
+CreateConVar(	 "csm_stormfoxsupport", 0,  FCVAR_ARCHIVE)
+CreateConVar(	 "csm_stormfox_brightness_multiplier", 1, FCVAR_ARCHIVE)
+CreateConVar(	 "csm_stormfox_coloured_sun", 0, FCVAR_ARCHIVE)
 local lightenvs = {ents.FindByClass("light_environment")}
 local hasLightEnvs = false
 

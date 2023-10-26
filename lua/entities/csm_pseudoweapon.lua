@@ -1,5 +1,5 @@
 -- Shitty solution to have a shadow for the player, weapon edition wow
-CreateConVar( "csm_debug_pseudoplayer", 0,  false, false )
+CreateConVar( "csm_debug_pseudoplayer", 0,  FCVAR_NONE )
 AddCSLuaFile()
 
 ENT.Type 			= "anim"
