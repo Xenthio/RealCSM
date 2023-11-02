@@ -1,5 +1,5 @@
 # Real CSM
- a real Cascading Shadows Maps addon for Garry's Mod
+A real Cascading Shadows Maps addon for Garry's Mod
  
 shoutouts to [Blueberry_pie](https://steamcommunity.com/id/Blueberry_pie) for the original work
 
