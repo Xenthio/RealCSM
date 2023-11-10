@@ -22,6 +22,9 @@ CreateClientConVar(	"csm_farshadows", 1,  true, false)
 CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
+CreateClientConVar(	"csm_depthresasmultiple", 0,  false, false)
+CreateClientConVar(	"csm_depthbias", 0.000002,  false, false)
+CreateClientConVar(	"csm_slopescaledepthbias", 2,  false, false)
 
 CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
 
@@ -39,6 +42,8 @@ local ConVarsDefault = {
 	csm_furthershadows = "1",
 	csm_sizescale = "1",
 	csm_perfmode = "0",
+	csm_depthbias = "0.000002",
+	csm_slopescaledepthbias = "2",
 }
 
 hook.Add( "PopulateToolMenu", "CSMClient", function()
@@ -54,8 +59,21 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:CheckBox( "Super performance mode", "csm_farshadows")
 		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
 
-		panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 8192 )
+		qualityslider = panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 16384, 0 )
 		panel:ControlHelp( "Shadow map resolution." )
+		qualityslider.OnValueChanged = function(self, value) 
+			RunConsoleCommand("csm_depthresasmultiple", math.log (value) / math.log (2) - 6)
+			RunConsoleCommand("r_flashlightdepthres", value)
+		end
+		
+		multslider = panel:NumSlider( "Shadow Quality as Multiple", "csm_depthresasmultiple", 0, 8, 0 )
+		panel:ControlHelp( "Shadow map resolution (as an exponential multipler)." )
+		multslider.OnValueChanged = function(self, value)  
+
+			if multslider:IsEditing() then RunConsoleCommand("r_flashlightdepthres", 2^math.floor(GetConVar("csm_depthresasmultiple"):GetFloat() + 6)) end
+		end
+		multslider:SetValue(math.log(qualityslider:GetValue()) / math.log (2) - 6)
+
 		panel:NumSlider( "Shadow Filter", "r_projectedtexture_filter", 0, 10)
 		panel:ControlHelp( "Default Source engine shadow filter, It's quite grainy, it's best you leave this at 0.10 unless you know what you're doing." )
 
@@ -85,7 +103,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:ControlHelp( "Alert! This doesn't work above 7 unless you launch gmod with extra shadow maps enabled!!!" )
 		panel:ControlHelp( "Double Alert! Setting this too high may crash your game!" )
 
-		panel:NumSlider( "Spread Circle Layers", "csm_spread_layers", 1, 5, 0)
+		panel:NumSlider( "Spread Circle Layers", "csm_spread_layers", 1, 6, 0)
 		panel:ControlHelp( "Since circle packing in a circle is hard I settled on layers for circles to fill in the middle, 1 is softer but 2 is more accurate and might look harsher" )
 		--panel:NumSlider( "Spread Circle Layer Density", "csm_spread_layer_density", 0, 1)
 		--panel:ControlHelp( "How close each layer is, It's recommended to leave this at 0 but the option is here just in case" )
@@ -96,12 +114,17 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:NumSlider( "Size / Distance Scale", "csm_sizescale", 0, 5)
 		panel:ControlHelp( "Cascade size multiplier to lower / raise view distance, this affects the perceived quality." )
 
-
-
 		panel:CheckBox( "Enable further cascade for large maps", "csm_further")
 		panel:ControlHelp( "Add a further cascade to increase shadow draw distance without sacrificing perceived quality" )
 		panel:CheckBox( "Enable shadows on further cascade", "csm_furthershadows")
 		panel:ControlHelp( "Enable shadows on the further cascade, ")
+		
+
+		panel:NumSlider( "Shadowmap Depth Bias", "csm_depthbias", -1, 1, 6)
+		panel:ControlHelp( "The amount to bias the depth of the shadowmap by." )
+		
+		panel:NumSlider( "Shadowmap Slope Scale Depth Bias", "csm_slopescaledepthbias", 0, 6, 1)
+		panel:ControlHelp( "The sloped scale of the amount the depth of the shadowmap is biased by." )
 
 		panel:CheckBox( "Cascade Debug", "csm_debug_cascade")
 		panel:ControlHelp( "Each cascade is drawn in a different colour, this is useful for debugging." )

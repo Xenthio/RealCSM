@@ -50,7 +50,7 @@ function ENT:Think()
         pseudoplayer:SetRenderMode(2)
         pseudoplayer:SetColor(Color(255,255,255,0))
     end
-    if not (pseudoweapon or pseudoweapon:IsValid()) then
+    if not pseudoweapon or not pseudoweapon:IsValid() then
         pseudoweapon = ents.CreateClientside( "csm_pseudoweapon" )
         pseudoweapon:Spawn()
     end

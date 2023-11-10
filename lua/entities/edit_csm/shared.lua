@@ -28,9 +28,10 @@ cvar_csm_hashdr = CreateClientConVar(	 "csm_hashdr", 0,  false, false)
 cvar_csm_enabled = CreateClientConVar(	 "csm_enabled", 1,  false, false)
 
 CreateClientConVar(	 "csm_update", 1,  false, false)
-CreateClientConVar(	 "csm_filter", 0.10,  false, false)
+CreateClientConVar(	 "csm_filter", 0.08,  false, false)
 CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false)
 CreateClientConVar(	 "csm_spread_layer_reservemiddle", 1,  false, false)
+
 
 CreateConVar(	 "csm_stormfoxsupport", 0,  FCVAR_ARCHIVE)
 CreateConVar(	 "csm_stormfox_brightness_multiplier", 1, FCVAR_ARCHIVE)
@@ -42,6 +43,8 @@ local RemoveStaticSunPrev = false
 local HideRTTShadowsPrev = false
 local BlobShadowsPrev = false
 local ShadowFilterPrev = 1.0
+local DepthBiasPrev = 1.0
+local SlopeScaleDepthBiasPrev = 1.0
 local shadfiltChanged = true
 local csmEnabledPrev = false
 local useskyandfog = false
@@ -784,6 +787,7 @@ function ENT:Think()
 			shadfiltChanged = true
 			RunConsoleCommand("csm_filter", shadfilt)
 		end
+
 		if (BlobShadowsPrev != BlobShadows) and GetConVar( "csm_enabled" ):GetBool() then
 			BlobShadowsPrev = BlobShadows
 			if (BlobShadows) then
@@ -906,10 +910,15 @@ function ENT:Think()
 				end
 			end
 		end
+
+		depthBias = GetConVar( "csm_depthbias" ):GetFloat()
+		slopeScaleDepthBias = GetConVar( "csm_slopescaledepthbias" ):GetFloat()
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			if (shadfiltChanged) then
 				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
 			end
+			projectedTexture:SetShadowDepthBias(depthBias)
+			projectedTexture:SetShadowSlopeScaleDepthBias(slopeScaleDepthBias)
 			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
 				if (spreadEnabled) then
