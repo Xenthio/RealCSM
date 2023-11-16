@@ -195,7 +195,8 @@ function ENT:Initialize()
 	shadfiltChanged = true
 
 	RunConsoleCommand("csm_enabled", "1")
-	-- whats this for again??
+	-- https://youtu.be/gTR2TVXbMGI?t=102
+	-- fix for 1:48
 	RunConsoleCommand("r_farz", "50000")
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
