@@ -14,5 +14,6 @@ TODO
 * [x] Shadow spread in the closest ring (maybe second ring too, yknow for insane people)
 * [ ] Weapon self shadowing
 * [x] Firstperson player shadow
+* [ ] Sqaure texture for projtext for slightly better use of space???
  
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
