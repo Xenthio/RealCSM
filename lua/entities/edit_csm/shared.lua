@@ -73,6 +73,18 @@ local lightAlloc = {} -- var PISS --old name for reference, maybe stop using dum
 --local SHIT = {} -- var SHIT
 local lightPoints = {} -- var FUCK
 
+-- https://youtu.be/gTR2TVXbMGI?t=102
+-- fix for 1:48
+function SkyBoxFixFunction( ply, pos, angles, fov )
+	if (GetConVar( "csm_enabled" ):GetInt() != 1) then return null end
+	if (GetConVar( "csm_skyboxfix" ):GetInt() != 1) then return null end
+	local view = {
+		zfar = 80000
+	}
+
+	return view
+end
+
 if (CLIENT) then
 	if (render.GetHDREnabled()) then
 		RunConsoleCommand("csm_hashdr", "1")
@@ -196,10 +208,10 @@ function ENT:Initialize()
 
 	RunConsoleCommand("csm_enabled", "1")
 	
+	
 	-- https://youtu.be/gTR2TVXbMGI?t=102
 	-- fix for 1:48
-	--RunConsoleCommand("r_farz", "50000")
-	-- Moved into cl_shadows.lua as CalcView hook
+	hook.Add( "CalcView", "RealCSMSkyboxViewFix",  SkyBoxFixFunction)
 
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
@@ -475,6 +487,9 @@ function ENT:OnRemove()
 		fpshadowcontrollerCLIENT:Remove()
 	end
 	--RunConsoleCommand("r_farz", "-1")
+	
+	hook.Remove( "CalcView", "RealCSMSkyboxViewFix")
+
 	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
 		furtherEnabled = false
 		furtherEnabledPrev = false

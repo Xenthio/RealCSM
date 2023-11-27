@@ -194,17 +194,6 @@ if (CLIENT) then
 	end
 
 	
-	-- https://youtu.be/gTR2TVXbMGI?t=102
-	-- fix for 1:48
-	hook.Add( "CalcView", "RealCSMSkyboxViewFix", function( ply, pos, angles, fov )
-		if (GetConVar( "csm_enabled" ):GetInt() != 1) then return null end
-		if (GetConVar( "csm_skyboxfix" ):GetInt() != 1) then return null end
-		local view = {
-			zfar = 80000
-		}
-	
-		return view
-	end )
 	--hook.Add( "PlayerFullLoad", "firstieCheck", firstTimeCheck)
 	hook.Add( "InitPostEntity", "RealCSMReady", firstTimeCheck)
 	--net.Receive( "PlayerSpawnedFully", firstTimeCheck())
