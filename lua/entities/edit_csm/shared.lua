@@ -200,7 +200,7 @@ function ENT:Initialize()
 	end
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	if !GetConVar( "csm_blobbyao" ):GetBool() then
-		RunConsoleCommand("r_shadows_gamecontrol", "0")
+		DisableRTT()
 	else
 		BlobShadowsPrev = false
 	end
@@ -494,7 +494,7 @@ function ENT:OnRemove()
 		furtherEnabled = false
 		furtherEnabledPrev = false
 		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
+			EnableRTT()
 		end
 		if GetConVar( "csm_blobbyao" ):GetBool() then
 			RunConsoleCommand("r_shadowrendertotexture", "1")
@@ -532,6 +532,42 @@ function ENT:OnRemove()
 	end
 end
 
+rttenabled = true 
+
+function DisableRTTHook(ent)
+	ent:DrawShadow( ent.stored_shadow_value or true )
+end
+
+function DisableRTT()
+	if (rttenabled == false) then return end
+	hook.Add( "OnEntityCreated", "RealCSMDisableRTTHook", DisableRTTHook)
+	rttenabled = false
+	for k, v in pairs(ents.GetAll()) do
+		v:DrawShadow( v.stored_shadow_value or true )
+	end
+end
+
+function EnableRTT()
+	if (rttenabled == true) then return end
+	hook.Remove( "OnEntityCreated", "RealCSMDisableRTTHook" )
+	rttenabled = true 
+	for k, v in pairs(ents.GetAll()) do
+		v:DrawShadow(v.stored_shadow_value or true )
+	end
+end
+
+local meta = FindMetaTable("Entity")
+
+meta.oldsh = meta.oldsh or meta.DrawShadow
+function meta:DrawShadow(val)
+	self.stored_shadow_value = val
+	if (rttenabled) then
+		self:oldsh( val )
+	else
+		self:oldsh( false )
+	end
+end
+
 hook.Add( "ShadnowFilterChange", "shadfiltchanged", function()
 	shadfiltChanged = true
 end)
@@ -556,13 +592,13 @@ function ENT:Think()
 			wakeup()
 		end
 		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "0")
+			DisableRTT()
 			BlobShadowsPrev = false
 		end
 		if GetConVar( "csm_blobbyao" ):GetBool() then
 			RunConsoleCommand("r_shadowrendertotexture", "0")
 			RunConsoleCommand("r_shadowdist", "20")
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
+			EnableRTT()
 		end
 		if (CLIENT) then
 			self:createlamps()
@@ -588,7 +624,7 @@ function ENT:Think()
 		RunConsoleCommand("r_shadowrendertotexture", "1")
 		RunConsoleCommand("r_shadowdist", "10000")
 		if (self:GetHideRTTShadows()) then
-			RunConsoleCommand("r_shadows_gamecontrol", "1")
+			EnableRTT()
 		end
 		if (CLIENT) then
 			for i, projectedTexture in pairs(self.ProjectedTextures) do
@@ -794,9 +830,9 @@ function ENT:Think()
 		if (HideRTTShadowsPrev != hiderttshad) and !BlobShadows then
 
 			if (hiderttshad) then
-				RunConsoleCommand("r_shadows_gamecontrol", "0")
+				DisableRTT()
 			else
-				RunConsoleCommand("r_shadows_gamecontrol", "1")
+				EnableRTT()
 			end
 			HideRTTShadowsPrev = hiderttshad
 		end
@@ -815,15 +851,15 @@ function ENT:Think()
 				hiderttshad = false
 				RunConsoleCommand("r_shadowrendertotexture", "0")
 				RunConsoleCommand("r_shadowdist", "20")
-				RunConsoleCommand("r_shadows_gamecontrol", "1")
+				EnableRTT()
 				BlobShadowsPrev = true
 			else
 				RunConsoleCommand("r_shadowrendertotexture", "1")
 				RunConsoleCommand("r_shadowdist", "10000")
 				if (hiderttshad) then
-					RunConsoleCommand("r_shadows_gamecontrol", "0")
+					DisableRTT()
 				else
-					RunConsoleCommand("r_shadows_gamecontrol", "1")
+					EnableRTT()
 				end
 				BlobShadowsPrev = false
 			end
