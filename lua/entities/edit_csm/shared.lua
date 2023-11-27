@@ -195,9 +195,12 @@ function ENT:Initialize()
 	shadfiltChanged = true
 
 	RunConsoleCommand("csm_enabled", "1")
+	
 	-- https://youtu.be/gTR2TVXbMGI?t=102
 	-- fix for 1:48
-	RunConsoleCommand("r_farz", "50000")
+	--RunConsoleCommand("r_farz", "50000")
+	-- Moved into cl_shadows.lua as CalcView hook
+
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 		local Frame = vgui.Create( "DFrame" )
@@ -471,7 +474,7 @@ function ENT:OnRemove()
 	if fpshadowcontrollerCLIENT and fpshadowcontrollerCLIENT:IsValid() then
 		fpshadowcontrollerCLIENT:Remove()
 	end
-	RunConsoleCommand("r_farz", "-1")
+	--RunConsoleCommand("r_farz", "-1")
 	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
 		furtherEnabled = false
 		furtherEnabledPrev = false
