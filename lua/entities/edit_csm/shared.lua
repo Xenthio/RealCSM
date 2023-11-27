@@ -558,6 +558,8 @@ end
 
 local meta = FindMetaTable("Entity")
 
+meta.stored_shadow_value = true
+
 meta.oldsh = meta.oldsh or meta.DrawShadow
 function meta:DrawShadow(val)
 	self.stored_shadow_value = val
