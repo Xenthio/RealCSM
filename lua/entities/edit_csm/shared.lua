@@ -75,14 +75,30 @@ local lightPoints = {} -- var FUCK
 
 -- https://youtu.be/gTR2TVXbMGI?t=102
 -- fix for 1:48
-function SkyBoxFixFunction( ply, pos, angles, fov )
-	if (GetConVar( "csm_enabled" ):GetInt() != 1) then return null end
-	if (GetConVar( "csm_skyboxfix" ):GetInt() != 1) then return null end
-	local view = {
-		zfar = 80000
-	}
+function SkyBoxFixOn()
+	
+	local fog_controller = ents.FindByClass("env_fog_controller")[1]
+	if (fog_controller) then 
+		fog_controller:SetKeyValue("farz", 80000)
+	end
+	--hook.Add( "PreDrawOpaqueRenderables", "RealCSMSkyboxViewFix",  SkyBoxFixFunction)
+end
 
-	return view
+function SkyBoxFixOff()
+	--hook.Remove( "PreDrawOpaqueRenderables", "RealCSMSkyboxViewFix")
+end
+function SkyBoxFixFunction(isDrawingDepth, isDrawSkybox, isDraw3DSkybox )
+	
+	
+	if (!isDrawSkybox) then return nil end
+	if (isDraw3DSkybox) then return nil end
+	--if (GetConVar( "csm_enabled" ):GetInt() != 1) then return nil end
+	--if (GetConVar( "csm_skyboxfix" ):GetInt() != 1) then return nil end
+	--render.SuppressEngineLighting( isDrawSkybox && !isDraw3DSkybox )
+	render.DepthRange(0.01,1)
+	render.EnableClipping(false)
+	--render.FogEnd(80000)
+	--print("gi")
 end
 
 if (CLIENT) then
@@ -211,7 +227,7 @@ function ENT:Initialize()
 	
 	-- https://youtu.be/gTR2TVXbMGI?t=102
 	-- fix for 1:48
-	hook.Add( "CalcView", "RealCSMSkyboxViewFix",  SkyBoxFixFunction)
+	SkyBoxFixOn()
 
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
@@ -488,7 +504,7 @@ function ENT:OnRemove()
 	end
 	--RunConsoleCommand("r_farz", "-1")
 	
-	hook.Remove( "CalcView", "RealCSMSkyboxViewFix")
+	SkyBoxFixOff()
 
 	if (GetConVar( "csm_spawnalways" ):GetInt() == 0) then
 		furtherEnabled = false
