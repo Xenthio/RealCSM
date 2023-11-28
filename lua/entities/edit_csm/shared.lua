@@ -85,6 +85,10 @@ function SkyBoxFixOn()
 end
 
 function SkyBoxFixOff()
+	
+	if (fog_controller) then 
+		fog_controller:SetKeyValue("farz", -1)
+	end
 	--hook.Remove( "PreDrawOpaqueRenderables", "RealCSMSkyboxViewFix")
 end
 function SkyBoxFixFunction(isDrawingDepth, isDrawSkybox, isDraw3DSkybox )
