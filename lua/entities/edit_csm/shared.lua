@@ -562,6 +562,7 @@ end
 
 function DisableRTT()
 	if (rttenabled == false) then return end
+	RunConsoleCommand("r_shadows_gamecontrol", "0")
 	hook.Add( "OnEntityCreated", "RealCSMDisableRTTHook", DisableRTTHook)
 	rttenabled = false
 	for k, v in pairs(ents.GetAll()) do
@@ -570,7 +571,9 @@ function DisableRTT()
 end
 
 function EnableRTT()
+	
 	if (rttenabled == true) then return end
+	RunConsoleCommand("r_shadows_gamecontrol", "1")
 	hook.Remove( "OnEntityCreated", "RealCSMDisableRTTHook" )
 	rttenabled = true 
 	for k, v in pairs(ents.GetAll()) do
@@ -583,8 +586,8 @@ local meta = FindMetaTable("Entity")
 
 meta.oldsh = meta.oldsh or meta.DrawShadow
 function meta:DrawShadow(val)
-	self.stored_shadow_value = val
 	if (rttenabled) then
+		self.stored_shadow_value = val
 		self:oldsh( val )
 	else
 		self:oldsh( false )
