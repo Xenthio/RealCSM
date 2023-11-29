@@ -904,6 +904,12 @@ function ENT:Think()
 			pitch = sun.direction:Angle().pitch + 90
 			yaw = sun.direction:Angle().yaw
 			roll = sun.direction:Angle().roll
+		elseif (FindEntity("shadow_control") != nil) then
+			local shadowcontrol = FindEntity("shadow_control")
+			print("[Real CSM] - No env_sun but we do have shadow_control, using rotation values from that")
+			pitch = shadowcontrol:GetAngles().pitch + 90
+			yaw = shadowcontrol:GetAngles().yaw
+			roll = shadowcontrol:GetAngles().roll
 		else
 			if (warnedyet == false) then
 				Derma_Message( "This map has no env_sun. CSM will not be able to find the sun position and rotation!", "CSM Alert!", "OK!" )
