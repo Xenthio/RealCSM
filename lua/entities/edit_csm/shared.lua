@@ -81,6 +81,7 @@ function SkyBoxFixOn()
 	if (fog_controller) then 
 		fog_controller:SetKeyValue("farz", 80000)
 	end
+	RunConsoleCommand("r_farz", "80000")
 	--hook.Add( "PreDrawOpaqueRenderables", "RealCSMSkyboxViewFix",  SkyBoxFixFunction)
 end
 
@@ -89,6 +90,7 @@ function SkyBoxFixOff()
 	if (fog_controller) then 
 		fog_controller:SetKeyValue("farz", -1)
 	end
+	RunConsoleCommand("r_farz", "-1")
 	--hook.Remove( "PreDrawOpaqueRenderables", "RealCSMSkyboxViewFix")
 end
 function SkyBoxFixFunction(isDrawingDepth, isDrawSkybox, isDraw3DSkybox )
@@ -577,8 +579,7 @@ function EnableRTT()
 end
 
 local meta = FindMetaTable("Entity")
-
-meta.stored_shadow_value = true
+ 
 
 meta.oldsh = meta.oldsh or meta.DrawShadow
 function meta:DrawShadow(val)
