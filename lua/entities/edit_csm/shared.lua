@@ -2,6 +2,7 @@
 -- - Use a single ProjectedTexture when r_flashlightdepthres is 0 (since there's no shadows then anyway)
 
 AddCSLuaFile()
+-- use custom base_edit so we can work in any gamemose
 DEFINE_BASECLASS("base_edit_csm")
 
 --jit.opt.start(2) -- same as -O2
