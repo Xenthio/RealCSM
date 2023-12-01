@@ -15,6 +15,7 @@ TODO
 * [ ] Weapon self shadowing
 * [x] Firstperson player shadow
 * [ ] Sqaure texture for projtext for slightly better use of space???
-* [ ] fix decals on props somehow 
- 
+* [ ] fix decals on props somehow
+* [ ] rewrite cause all this code is messy and kinda sucks
+      
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
