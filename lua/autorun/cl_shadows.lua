@@ -130,6 +130,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:CheckBox( "Cascade Debug", "csm_debug_cascade")
 		panel:ControlHelp( "Each cascade is drawn in a different colour, this is useful for debugging." )
 
+		
+		local resetbutton = panel:Button( "Open First-Time Setup" )
+		resetbutton.DoClick = FirstTimeSetup
 
 		-- Add stuff here
 	end )
@@ -139,12 +142,16 @@ if (CLIENT) then
 	function firstTimeCheck()
 		if !(file.Read( "csm.txt", "DATA" ) == "two" ) and (file.Read( "csm.txt", "DATA" ) != "one" ) then
 		--if true then
+			FirstTimeSetup()
+		end
+	end
+	function FirstTimeSetup()
 			--if not game.SinglePlayer() then return end
 			--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 			local Frame = vgui.Create( "DFrame" )
-			Frame:SetSize( 310, 200 )
+			Frame:SetSize( 330, 260 )
 
-			RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
+			RunConsoleCommand("r_flashlightdepthres", "1024") -- set it to the lowest of the low to avoid crashes
 
 			Frame:Center()
 			Frame:SetTitle( "CSM First Time Load!" )
@@ -155,33 +162,52 @@ if (CLIENT) then
 			local label1 = vgui.Create( "DLabel", Frame )
 			label1:SetPos( 15, 40 )
 			label1:SetSize(	300, 20)
-			label1:SetText( "Thanks for using Real CSM" )
+				label1:SetText( "Thanks for using Real CSM" )
+				label1:SetTextColor( Color( 255, 255, 255) )
 			local label2 = vgui.Create( "DLabel", Frame )
-			label2:SetPos( 15, 55 )
+			label2:SetPos( 15, 70 )
 			label2:SetSize(	300, 20)
-			label2:SetText( "would you like Real CSM to spawn when you load the game?" )
+			label2:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+			
 			local label3 = vgui.Create( "DLabel", Frame )
-			label3:SetPos( 15, 70 )
+			label3:SetPos( 15, 85 )
 			label3:SetSize(	300, 20)
-			label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+			label3:SetText( "More quality settings will be shown when csm is next activated" )
+			local label4 = vgui.Create( "DLabel", Frame )
+			label4:SetPos( 15, 100 )
+			label4:SetSize(	300, 20)
+			label4:SetText( "After that they can be found in the spawnmenu's \"Utilities\" tab" )
 
 			local DermaCheckbox2 = vgui.Create( "DCheckBoxLabel", Frame )
 			DermaCheckbox2:SetText("Performance Mode")
-			DermaCheckbox2:SetPos( 8, 100 )				-- Set the position
+			DermaCheckbox2:SetPos( 15, 125 )				-- Set the position
 			DermaCheckbox2:SetSize( 300, 30 )			-- Set the size
-
+			DermaCheckbox2:SetTextColor( Color( 255, 255, 255) )
 			DermaCheckbox2:SetConVar( "csm_perfmode" )
+			
+			local label5 = vgui.Create( "DLabel", Frame )
+			label5:SetPos( 39, 145 )
+			label5:SetSize(	300, 20)
+			label5:SetTextColor( Color( 180, 180, 180) )
+			label5:SetText( "Use less shadow cascades for increased performance." )
 
 			local DermaCheckbox = vgui.Create( "DCheckBoxLabel", Frame )
 			DermaCheckbox:SetText("Spawn on load")
-			DermaCheckbox:SetPos( 8, 120 )				-- Set the position
+			DermaCheckbox:SetPos( 15, 165 )				-- Set the position
 			DermaCheckbox:SetSize( 300, 30 )			-- Set the size
-
+			DermaCheckbox:SetTextColor( Color( 255, 255, 255) )
 			DermaCheckbox:SetConVar( "csm_spawnalways" )	-- Changes the ConVar when you slide
+
+			local label6 = vgui.Create( "DLabel", Frame )
+			label6:SetPos( 39, 185 )
+			label6:SetSize(	300, 20)
+			label6:SetTextColor( Color( 180, 180, 180) )
+			label6:SetText( "Spawn Real CSM on map load, serverside only." )
+
 
 			local Button = vgui.Create("DButton", Frame)
 			Button:SetText( "Continue" )
-			Button:SetPos( 120, 155 )
+			Button:SetPos( 133, 220 )
 			Button.DoClick = function()
 				file.Write( "csm.txt", "one" )
 				if (GetConVar( "csm_spawnalways" ):GetInt() == 1) then
@@ -190,9 +216,7 @@ if (CLIENT) then
 
 				Frame:Close()
 			end
-		end
 	end
-
 	
 	--hook.Add( "PlayerFullLoad", "firstieCheck", firstTimeCheck)
 	hook.Add( "InitPostEntity", "RealCSMReady", firstTimeCheck)

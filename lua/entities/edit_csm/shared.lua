@@ -239,9 +239,9 @@ function ENT:Initialize()
 	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 		local Frame = vgui.Create( "DFrame" )
-		Frame:SetSize( 300, 240 )
+		Frame:SetSize( 330, 290 )
 
-		RunConsoleCommand("r_flashlightdepthres", "512") -- set it to the lowest of the low to avoid crashes
+		RunConsoleCommand("r_flashlightdepthres", "1024") -- set it to the lowest of the low to avoid crashes
 
 		Frame:Center()
 		Frame:SetTitle( "CSM First Time Spawn!" )
@@ -252,24 +252,43 @@ function ENT:Initialize()
 		local label1 = vgui.Create( "DLabel", Frame )
 		label1:SetPos( 15, 40 )
 		label1:SetSize(	300, 20)
-		label1:SetText( "Welcome to the CSM addon!" )
+		label1:SetText( "Welcome to Real CSM!" )
+		label1:SetTextColor( Color( 255, 255, 255) )
 		local label2 = vgui.Create( "DLabel", Frame )
-		label2:SetPos( 15, 55 )
+		label2:SetPos( 15, 70 )
 		label2:SetSize(	300, 20)
 		label2:SetText( "This is your first time spawning CSM, go set your quality!" )
+		
 		local label3 = vgui.Create( "DLabel", Frame )
-		label3:SetPos( 15, 70 )
+		label3:SetPos( 15, 85 )
 		label3:SetSize(	300, 20)
 		label3:SetText( "Refer to the F.A.Q for troubleshooting and help!" )
+		
+		local label4 = vgui.Create( "DLabel", Frame )
+		label4:SetPos( 15, 100 )
+		label4:SetSize(	300, 20)
+		label4:SetText( "More settings can be found in the spawnmenu's \"Utilities\" tab" )
+
+
+		local DermaNumSlider = vgui.Create( "DNumSlider", Frame )
+		DermaNumSlider:SetPos( 15, 130 )				-- Set the position
+		DermaNumSlider:SetSize( 300, 30 )			-- Set the size
+		DermaNumSlider:SetText( "Shadow Quality" )	-- Set the text above the slider
+		DermaNumSlider:SetMin( 0 )				 	-- Set the minimum number you can slide to
+		DermaNumSlider:SetMax( 8192 )				-- Set the maximum number you can slide to
+		DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
+		DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
+
+		
 		local lowButton = vgui.Create("DButton", Frame)
 		lowButton:SetText( "Low" )
-		lowButton:SetPos( 20, 100 )
+		lowButton:SetPos( 15, 160 )
 		local mediumButton = vgui.Create("DButton", Frame)
 		mediumButton:SetText( "Medium" )
-		mediumButton:SetPos( 120, 100 )
+		mediumButton:SetPos( 135, 160 )
 		local highButton = vgui.Create("DButton", Frame)
 		highButton:SetText( "High" )
-		highButton:SetPos( 220, 100 )
+		highButton:SetPos( 255, 160 )
 		highButton.DoClick = function()
 			RunConsoleCommand("r_flashlightdepthres", "8192")
 		end
@@ -279,15 +298,6 @@ function ENT:Initialize()
 		lowButton.DoClick = function()
 			RunConsoleCommand("r_flashlightdepthres", "2048")
 		end
-
-		local DermaNumSlider = vgui.Create( "DNumSlider", Frame )
-		DermaNumSlider:SetPos( 8, 120 )				-- Set the position
-		DermaNumSlider:SetSize( 300, 30 )			-- Set the size
-		DermaNumSlider:SetText( "Shadow Quality" )	-- Set the text above the slider
-		DermaNumSlider:SetMin( 0 )				 	-- Set the minimum number you can slide to
-		DermaNumSlider:SetMax( 8192 )				-- Set the maximum number you can slide to
-		DermaNumSlider:SetDecimals( 0 )				-- Decimal places - zero for whole number
-		DermaNumSlider:SetConVar( "r_flashlightdepthres" )	-- Changes the ConVar when you slide
 
 		--local DermaNumSlider2 = vgui.Create( "DNumSlider", Frame )
 		--DermaNumSlider2:SetPos( 8, 140 )				-- Set the position
@@ -299,19 +309,24 @@ function ENT:Initialize()
 		--DermaNumSlider2:SetConVar( "r_projectedtexture_filter" )	-- Changes the ConVar when you slide
 
 		local DermaCheckbox2 = vgui.Create( "DCheckBoxLabel", Frame )
-		DermaCheckbox2:SetText("Performance Mode (for better framerate / less lag)")
-		--DermaCheckbox2:SetPos( 8, 164 )				-- Set the position
-		DermaCheckbox2:SetPos( 8, 150 )				-- Set the position
+		DermaCheckbox2:SetText("Performance Mode")
+		DermaCheckbox2:SetPos( 15, 195 )				-- Set the position
 		DermaCheckbox2:SetSize( 300, 30 )			-- Set the size
-
+		DermaCheckbox2:SetTextColor( Color( 255, 255, 255) )
 		DermaCheckbox2:SetConVar( "csm_perfmode" )
+
+		local label5 = vgui.Create( "DLabel", Frame )
+		label5:SetPos( 39, 215 )
+		label5:SetSize(	300, 20)
+		label5:SetTextColor( Color( 180, 180, 180) )
+		label5:SetText( "Use less shadow cascades for increased performance." )
 
 		local Button = vgui.Create("DButton", Frame)
 		Button:SetText( "Continue" )
-		Button:SetPos( 160, 195 )
+		Button:SetPos( 175, 250 )
 		local Button2 = vgui.Create("DButton", Frame)
 		Button2:SetText( "Cancel" )
-		Button2:SetPos( 80, 195 )
+		Button2:SetPos( 95, 250 )
 		Button.DoClick = function()
 			file.Write( "csm.txt", "two" )
 			Frame:Close()
