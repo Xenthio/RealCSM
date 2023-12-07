@@ -17,5 +17,6 @@ TODO
 * [ ] Sqaure texture for projtext for slightly better use of space???
 * [ ] fix decals on props somehow
 * [ ] rewrite cause all this code is messy and kinda sucks
-      
+* [ ] performance 
+
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
