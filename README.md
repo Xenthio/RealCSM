@@ -1,6 +1,8 @@
 # Real CSM
 A real Cascading Shadows Maps addon for Garry's Mod
  
+https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
+
 shoutouts to [Blueberry_pie](https://steamcommunity.com/id/Blueberry_pie) for the original work
 
 TODO
@@ -21,4 +23,3 @@ TRY TODO MORE
 * [ ] performance, it's fine right now but no reason I cant try to improve (even tho i dont think i can at all)
 * [ ] fix decals on props somehow
 
-https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
