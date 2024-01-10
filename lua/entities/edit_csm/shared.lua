@@ -578,22 +578,25 @@ end
 
 function DisableRTT()
 	if (rttenabled == false) then return end
+	if (SERVER) then return end
+	rttenabled = false
+	print("[Real CSM] - Disabling RTT Shadows")
 	RunConsoleCommand("r_shadows_gamecontrol", "0")
 	hook.Add( "OnEntityCreated", "RealCSMDisableRTTHook", DisableRTTHook)
-	rttenabled = false
 	for k, v in pairs(ents.GetAll()) do
 		v:DrawShadow( v.stored_shadow_value or true )
 	end
 end
 
 function EnableRTT()
-	
 	if (rttenabled == true) then return end
+	if (SERVER) then return end
+	rttenabled = true 
+	print("[Real CSM] - Enabling RTT Shadows")
 	RunConsoleCommand("r_shadows_gamecontrol", "1")
 	hook.Remove( "OnEntityCreated", "RealCSMDisableRTTHook" )
-	rttenabled = true 
 	for k, v in pairs(ents.GetAll()) do
-		v:DrawShadow(v.stored_shadow_value or true )
+		v:DrawShadow(v.stored_shadow_value or true ) 
 	end
 end
 
@@ -638,9 +641,9 @@ function ENT:Think()
 			BlobShadowsPrev = false
 		end
 		if GetConVar( "csm_blobbyao" ):GetBool() then
+			EnableRTT()
 			RunConsoleCommand("r_shadowrendertotexture", "0")
 			RunConsoleCommand("r_shadowdist", "20")
-			EnableRTT()
 		end
 		if (CLIENT) then
 			self:createlamps()
