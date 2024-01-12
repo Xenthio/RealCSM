@@ -1,5 +1,5 @@
 # Real CSM
-A real Cascading Shadows Maps addon for Garry's Mod
+A real 'Cascading Shadow Maps' addon for Garry's Mod
  
 https://steamcommunity.com/sharedfiles/filedetails/?id=2817072898
 
