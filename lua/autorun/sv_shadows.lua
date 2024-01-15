@@ -7,6 +7,9 @@ hook.Add( "PopulateToolMenu", "CSMServer", function()
 	spawnmenu.AddToolMenuOption( "Utilities", "Admin", "CSM_Server", "#CSM", "", "", function( panel )
 		panel:ClearControls()
 
+		panel:ControlHelp( "Thanks for using Real CSM! In order to allow me to continue to fix and support this addon while keeping it free, it would be nice if you could PLEASE consider donating to my patreon!" )
+		panel:ControlHelp("https://www.patreon.com/xenthio")
+
 		panel:CheckBox( "CSM Spawn on load (Experimental)", "csm_spawnalways" )
 
 		panel:CheckBox( "Spawn only if map is supported (light_environment is named) (Experimental)", "csm_spawnwithlightenv" )

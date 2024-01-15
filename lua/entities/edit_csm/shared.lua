@@ -236,7 +236,7 @@ function ENT:Initialize()
 	-- fix for 1:48
 	SkyBoxFixOn()
 
-	if CLIENT and (file.Read( "csm.txt", "DATA" ) != "two" ) then
+	if CLIENT and (file.Read( "realcsm.txt", "DATA" ) != "two" ) then
 		--Derma_Message( "Hello! Welcome to the CSM addon! You should raise r_flashlightdepthres else the shadows will be blocky! Make sure you've read the FAQ for troubleshooting.", "CSM Alert!", "OK!" )
 		local Frame = vgui.Create( "DFrame" )
 		Frame:SetSize( 330, 290 )
@@ -328,7 +328,7 @@ function ENT:Initialize()
 		Button2:SetText( "Cancel" )
 		Button2:SetPos( 95, 250 )
 		Button.DoClick = function()
-			file.Write( "csm.txt", "two" )
+			file.Write( "realcsm.txt", "two" )
 			Frame:Close()
 		end
 
