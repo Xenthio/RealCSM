@@ -1,3 +1,4 @@
+-- some weird hack to run code after the player loads in properly
 hook.Add( "PlayerInitialSpawn", "RealCSMFullLoadSetup", function( ply )
 	hook.Add( "SetupMove", ply, function( self, mvply, _, cmd )
 		if self == mvply and not cmd:IsForced() then
