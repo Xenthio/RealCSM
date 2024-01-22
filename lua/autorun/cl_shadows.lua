@@ -144,7 +144,7 @@ end )
 
 if (CLIENT) then
 	function firstTimeCheck()
-		if !(file.Read( "realcsm.txt", "DATA" ) == "two" ) and (file.Read( "csm.txt", "DATA" ) != "one" ) then
+		if !(file.Read( "realcsm.txt", "DATA" ) == "two" ) and (file.Read( "realcsm.txt", "DATA" ) != "one" ) then
 		--if true then
 			FirstTimeSetup()
 		end
