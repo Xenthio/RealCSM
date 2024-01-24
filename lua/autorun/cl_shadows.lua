@@ -28,6 +28,7 @@ CreateClientConVar(	"csm_depthbias", 0.000002,  false, false)
 CreateClientConVar(	"csm_slopescaledepthbias", 2,  false, false)
 
 CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
+CreateClientConVar(	"csm_disable_warnings", 0,  false, false)
 
 local ConVarsDefault = {
 	csm_spawnalways = "0",
