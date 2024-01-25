@@ -1,4 +1,4 @@
-
+-- this is here so the editor works in other gamemodes than sandbox
 AddCSLuaFile()
 DEFINE_BASECLASS( "base_anim" )
 
