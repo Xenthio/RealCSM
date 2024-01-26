@@ -161,7 +161,7 @@ function findlight()
 end
 function warn()
 	findlight()
-	if CLIENT and (GetConVar( "csm_haslightenv" ):GetInt() == 0) then
+	if CLIENT and (GetConVar( "csm_haslightenv" ):GetInt() == 0 && !GetConVar( "csm_disable_warnings" ):GetBool()) then
 		Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
 	end
 	--print(hasLightEnvs)
@@ -930,7 +930,7 @@ function ENT:Think()
 			yaw = shadowcontrol:GetAngles().yaw
 			roll = shadowcontrol:GetAngles().roll
 		else
-			if (warnedyet == false) then
+			if (warnedyet == false && !GetConVar( "csm_disable_warnings" ):GetBool()) then
 				Derma_Message( "This map has no env_sun. CSM will not be able to find the sun position and rotation!", "CSM Alert!", "OK!" )
 				warnedyet = true
 			end
