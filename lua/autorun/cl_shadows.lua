@@ -156,7 +156,7 @@ if (CLIENT) then
 			local Frame = vgui.Create( "DFrame" )
 			Frame:SetSize( 330, 290 )
 
-			RunConsoleCommand("r_flashlightdepthres", "1024") -- set it to the lowest of the low to avoid crashes
+			--RunConsoleCommand("r_flashlightdepthres", "2048") -- set it to the lowest of the low to avoid crashes
 
 			Frame:Center()
 			Frame:SetTitle( "CSM First Time Load!" )
