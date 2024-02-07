@@ -67,16 +67,19 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		qualityslider = panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 16384, 0 )
 		panel:ControlHelp( "Shadow map resolution." )
-		qualityslider.OnValueChanged = function(self, value) 
-			RunConsoleCommand("csm_depthresasmultiple", math.log (value) / math.log (2) - 6)
+		qualityslider.OnValueChanged = function(self, value)
+			RunConsoleCommand("csm_depthresasmultiple", math.floor((math.log(value) / math.log(2)) - 6))
 			RunConsoleCommand("r_flashlightdepthres", value)
 		end
-		
+
 		multslider = panel:NumSlider( "Shadow Quality as Multiple", "csm_depthresasmultiple", 0, 8, 0 )
 		panel:ControlHelp( "Shadow map resolution (as an exponential multipler)." )
-		multslider.OnValueChanged = function(self, value)  
-
-			if multslider:IsEditing() then RunConsoleCommand("r_flashlightdepthres", 2^math.floor(GetConVar("csm_depthresasmultiple"):GetFloat() + 6)) end
+		multslider.OnValueChanged = function(self, value)
+			value = math.floor(value)
+			if multslider:IsEditing() then
+				newdepthres = 2^(value + 6)
+				RunConsoleCommand("r_flashlightdepthres", newdepthres)
+			end
 		end
 		multslider:SetValue(math.log(qualityslider:GetValue()) / math.log (2) - 6)
 
