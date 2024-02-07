@@ -61,6 +61,7 @@ local spreadSample = 6
 local spreadSamplePrev = 6
 local spreadLayer = 1
 local spreadLayerPrev = 0
+local spreadRadiusPrev = 0
 local propradiosity = 4
 local propradiosityPrev = 4
 local perfMode = false
@@ -751,6 +752,14 @@ function ENT:Think()
 			self:allocLights()
 		end
 		spreadLayerPrev = spreadLayer
+
+	end
+	spreadRadius = GetConVar( "csm_spread_radius" ):GetFloat()
+	if (spreadRadiusPrev != spreadRadius) then
+		if (CLIENT) then
+			self:allocLights()
+		end
+		spreadRadiusPrev = spreadRadius
 
 	end
 
