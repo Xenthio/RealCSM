@@ -102,7 +102,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 
 		panel:CheckBox( "Shadow Spread", "csm_spread" )
-		panel:ControlHelp( "Simulates the penumbra of the sun, can also be used for multisampling on shadows." )
+		panel:ControlHelp( "Simulates the penumbra of the sun, can also be used for multisampling on shadows at a low radius." )
 		panel:ControlHelp( "Notice: Enabling spread disables the near ring, shadows may look lower quality closer up." )
 		panel:ControlHelp( "Notice: Spread is only on the second ring to avoid blowing up your computer." )
 		panel:NumSlider( "Spread Radius", "csm_spread_radius", 0, 1)
