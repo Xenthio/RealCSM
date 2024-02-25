@@ -163,7 +163,7 @@ end
 function warn()
 	findlight()
 	if CLIENT and (GetConVar( "csm_haslightenv" ):GetInt() == 0 && !GetConVar( "csm_disable_warnings" ):GetBool()) then
-		Derma_Message( "This map has no named light_environments, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
+		Derma_Message( "This map has no named light_environment, the CSM will not look nearly as good as it could.", "CSM Alert!", "OK!" )
 	end
 	--print(hasLightEnvs)
 end
