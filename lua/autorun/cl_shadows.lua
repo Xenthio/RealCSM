@@ -19,6 +19,7 @@ CreateClientConVar(	"csm_localplayershadow", 0,  true, false)
 CreateClientConVar(	"csm_localplayershadow_old", 0,  false, false)
 CreateClientConVar(	"csm_further", 0,  true, false)
 CreateClientConVar(	"csm_furthershadows", 1,  true, false)
+CreateClientConVar(	"csm_harshcutoff", 0,  true, false)
 CreateClientConVar(	"csm_farshadows", 1,  true, false)
 CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
@@ -122,6 +123,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 
 		panel:NumSlider( "Size / Distance Scale", "csm_sizescale", 0, 5)
 		panel:ControlHelp( "Cascade size multiplier to lower / raise view distance, this affects the perceived quality." )
+
+		panel:CheckBox( "Hard distance cutoff", "csm_harshcutoff" )
+		panel:ControlHelp( "Makes the edge of the final cascade a hard cutoff instead of being a gradient fade." )
 
 		panel:CheckBox( "Enable further cascade for large maps", "csm_further")
 		panel:ControlHelp( "Add a further cascade to increase shadow draw distance without sacrificing perceived quality" )

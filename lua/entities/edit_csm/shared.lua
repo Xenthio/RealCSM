@@ -53,6 +53,8 @@ local furtherEnabled = false
 local furtherEnabledPrev = false
 local furtherEnabledShadows = false
 local furtherEnabledShadowsPrev = false
+local harshCutoff = false
+local harshCutoffPrev = false
 local farEnabledShadows = true
 local farEnabledShadowsPrev = true
 local spreadEnabled = false
@@ -186,6 +188,11 @@ function ENT:createlamps()
 			end
 		end
 	end
+	if (furtherEnabled or !harshCutoff) then
+		self.ProjectedTextures[3]:SetTexture("csm/mask_ring") 
+	else
+		self.ProjectedTextures[3]:SetTexture("csm/mask_end")
+	end
 	if spreadEnabled and CLIENT then
 		self:allocLights()
 		self.ProjectedTextures[2]:SetTexture("csm/mask_center")
@@ -195,6 +202,8 @@ function ENT:createlamps()
 			self.ProjectedTextures[i + 4]:SetTexture("csm/mask_center")
 		end
 	end
+
+
 end
 
 function ENT:SUNOff()
@@ -710,13 +719,39 @@ function ENT:Think()
 		end
 	end
 
+	harshCutoff = GetConVar( "csm_harshcutoff" ):GetBool()
+
 	furtherEnabledShadows = GetConVar( "csm_furthershadows" ):GetBool()
 	furtherEnabled = GetConVar( "csm_further" ):GetBool()
+
+	if (harshCutoffPrev != harshCutoff and CLIENT) then
+		if (furtherEnabled and self.ProjectedTextures[4] != nil) then
+			if (harshCutoff) then
+				self.ProjectedTextures[4]:SetTexture("csm/mask_end")
+			else
+				self.ProjectedTextures[4]:SetTexture("csm/mask_ring")
+			end
+		else 
+			if (harshCutoff) then
+				self.ProjectedTextures[3]:SetTexture("csm/mask_end")
+			else
+				self.ProjectedTextures[3]:SetTexture("csm/mask_ring")
+			end
+		end
+		harshCutoffPrev = harshCutoff
+	end
+
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
 				self.ProjectedTextures[4] = ProjectedTexture()
-				self.ProjectedTextures[4]:SetTexture("csm/mask_ring")
+				if (harshCutoff) then
+					self.ProjectedTextures[3]:SetTexture("csm/mask_ring")
+					self.ProjectedTextures[4]:SetTexture("csm/mask_end")
+				else
+					self.ProjectedTextures[4]:SetTexture("csm/mask_ring")
+					self.ProjectedTextures[3]:SetTexture("csm/mask_ring")
+				end
 				if (furtherEnabledShadows) then
 					self.ProjectedTextures[4]:SetEnableShadows(true)
 				else
@@ -727,6 +762,11 @@ function ENT:Think()
 		else
 			if CLIENT and (self.ProjectedTextures[4] != nil) and (self.ProjectedTextures[4]:IsValid()) then -- hacky: fix the cause properly
 				self.ProjectedTextures[4]:Remove()
+				if (harshCutoff) then
+					self.ProjectedTextures[3]:SetTexture("csm/mask_end")
+				else
+					self.ProjectedTextures[3]:SetTexture("csm/mask_ring")
+				end
 			end
 			furtherEnabledPrev = false
 		end
