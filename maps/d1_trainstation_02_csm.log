@@ -1,0 +1,765 @@
+
+
+
+materialPath: E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\materials
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.vmf
+ConVarRef mat_reduceparticles doesn't point to an existing ConVar
+Patching WVT material: maps/d1_trainstation_02_csm/nature/red_grass_wvt_patch
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+Chop Details...done (0)
+Find Visible Detail Sides...
+Merged 980 detail faces...done (0)
+Merging details...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt...Building visibility clusters...
+done (0)
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+Creating default LDR cubemaps for env_cubemap using skybox materials:
+   skybox/sky_day01_01*.vmt
+ ! Run buildcubemaps in the engine to get the correct cube maps.
+*** Error: Skybox vtf files for skybox/sky_day01_01 weren't compiled with the same size texture and/or same flags!
+Can't load skybox file skybox/sky_day01_01 to build the default cubemap!
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+done (0) (842862 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 6663 texinfos to 2596
+Reduced 918 texdatas to 578 (59992 bytes to 38097)
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+2 seconds elapsed
+
+
+
+32 threads
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt
+1038 portalclusters
+3135 numportals
+0...1...2...3...4...5...6...7...8...9...10Optimized: 67128 visible clusters (10.55%)
+Total clusters visible: 636114
+Average clusters visible: 612
+Building PAS...
+Average clusters audible: 922
+visdatasize:238188  compressed from 282336
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+0 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+Error! Unable to load model "models/props_c17/fence01b.mdl"
+Error! Unable to load model "models/props_c17/light_domelight02_on.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001b.mdl"
+Error! Unable to load model "models/props_combine/combine_smallmonitor001.mdl"
+Error! Unable to load model "models/props_interiors/VendingMachineSoda01a_door.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall02b.mdl"
+Error! Unable to load model "models/props_c17/LampFixture01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002.mdl"
+Error! Unable to load model "models/props_c17/playgroundslide01.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003b.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002b.mdl"
+Error! Unable to load model "models/props_buildings/row_upscale.mdl"
+Error! Unable to load model "models/props_c17/Awning002a.mdl"
+Error! Unable to load model "models/props_combine/combinetower001.mdl"
+Error! Unable to load model "models/props_c17/utilitypole02b.mdl"
+Error! Unable to load model "models/props_c17/utilitypolemount01a.mdl"
+Error! Unable to load model "models/props_foliage/tree_poplar_01.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall01a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_short01a.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_ornament001.mdl"
+Error! Unable to load model "models/props_c17/playgroundTick-tack-toe_post01.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge_b.mdl"
+Error! Unable to load model "models/props_trainstation/BenchOutdoor01a.mdl"
+Error! Unable to load model "models/Effects/vol_light.mdl"
+Error! Unable to load model "models/props_wasteland/woodwall030b_window02a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_03b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_sprinkler001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_lamp001b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003a.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002c.mdl"
+Error! Unable to load model "models/Combine_Room/combine_monitor002.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002a.mdl"
+Error! Unable to load model "models/props_c17/fence01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_switchbox001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_cagedlight001a.mdl"
+Error! Unable to load model "models/props_trainstation/payphone001a.mdl"
+Error! Unable to load model "models/props_pipes/GutterLarge_512_001a.mdl"
+Error! Unable to load model "models/props_combine/combine_lock01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_clock001.mdl"
+Error! Unable to load model "models/props_lab/lab_flourescentlight002b.mdl"
+Error! Unable to load model "models/props_combine/combine_light001a.mdl"
+Error! Unable to load model "models/props_combine/combine_light002a.mdl"
+Error! Unable to load model "models/props_interiors/LightBulb01a.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001a.mdl"
+Error! Unable to load model "models/props_junk/garbage128_composite001b.mdl"
+Error! Unable to load model "models/props_trainstation/bench_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01a.mdl"
+Error! Unable to load model "models/props_c17/playground_swingset01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_column001.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_arch001.mdl"
+Error! Unable to load model "models/props_c17/Awning001a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_01a-lod.mdl"
+Error! Unable to load model "models/props_c17/lamppost03a_off.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_001a.mdl"
+Error! Unable to load model "models/props_rooftop/Scaffolding01a.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_002a.mdl"
+Error! Unable to load model "models/props_combine/Combine_Citadel001b.mdl"
+Error! Unable to load model "models/props_buildings/row_res_2.mdl"
+Error! Unable to load model "models/props_buildings/row_hill_cluster.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_post001.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser06a.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser07a.mdl"
+Error! Unable to load model "models/props_rooftop/AntennaClusters01a.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_01.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_02.mdl"
+Error! Unable to load model "models/props_trainstation/light_256ceilingMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/light_128wallMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/handrail_64decoration001a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med02b.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med01a.mdl"
+7631 faces
+2325404 square feet [334858176.00 square inches]
+3 Displacements
+5866 Square Feet [844800.00 Square Inches]
+7631 patches before subdivision
+261607 patches after subdivision
+3942 direct lights
+0...1...2...3
+
+
+materialPath: E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\materials
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.vmf
+ConVarRef mat_reduceparticles doesn't point to an existing ConVar
+Patching WVT material: maps/d1_trainstation_02_csm/nature/red_grass_wvt_patch
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+Chop Details...done (0)
+Find Visible Detail Sides...
+Merged 980 detail faces...done (0)
+Merging details...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt...Building visibility clusters...
+done (0)
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+Creating default LDR cubemaps for env_cubemap using skybox materials:
+   skybox/sky_day01_01*.vmt
+ ! Run buildcubemaps in the engine to get the correct cube maps.
+*** Error: Skybox vtf files for skybox/sky_day01_01 weren't compiled with the same size texture and/or same flags!
+Can't load skybox file skybox/sky_day01_01 to build the default cubemap!
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+done (0) (842862 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 6663 texinfos to 2596
+Reduced 918 texdatas to 578 (59992 bytes to 38097)
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+2 seconds elapsed
+
+
+
+32 threads
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt
+1038 portalclusters
+3135 numportals
+0...1...2...3...4...5...6...7...8...9...10Optimized: 67128 visible clusters (10.55%)
+Total clusters visible: 636114
+Average clusters visible: 612
+Building PAS...
+Average clusters audible: 922
+visdatasize:238188  compressed from 282336
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+0 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+Error! Unable to load model "models/props_c17/fence01b.mdl"
+Error! Unable to load model "models/props_c17/light_domelight02_on.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001b.mdl"
+Error! Unable to load model "models/props_combine/combine_smallmonitor001.mdl"
+Error! Unable to load model "models/props_interiors/VendingMachineSoda01a_door.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall02b.mdl"
+Error! Unable to load model "models/props_c17/LampFixture01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002.mdl"
+Error! Unable to load model "models/props_c17/playgroundslide01.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003b.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002b.mdl"
+Error! Unable to load model "models/props_buildings/row_upscale.mdl"
+Error! Unable to load model "models/props_c17/Awning002a.mdl"
+Error! Unable to load model "models/props_combine/combinetower001.mdl"
+Error! Unable to load model "models/props_c17/utilitypole02b.mdl"
+Error! Unable to load model "models/props_c17/utilitypolemount01a.mdl"
+Error! Unable to load model "models/props_foliage/tree_poplar_01.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall01a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_short01a.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_ornament001.mdl"
+Error! Unable to load model "models/props_c17/playgroundTick-tack-toe_post01.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge_b.mdl"
+Error! Unable to load model "models/props_trainstation/BenchOutdoor01a.mdl"
+Error! Unable to load model "models/Effects/vol_light.mdl"
+Error! Unable to load model "models/props_wasteland/woodwall030b_window02a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_03b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_sprinkler001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_lamp001b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003a.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002c.mdl"
+Error! Unable to load model "models/Combine_Room/combine_monitor002.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002a.mdl"
+Error! Unable to load model "models/props_c17/fence01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_switchbox001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_cagedlight001a.mdl"
+Error! Unable to load model "models/props_trainstation/payphone001a.mdl"
+Error! Unable to load model "models/props_pipes/GutterLarge_512_001a.mdl"
+Error! Unable to load model "models/props_combine/combine_lock01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_clock001.mdl"
+Error! Unable to load model "models/props_lab/lab_flourescentlight002b.mdl"
+Error! Unable to load model "models/props_combine/combine_light001a.mdl"
+Error! Unable to load model "models/props_combine/combine_light002a.mdl"
+Error! Unable to load model "models/props_interiors/LightBulb01a.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001a.mdl"
+Error! Unable to load model "models/props_junk/garbage128_composite001b.mdl"
+Error! Unable to load model "models/props_trainstation/bench_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01a.mdl"
+Error! Unable to load model "models/props_c17/playground_swingset01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_column001.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_arch001.mdl"
+Error! Unable to load model "models/props_c17/Awning001a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_01a-lod.mdl"
+Error! Unable to load model "models/props_c17/lamppost03a_off.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_001a.mdl"
+Error! Unable to load model "models/props_rooftop/Scaffolding01a.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_002a.mdl"
+Error! Unable to load model "models/props_combine/Combine_Citadel001b.mdl"
+Error! Unable to load model "models/props_buildings/row_res_2.mdl"
+Error! Unable to load model "models/props_buildings/row_hill_cluster.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_post001.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser06a.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser07a.mdl"
+Error! Unable to load model "models/props_rooftop/AntennaClusters01a.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_01.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_02.mdl"
+Error! Unable to load model "models/props_trainstation/light_256ceilingMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/light_128wallMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/handrail_64decoration001a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med02b.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med01a.mdl"
+7631 faces
+2325404 square feet [334858176.00 square inches]
+3 Displacements
+5866 Square Feet [844800.00 Square Inches]
+7631 patches before subdivision
+261607 patches after subdivision
+3938 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 51575689, max 1563
+transfer lists: 393.5 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(771597, 642291, 356949)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #2 added RGB(140902, 99766, 43033)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #3 added RGB(28992, 17383, 5818)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #4 added RGB(6949, 3483, 882)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #5 added RGB(1757, 734, 144)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #6 added RGB(475, 165, 25)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #7 added RGB(131, 38, 5)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #8 added RGB(38, 9, 1)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #9 added RGB(11, 2, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #10 added RGB(3, 1, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #11 added RGB(1, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0296 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+Computing detail prop lighting : 0...1...2...3...4...5...6...7...8...9...10
+3836 of 3908 (98% of) surface lights went in leaf ambient cubes.
+0...1...2...3...4...5...6...7...8...9...10Writing leaf ambient...done
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                 116/1024         5568/49152    (11.3%) 
+brushes               2210/8192        26520/98304    (27.0%) 
+brushsides           20494/65536      163952/524288   (31.3%) 
+planes               20240/65536      404800/1310720  (30.9%) 
+vertexes             19728/65536      236736/786432   (30.1%) 
+nodes                 3575/65536      114400/2097152  ( 5.5%) 
+texinfos              2596/12288      186912/884736   (21.1%) 
+texdata                578/2048        18496/65536    (28.2%) 
+dispinfos                3/0             528/0        ( 0.0%) 
+disp_verts             243/0            4860/0        ( 0.0%) 
+disp_tris              384/0             768/0        ( 0.0%) 
+disp_lmsamples       48808/0           48808/0        ( 0.0%) 
+faces                 7631/65536      427336/3670016  (11.6%) 
+hdr faces             7631/65536      427336/3670016  (11.6%) 
+origfaces             4521/65536      253176/3670016  ( 6.9%) 
+leaves                3692/65536      118144/2097152  ( 5.6%) 
+leaffaces            10031/65536       20062/131072   (15.3%) 
+leafbrushes           5135/65536       10270/131072   ( 7.8%) 
+areas                   13/256           104/2048     ( 5.1%) 
+surfedges            54146/512000     216584/2048000  (10.6%) 
+edges                33156/256000     132624/1024000  (13.0%) 
+LDR worldlights          0/8192            0/720896   ( 0.0%) 
+HDR worldlights       3938/8192       346544/720896   (48.1%) 
+leafwaterdata            0/32768           0/393216   ( 0.0%) 
+waterstrips           2616/32768       26160/327680   ( 8.0%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices         57021/65536      114042/131072   (87.0%) VERY FULL!
+cubemapsamples         174/1024         2784/16384    (17.0%) 
+overlays                27/512          9504/180224   ( 5.3%) 
+LDR lightdata         [variable]           0/0        ( 0.0%) 
+HDR lightdata         [variable]    15448608/0        ( 0.0%) 
+visdata               [variable]      238188/16777216 ( 1.4%) 
+entdata               [variable]      241128/393216   (61.3%) 
+LDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+HDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+LDR leaf ambient      3692/65536      103376/1835008  ( 5.6%) 
+HDR leaf ambient     15050/65536      421400/1835008  (23.0%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/28472    ( 0.0%) 
+dtl prp lght          [variable]           1/4        (25.0%) 
+HDR dtl prp lght      [variable]           1/2444     ( 0.0%) 
+static props          [variable]           1/33686    ( 0.0%) 
+pakfile               [variable]     4649165/0        ( 0.0%) 
+physics               [variable]      842862/4194304  (20.1%) 
+physics terrain       [variable]         203/1048576  ( 0.0%) 
+
+Level flags = 0
+
+Total triangle count: 20727
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+5 minutes, 52 seconds elapsed
+
+
+
+materialPath: E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\materials
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.vmf
+ConVarRef mat_reduceparticles doesn't point to an existing ConVar
+Patching WVT material: maps/d1_trainstation_02_csm/nature/red_grass_wvt_patch
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+Chop Details...done (0)
+Find Visible Detail Sides...
+Merged 980 detail faces...done (0)
+Merging details...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt...Building visibility clusters...
+done (0)
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+WARNING: node without a volume
+Creating default LDR cubemaps for env_cubemap using skybox materials:
+   skybox/sky_day01_01*.vmt
+ ! Run buildcubemaps in the engine to get the correct cube maps.
+*** Error: Skybox vtf files for skybox/sky_day01_01 weren't compiled with the same size texture and/or same flags!
+Can't load skybox file skybox/sky_day01_01 to build the default cubemap!
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+done (0) (842862 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 6663 texinfos to 2596
+Reduced 918 texdatas to 578 (59992 bytes to 38097)
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+2 seconds elapsed
+
+
+
+32 threads
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.prt
+1038 portalclusters
+3135 numportals
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Optimized: 1356 visible clusters (0.45%)
+Total clusters visible: 298296
+Average clusters visible: 287
+Building PAS...
+Average clusters audible: 714
+visdatasize:198342  compressed from 282336
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+22 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+Error! Unable to load model "models/props_c17/fence01b.mdl"
+Error! Unable to load model "models/props_c17/light_domelight02_on.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001b.mdl"
+Error! Unable to load model "models/props_combine/combine_smallmonitor001.mdl"
+Error! Unable to load model "models/props_interiors/VendingMachineSoda01a_door.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall02b.mdl"
+Error! Unable to load model "models/props_c17/LampFixture01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002.mdl"
+Error! Unable to load model "models/props_c17/playgroundslide01.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003b.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002b.mdl"
+Error! Unable to load model "models/props_buildings/row_upscale.mdl"
+Error! Unable to load model "models/props_c17/Awning002a.mdl"
+Error! Unable to load model "models/props_combine/combinetower001.mdl"
+Error! Unable to load model "models/props_c17/utilitypole02b.mdl"
+Error! Unable to load model "models/props_c17/utilitypolemount01a.mdl"
+Error! Unable to load model "models/props_foliage/tree_poplar_01.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall01a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_short01a.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_ornament001.mdl"
+Error! Unable to load model "models/props_c17/playgroundTick-tack-toe_post01.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge_b.mdl"
+Error! Unable to load model "models/props_trainstation/BenchOutdoor01a.mdl"
+Error! Unable to load model "models/Effects/vol_light.mdl"
+Error! Unable to load model "models/props_wasteland/woodwall030b_window02a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_03b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_sprinkler001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_lamp001b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003a.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002c.mdl"
+Error! Unable to load model "models/Combine_Room/combine_monitor002.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002a.mdl"
+Error! Unable to load model "models/props_c17/fence01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_switchbox001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_cagedlight001a.mdl"
+Error! Unable to load model "models/props_trainstation/payphone001a.mdl"
+Error! Unable to load model "models/props_pipes/GutterLarge_512_001a.mdl"
+Error! Unable to load model "models/props_combine/combine_lock01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_clock001.mdl"
+Error! Unable to load model "models/props_lab/lab_flourescentlight002b.mdl"
+Error! Unable to load model "models/props_combine/combine_light001a.mdl"
+Error! Unable to load model "models/props_combine/combine_light002a.mdl"
+Error! Unable to load model "models/props_interiors/LightBulb01a.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001a.mdl"
+Error! Unable to load model "models/props_junk/garbage128_composite001b.mdl"
+Error! Unable to load model "models/props_trainstation/bench_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01a.mdl"
+Error! Unable to load model "models/props_c17/playground_swingset01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_column001.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_arch001.mdl"
+Error! Unable to load model "models/props_c17/Awning001a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_01a-lod.mdl"
+Error! Unable to load model "models/props_c17/lamppost03a_off.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_001a.mdl"
+Error! Unable to load model "models/props_rooftop/Scaffolding01a.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_002a.mdl"
+Error! Unable to load model "models/props_combine/Combine_Citadel001b.mdl"
+Error! Unable to load model "models/props_buildings/row_res_2.mdl"
+Error! Unable to load model "models/props_buildings/row_hill_cluster.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_post001.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser06a.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser07a.mdl"
+Error! Unable to load model "models/props_rooftop/AntennaClusters01a.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_01.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_02.mdl"
+Error! Unable to load model "models/props_trainstation/light_256ceilingMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/light_128wallMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/handrail_64decoration001a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med02b.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med01a.mdl"
+7631 faces
+2325404 square feet [334858176.00 square inches]
+3 Displacements
+5866 Square Feet [844800.00 Square Inches]
+7631 patches before subdivision
+261607 patches after subdivision
+3938 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 51575374, max 1563
+transfer lists: 393.5 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(771599, 642295, 356952)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #2 added RGB(140903, 99767, 43034)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #3 added RGB(28993, 17383, 5818)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #4 added RGB(6949, 3483, 882)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #5 added RGB(1757, 734, 144)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #6 added RGB(475, 165, 25)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #7 added RGB(131, 38, 5)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #8 added RGB(38, 9, 1)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #9 added RGB(11, 2, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #10 added RGB(3, 1, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #11 added RGB(1, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0222 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+Computing detail prop lighting : 0...1...2...3...4...5...6...7...8...9...10
+3836 of 3908 (98% of) surface lights went in leaf ambient cubes.
+0...1...2...3...4...5...6...7...8...9...10Writing leaf ambient...done
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                 116/1024         5568/49152    (11.3%) 
+brushes               2210/8192        26520/98304    (27.0%) 
+brushsides           20494/65536      163952/524288   (31.3%) 
+planes               20240/65536      404800/1310720  (30.9%) 
+vertexes             19728/65536      236736/786432   (30.1%) 
+nodes                 3575/65536      114400/2097152  ( 5.5%) 
+texinfos              2596/12288      186912/884736   (21.1%) 
+texdata                578/2048        18496/65536    (28.2%) 
+dispinfos                3/0             528/0        ( 0.0%) 
+disp_verts             243/0            4860/0        ( 0.0%) 
+disp_tris              384/0             768/0        ( 0.0%) 
+disp_lmsamples       48808/0           48808/0        ( 0.0%) 
+faces                 7631/65536      427336/3670016  (11.6%) 
+hdr faces                0/65536           0/3670016  ( 0.0%) 
+origfaces             4521/65536      253176/3670016  ( 6.9%) 
+leaves                3692/65536      118144/2097152  ( 5.6%) 
+leaffaces            10031/65536       20062/131072   (15.3%) 
+leafbrushes           5135/65536       10270/131072   ( 7.8%) 
+areas                   13/256           104/2048     ( 5.1%) 
+surfedges            54146/512000     216584/2048000  (10.6%) 
+edges                33156/256000     132624/1024000  (13.0%) 
+LDR worldlights       3938/8192       346544/720896   (48.1%) 
+HDR worldlights          0/8192            0/720896   ( 0.0%) 
+leafwaterdata            0/32768           0/393216   ( 0.0%) 
+waterstrips           2616/32768       26160/327680   ( 8.0%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices         57021/65536      114042/131072   (87.0%) VERY FULL!
+cubemapsamples         174/1024         2784/16384    (17.0%) 
+overlays                27/512          9504/180224   ( 5.3%) 
+LDR lightdata         [variable]    15448608/0        ( 0.0%) 
+HDR lightdata         [variable]           0/0        ( 0.0%) 
+visdata               [variable]      198342/16777216 ( 1.2%) 
+entdata               [variable]      241220/393216   (61.3%) 
+LDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+HDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+LDR leaf ambient     15050/65536      421400/1835008  (23.0%) 
+HDR leaf ambient      3692/65536      103376/1835008  ( 5.6%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/28472    ( 0.0%) 
+dtl prp lght          [variable]           1/2444     ( 0.0%) 
+HDR dtl prp lght      [variable]           1/4        (25.0%) 
+static props          [variable]           1/33686    ( 0.0%) 
+pakfile               [variable]     4649165/0        ( 0.0%) 
+physics               [variable]      842862/4194304  (20.1%) 
+physics terrain       [variable]         203/1048576  ( 0.0%) 
+
+Level flags = 0
+
+Total triangle count: 20727
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+5 minutes, 6 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+Error! Unable to load model "models/props_c17/fence01b.mdl"
+Error! Unable to load model "models/props_c17/light_domelight02_on.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001b.mdl"
+Error! Unable to load model "models/props_combine/combine_smallmonitor001.mdl"
+Error! Unable to load model "models/props_interiors/VendingMachineSoda01a_door.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall02b.mdl"
+Error! Unable to load model "models/props_c17/LampFixture01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002.mdl"
+Error! Unable to load model "models/props_c17/playgroundslide01.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003b.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002b.mdl"
+Error! Unable to load model "models/props_buildings/row_upscale.mdl"
+Error! Unable to load model "models/props_c17/Awning002a.mdl"
+Error! Unable to load model "models/props_combine/combinetower001.mdl"
+Error! Unable to load model "models/props_c17/utilitypole02b.mdl"
+Error! Unable to load model "models/props_c17/utilitypolemount01a.mdl"
+Error! Unable to load model "models/props_foliage/tree_poplar_01.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_tall01a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_short01a.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_ornament001.mdl"
+Error! Unable to load model "models/props_c17/playgroundTick-tack-toe_post01.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge.mdl"
+Error! Unable to load model "models/props_combine/combine_bridge_b.mdl"
+Error! Unable to load model "models/props_trainstation/BenchOutdoor01a.mdl"
+Error! Unable to load model "models/Effects/vol_light.mdl"
+Error! Unable to load model "models/props_wasteland/woodwall030b_window02a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_03b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_sprinkler001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_lamp001b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002b.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence003a.mdl"
+Error! Unable to load model "models/props_wasteland/exterior_fence002c.mdl"
+Error! Unable to load model "models/Combine_Room/combine_monitor002.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite002a.mdl"
+Error! Unable to load model "models/props_c17/fence01a.mdl"
+Error! Unable to load model "models/props_c17/metalladder002b.mdl"
+Error! Unable to load model "models/props_wasteland/prison_switchbox001a.mdl"
+Error! Unable to load model "models/props_wasteland/prison_cagedlight001a.mdl"
+Error! Unable to load model "models/props_trainstation/payphone001a.mdl"
+Error! Unable to load model "models/props_pipes/GutterLarge_512_001a.mdl"
+Error! Unable to load model "models/props_combine/combine_lock01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_clock001.mdl"
+Error! Unable to load model "models/props_lab/lab_flourescentlight002b.mdl"
+Error! Unable to load model "models/props_combine/combine_light001a.mdl"
+Error! Unable to load model "models/props_combine/combine_light002a.mdl"
+Error! Unable to load model "models/props_interiors/LightBulb01a.mdl"
+Error! Unable to load model "models/props_trainstation/trashcan_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001a.mdl"
+Error! Unable to load model "models/props_junk/garbage128_composite001b.mdl"
+Error! Unable to load model "models/props_trainstation/bench_indoor001a.mdl"
+Error! Unable to load model "models/props_junk/garbage256_composite001b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01b.mdl"
+Error! Unable to load model "models/props_c17/playground_jungle_gym01a.mdl"
+Error! Unable to load model "models/props_c17/playground_swingset01.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_column001.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_arch001.mdl"
+Error! Unable to load model "models/props_c17/Awning001a.mdl"
+Error! Unable to load model "models/props_foliage/tree_deciduous_01a-lod.mdl"
+Error! Unable to load model "models/props_c17/lamppost03a_off.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_001a.mdl"
+Error! Unable to load model "models/props_rooftop/Scaffolding01a.mdl"
+Error! Unable to load model "models/props_pipes/Gutter_448_002a.mdl"
+Error! Unable to load model "models/props_combine/Combine_Citadel001b.mdl"
+Error! Unable to load model "models/props_buildings/row_res_2.mdl"
+Error! Unable to load model "models/props_buildings/row_hill_cluster.mdl"
+Error! Unable to load model "models/props_trainstation/trainstation_post001.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser06a.mdl"
+Error! Unable to load model "models/props_rooftop/RooftopCluser07a.mdl"
+Error! Unable to load model "models/props_rooftop/AntennaClusters01a.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_01.mdl"
+Error! Unable to load model "models/props_rooftop/dome_terminal_02.mdl"
+Error! Unable to load model "models/props_trainstation/light_256ceilingMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/light_128wallMounted001a.mdl"
+Error! Unable to load model "models/props_trainstation/handrail_64decoration001a.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med02b.mdl"
+Error! Unable to load model "models/props_combine/combine_barricade_med01a.mdl"
+7631 faces
+2325404 square feet [334858176.00 square inches]
+3 Displacements
+5866 Square Feet [844800.00 Square Inches]
+7631 patches before subdivision
+261607 patches after subdivision
+3938 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 51575374, max 1563
+transfer lists: 393.5 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(771602, 642294, 356950)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #2 added RGB(140904, 99767, 43033)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #3 added RGB(28993, 17383, 5818)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #4 added RGB(6949, 3483, 882)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #5 added RGB(1757, 734, 144)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #6 added RGB(475, 165, 25)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #7 added RGB(131, 38, 5)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #8 added RGB(38, 9, 1)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #9 added RGB(11, 2, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #10 added RGB(3, 1, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #11 added RGB(1, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0208 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+Computing detail prop lighting : 0...1...2...3...4...5...6...7...8...9...10
+3836 of 3908 (98% of) surface lights went in leaf ambient cubes.
+0...1...2...3...4...5...6...7...8...9...10Writing leaf ambient...done
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                 116/1024         5568/49152    (11.3%) 
+brushes               2210/8192        26520/98304    (27.0%) 
+brushsides           20494/65536      163952/524288   (31.3%) 
+planes               20240/65536      404800/1310720  (30.9%) 
+vertexes             19728/65536      236736/786432   (30.1%) 
+nodes                 3575/65536      114400/2097152  ( 5.5%) 
+texinfos              2596/12288      186912/884736   (21.1%) 
+texdata                578/2048        18496/65536    (28.2%) 
+dispinfos                3/0             528/0        ( 0.0%) 
+disp_verts             243/0            4860/0        ( 0.0%) 
+disp_tris              384/0             768/0        ( 0.0%) 
+disp_lmsamples       48808/0           48808/0        ( 0.0%) 
+faces                 7631/65536      427336/3670016  (11.6%) 
+hdr faces             7631/65536      427336/3670016  (11.6%) 
+origfaces             4521/65536      253176/3670016  ( 6.9%) 
+leaves                3692/65536      118144/2097152  ( 5.6%) 
+leaffaces            10031/65536       20062/131072   (15.3%) 
+leafbrushes           5135/65536       10270/131072   ( 7.8%) 
+areas                   13/256           104/2048     ( 5.1%) 
+surfedges            54146/512000     216584/2048000  (10.6%) 
+edges                33156/256000     132624/1024000  (13.0%) 
+LDR worldlights       3938/8192       346544/720896   (48.1%) 
+HDR worldlights       3938/8192       346544/720896   (48.1%) 
+leafwaterdata            0/32768           0/393216   ( 0.0%) 
+waterstrips           2616/32768       26160/327680   ( 8.0%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices         57021/65536      114042/131072   (87.0%) VERY FULL!
+cubemapsamples         174/1024         2784/16384    (17.0%) 
+overlays                27/512          9504/180224   ( 5.3%) 
+LDR lightdata         [variable]    15448608/0        ( 0.0%) 
+HDR lightdata         [variable]    15448608/0        ( 0.0%) 
+visdata               [variable]      198342/16777216 ( 1.2%) 
+entdata               [variable]      241220/393216   (61.3%) 
+LDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+HDR ambient table     3692/65536       14768/262144   ( 5.6%) 
+LDR leaf ambient     15050/65536      421400/1835008  (23.0%) 
+HDR leaf ambient     15050/65536      421400/1835008  (23.0%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/28472    ( 0.0%) 
+dtl prp lght          [variable]           1/2444     ( 0.0%) 
+HDR dtl prp lght      [variable]           1/2444     ( 0.0%) 
+static props          [variable]           1/33686    ( 0.0%) 
+pakfile               [variable]     4649165/0        ( 0.0%) 
+physics               [variable]      842862/4194304  (20.1%) 
+physics terrain       [variable]         203/1048576  ( 0.0%) 
+
+Level flags = 0
+
+Total triangle count: 20727
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\d1_trainstation_02_csm.bsp
+5 minutes, 4 seconds elapsed
