@@ -623,3 +623,319 @@ Level flags = 0
 Total triangle count: 27272
 Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
 2 minutes, 6 seconds elapsed
+
+
+
+materialPath: E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\materials
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.vmf
+ConVarRef mat_reduceparticles doesn't point to an existing ConVar
+Patching WVT material: maps/gm_construct_in_flatgrass_csm/gm_construct/grass_13_wvt_patch
+Patching WVT material: maps/gm_construct_in_flatgrass_csm/gm_construct/grass-sand_13_wvt_patch
+fixing up env_cubemap materials on brush sides...
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Processing areas...done (0)
+Building Faces...done (0)
+Chop Details...done (0)
+Find Visible Detail Sides...
+Merged 548 detail faces...done (0)
+Merging details...done (0)
+FixTjuncs...
+PruneNodes...
+WriteBSP...
+done (0)
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.prt...Building visibility clusters...
+done (0)
+Creating default LDR cubemaps for env_cubemap using skybox materials:
+   skybox/painted*.vmt
+ ! Run buildcubemaps in the engine to get the correct cube maps.
+Creating default HDR cubemaps for env_cubemap using skybox materials:
+   skybox/painted*.vmt
+ ! Run buildcubemaps in the engine to get the correct cube maps.
+Finding displacement neighbors...
+Finding lightmap sample positions...
+Displacement Alpha : 0...1...2...3...4...5...6...7...8...9...10
+Building Physics collision data...
+WARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.
+done (1) (2169447 bytes)
+Placing detail props : 0...1...2...3...4...5...6...7...8...9...10
+Compacting texture/material tables...
+Reduced 1707 texinfos to 1115
+Reduced 246 texdatas to 220 (17786 bytes to 16392)
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+1 second elapsed
+
+
+
+32 threads
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+reading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.prt
+1582 portalclusters
+3324 numportals
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10Optimized: 1572 visible clusters (0.08%)
+Total clusters visible: 1892138
+Average clusters visible: 1196
+Building PAS...
+Average clusters audible: 1406
+visdatasize:600856  compressed from 632800
+writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+6 minutes, 26 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+Error! Unable to load model "models/maxofs2d/companion_doll.mdl"
+Error! Unable to load model "models/props_c17/light_industrialbell01_on.mdl"
+Error! Unable to load model "models/props_interiors/lights_florescent01a.mdl"
+Error! Unable to load model "models/dav0r/buttons/switch.mdl"
+Error! Unable to load model "models/props_rooftop/antenna02a.mdl"
+Error! Unable to load model "models/props_interiors/sinkkitchen01a.mdl"
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+9855 faces
+38755556 square feet [5580800000.00 square inches]
+89 Displacements
+433321 Square Feet [62398236.00 Square Inches]
+9855 patches before subdivision
+155607 patches after subdivision
+light has _fifty_percent_distance of 130.000000 but _zero_percent_distance of 0.000000
+131 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 43948441, max 2932
+transfer lists: 335.3 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(452299, 462180, 360628)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #2 added RGB(137740, 129784, 95406)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #3 added RGB(39324, 34594, 23225)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #4 added RGB(14468, 11897, 7318)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #5 added RGB(5061, 3870, 2130)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #6 added RGB(1952, 1390, 691)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #7 added RGB(741, 488, 216)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #8 added RGB(294, 179, 71)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #9 added RGB(116, 65, 23)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #10 added RGB(47, 24, 8)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #11 added RGB(19, 9, 3)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #12 added RGB(8, 3, 1)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #13 added RGB(3, 1, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #14 added RGB(1, 0, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #15 added RGB(1, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0531 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+0 of 0 (0% of) surface lights went in leaf ambient cubes.
+0...1...2...3...4...5...6...7...8...9...10Writing leaf ambient...done
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                  11/1024          528/49152    ( 1.1%) 
+brushes               2415/8192        28980/98304    (29.5%) 
+brushsides           15869/65536      126952/524288   (24.2%) 
+planes                2670/65536       53400/1310720  ( 4.1%) 
+vertexes             14876/65536      178512/786432   (22.7%) 
+nodes                 4604/65536      147328/2097152  ( 7.0%) 
+texinfos              1115/12288       80280/884736   ( 9.1%) 
+texdata                220/2048         7040/65536    (10.7%) 
+dispinfos               89/0           15664/0        ( 0.0%) 
+disp_verts            7401/0          148020/0        ( 0.0%) 
+disp_tris            11776/0           23552/0        ( 0.0%) 
+disp_lmsamples       51064/0           51064/0        ( 0.0%) 
+faces                 9855/65536      551880/3670016  (15.0%) 
+hdr faces                0/65536           0/3670016  ( 0.0%) 
+origfaces             5878/65536      329168/3670016  ( 9.0%) 
+leaves                4616/65536      147712/2097152  ( 7.0%) 
+leaffaces            10966/65536       21932/131072   (16.7%) 
+leafbrushes           6274/65536       12548/131072   ( 9.6%) 
+areas                    3/256            24/2048     ( 1.2%) 
+surfedges            70492/512000     281968/2048000  (13.8%) 
+edges                44618/256000     178472/1024000  (17.4%) 
+LDR worldlights        131/8192        11528/720896   ( 1.6%) 
+HDR worldlights          0/8192            0/720896   ( 0.0%) 
+leafwaterdata            1/32768          12/393216   ( 0.0%) 
+waterstrips            848/32768        8480/327680   ( 2.6%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices         19287/65536       38574/131072   (29.4%) 
+cubemapsamples          37/1024          592/16384    ( 3.6%) 
+overlays                11/512          3872/180224   ( 2.1%) 
+LDR lightdata         [variable]    11846344/0        ( 0.0%) 
+HDR lightdata         [variable]           0/0        ( 0.0%) 
+visdata               [variable]      600856/16777216 ( 3.6%) 
+entdata               [variable]      222067/393216   (56.5%) 
+LDR ambient table     4616/65536       18464/262144   ( 7.0%) 
+HDR ambient table     4616/65536       18464/262144   ( 7.0%) 
+LDR leaf ambient     18967/65536      531076/1835008  (28.9%) 
+HDR leaf ambient      4616/65536      129248/1835008  ( 7.0%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/12       ( 8.3%) 
+static props          [variable]           1/2704     ( 0.0%) 
+pakfile               [variable]     2911436/0        ( 0.0%) 
+physics               [variable]     2169447/4194304  (51.7%) 
+physics terrain       [variable]           0/1048576  ( 0.0%) 
+
+Level flags = 0
+
+Total triangle count: 27264
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+1 minute, 51 seconds elapsed
+
+
+
+[Reading texlights from 'lights.rad']
+[45 texlights parsed from 'lights.rad']
+
+Loading e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+Error! Unable to load model "models/maxofs2d/companion_doll.mdl"
+Error! Unable to load model "models/props_c17/light_industrialbell01_on.mdl"
+Error! Unable to load model "models/props_interiors/lights_florescent01a.mdl"
+Error! Unable to load model "models/dav0r/buttons/switch.mdl"
+Error! Unable to load model "models/props_rooftop/antenna02a.mdl"
+Error! Unable to load model "models/props_interiors/sinkkitchen01a.mdl"
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+Patch Sample Radius Clamped!
+9855 faces
+38755556 square feet [5580800000.00 square inches]
+89 Displacements
+433321 Square Feet [62398236.00 Square Inches]
+9855 patches before subdivision
+155607 patches after subdivision
+light has _fifty_percent_distance of 130.000000 but _zero_percent_distance of 0.000000
+131 direct lights
+0...1...2...3...4...5...6...7...8...9...100...1...2...3...4...5...6...7...8...9...10transfers 43948441, max 2932
+transfer lists: 335.3 megs
+0...1...2...3...4...5...6...7...8...9...10	Bounce #1 added RGB(353041, 374616, 307562)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #2 added RGB(108174, 106080, 82124)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #3 added RGB(30999, 28556, 20374)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #4 added RGB(11413, 9856, 6452)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #5 added RGB(3980, 3215, 1896)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #6 added RGB(1531, 1156, 618)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #7 added RGB(578, 406, 194)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #8 added RGB(228, 149, 64)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #9 added RGB(90, 54, 21)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #10 added RGB(36, 20, 7)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #11 added RGB(15, 8, 2)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #12 added RGB(6, 3, 1)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #13 added RGB(2, 1, 0)
+0...1...2...3...4...5...6...7...8...9...10	Bounce #14 added RGB(1, 0, 0)
+Build Patch/Sample Hash Table(s).....Done<0.0227 sec>
+0...1...2...3...4...5...6...7...8...9...10FinalLightFace Done
+0 of 0 (0% of) surface lights went in leaf ambient cubes.
+0...1...2...3...4...5...6...7...8...9...10Writing leaf ambient...done
+Ready to Finish
+
+Object names       Objects/Maxobjs  Memory / Maxmem  Fullness 
+------------       ---------------  ---------------  -------- 
+models                  11/1024          528/49152    ( 1.1%) 
+brushes               2415/8192        28980/98304    (29.5%) 
+brushsides           15869/65536      126952/524288   (24.2%) 
+planes                2670/65536       53400/1310720  ( 4.1%) 
+vertexes             14876/65536      178512/786432   (22.7%) 
+nodes                 4604/65536      147328/2097152  ( 7.0%) 
+texinfos              1115/12288       80280/884736   ( 9.1%) 
+texdata                220/2048         7040/65536    (10.7%) 
+dispinfos               89/0           15664/0        ( 0.0%) 
+disp_verts            7401/0          148020/0        ( 0.0%) 
+disp_tris            11776/0           23552/0        ( 0.0%) 
+disp_lmsamples       51064/0           51064/0        ( 0.0%) 
+faces                 9855/65536      551880/3670016  (15.0%) 
+hdr faces             9855/65536      551880/3670016  (15.0%) 
+origfaces             5878/65536      329168/3670016  ( 9.0%) 
+leaves                4616/65536      147712/2097152  ( 7.0%) 
+leaffaces            10966/65536       21932/131072   (16.7%) 
+leafbrushes           6274/65536       12548/131072   ( 9.6%) 
+areas                    3/256            24/2048     ( 1.2%) 
+surfedges            70492/512000     281968/2048000  (13.8%) 
+edges                44618/256000     178472/1024000  (17.4%) 
+LDR worldlights        131/8192        11528/720896   ( 1.6%) 
+HDR worldlights        131/8192        11528/720896   ( 1.6%) 
+leafwaterdata            1/32768          12/393216   ( 0.0%) 
+waterstrips            848/32768        8480/327680   ( 2.6%) 
+waterverts               0/65536           0/786432   ( 0.0%) 
+waterindices         19287/65536       38574/131072   (29.4%) 
+cubemapsamples          37/1024          592/16384    ( 3.6%) 
+overlays                11/512          3872/180224   ( 2.1%) 
+LDR lightdata         [variable]    11846344/0        ( 0.0%) 
+HDR lightdata         [variable]    11846344/0        ( 0.0%) 
+visdata               [variable]      600856/16777216 ( 3.6%) 
+entdata               [variable]      222067/393216   (56.5%) 
+LDR ambient table     4616/65536       18464/262144   ( 7.0%) 
+HDR ambient table     4616/65536       18464/262144   ( 7.0%) 
+LDR leaf ambient     18967/65536      531076/1835008  (28.9%) 
+HDR leaf ambient     18959/65536      530852/1835008  (28.9%) 
+occluders                0/0               0/0        ( 0.0%) 
+occluder polygons        0/0               0/0        ( 0.0%) 
+occluder vert ind        0/0               0/0        ( 0.0%) 
+detail props          [variable]           1/12       ( 8.3%) 
+static props          [variable]           1/2704     ( 0.0%) 
+pakfile               [variable]     2911436/0        ( 0.0%) 
+physics               [variable]     2169447/4194304  (51.7%) 
+physics terrain       [variable]           0/1048576  ( 0.0%) 
+
+Level flags = 0
+
+Total triangle count: 27264
+Writing e:\steamlibrary\steamapps\common\garrysmod\garrysmod\addons\realcsm\maps\gm_construct_in_flatgrass_csm.bsp
+1 minute, 54 seconds elapsed
