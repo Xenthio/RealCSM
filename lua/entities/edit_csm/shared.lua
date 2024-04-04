@@ -582,9 +582,25 @@ end
 
 rttenabled = true 
 
+function EnableShadowFix(ent)
+	if (ent:GetRenderGroup() == RENDERGROUP_TRANSLUCENT && GetConVar( "csm_experimental_translucentshadows" ):GetBool()) then
+		ent.RenderOverride = ShadowFix
+	end
+end
+function ShadowFix( self, flags )
+	-- WHY THE FUCK DOES THIS WORK???????? 
+	if (self:GetRenderMode() != RENDERMODE_NONE) then
+		self:SetRenderMode( RENDERMODE_NONE )
+	end
+	self:DrawModel( flags )
+	render.OverrideDepthEnable(false   ,true    )
+end
+
 function DisableRTTHook(ent)
 	ent:DrawShadow( ent.stored_shadow_value or true )
+	EnableShadowFix(ent)
 end
+
 
 function DisableRTT()
 	if (rttenabled == false) then return end
@@ -622,6 +638,37 @@ function meta:DrawShadow(val)
 		self:oldsh( false )
 	end
 end
+
+-- meta.olddr = meta.olddr or meta.Draw
+-- function meta:Draw( flags )
+-- 	print("hi")
+	 
+-- 	if (!flags) then flags = 0 end	
+-- 	--self:SetRenderMode(RENDERMODE_NORMAL)
+-- 	--self:SetRenderMode(RENDERMODE_NORMAL)
+-- 	self:olddr( flags + STUDIO_WIREFRAME )
+-- 	--self:SetRenderMode(RENDERMODE_NORMAL) 
+-- end
+
+
+-- meta.oldrg = meta.oldrg or meta.GetRenderGroup
+-- function meta:GetRenderGroup()
+-- 	if (render.GetRenderTarget()) then
+-- 		return RENDERGROUP_OPAQUE
+-- 	else 
+-- 		return self:oldrg()
+-- 	end
+-- end
+
+-- meta.oldsm = meta.oldsm or meta.SetRenderMode
+-- function meta:SetRenderMode( renderMode )
+-- 	if (render.GetRenderTarget()) then
+-- 		self:oldsm( RENDERMODE_TRANSALPHA )
+-- 	else 
+-- 		self:oldsm( RENDERMODE_TRANSALPHA )
+-- 	end
+-- end
+
 
 hook.Add( "ShadnowFilterChange", "shadfiltchanged", function()
 	shadfiltChanged = true

@@ -27,6 +27,7 @@ CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
 CreateClientConVar(	"csm_depthresasmultiple", 0,  false, false)
 CreateClientConVar(	"csm_depthbias", 0.000002,  false, false)
 CreateClientConVar(	"csm_slopescaledepthbias", 2,  false, false)
+CreateClientConVar(	"csm_experimental_translucentshadows", 0,  false, false)
 
 CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
 CreateClientConVar(	"csm_disable_warnings", 0,  false, false)
