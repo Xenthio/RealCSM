@@ -1123,25 +1123,25 @@ function ENT:Think()
 			projectedTexture:SetShadowDepthBias(depthBias)
 			projectedTexture:SetShadowSlopeScaleDepthBias(slopeScaleDepthBias)
 			sunBright = (self:GetSunBrightness()) / 400
-			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 0) then
-				if (spreadEnabled) then
-					if (i == 1) then
-						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
-					elseif (i == 2) then
-						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
-					elseif (i > 4) then
-						projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
-					else
-						projectedTexture:SetBrightness(sunBright)
-					end
+			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 1) then
+				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
+				sunBright = self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat()
+				--print((self.CurrentAppearance.SunBrightness) )
+			end
+			if (spreadEnabled) then
+				if (i == 1) then
+					projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
+				elseif (i == 2) then
+					projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
+				elseif (i > 4) then
+					projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
 				else
 					projectedTexture:SetBrightness(sunBright)
 				end
 			else
-				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
-				projectedTexture:SetBrightness(self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat())
-				--print((self.CurrentAppearance.SunBrightness) )
+				projectedTexture:SetBrightness(sunBright)
 			end
+
 			if GetConVar("csm_debug_cascade"):GetBool() then
 				for i2, projectedTexture2 in pairs(self.ProjectedTextures) do
 					projectedTexture2:SetColor(debugColours[i])
