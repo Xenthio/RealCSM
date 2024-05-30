@@ -1129,6 +1129,8 @@ function ENT:Think()
 				--print((self.CurrentAppearance.SunBrightness) )
 			end
 			if (spreadEnabled) then
+
+				-- if we are the first two lights, or any of the other samples
 				if (i == 1) then
 					projectedTexture:SetBrightness(sunBright / GetConVar( "csm_spread_samples" ):GetInt())
 				elseif (i == 2) then
