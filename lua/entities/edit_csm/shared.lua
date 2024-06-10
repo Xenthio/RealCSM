@@ -32,6 +32,7 @@ CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.08,  false, false)
 CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false)
 CreateClientConVar(	 "csm_spread_layer_reservemiddle", 1,  false, false)
+CreateClientConVar(	 "csm_nofar", 0,  false, false)
 
 
 CreateConVar(	 "csm_getENVSUNcolour", 1, FCVAR_ARCHIVE)
@@ -132,11 +133,11 @@ end
 local AppearanceKeys = {
 	{ Position = 0.00, SunColour = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.00, 0.00), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) },
 	{ Position = 0.25, SunColour = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.03, 0.03), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) },
-	{ Position = 0.30, SunColour = Color(255,  140,  0, 255), SunBrightness = 1.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
-	{ Position = 0.35, SunColour = Color(255, 217, 179, 255), SunBrightness = 3.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
-	{ Position = 0.50, SunColour = Color(255, 217, 179, 255), SunBrightness = 3.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.18, 1.00), SkyBottomColor = Vector(0.00, 0.34, 0.67), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
-	{ Position = 0.65, SunColour = Color(255, 217, 179, 255), SunBrightness = 3.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
-	{ Position = 0.70, SunColour = Color(255,  140,  0, 255), SunBrightness = 1.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
+	{ Position = 0.30, SunColour = Color(255,  140,  0, 255), SunBrightness = 0.3, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
+	{ Position = 0.35, SunColour = Color(255, 217, 179, 255), SunBrightness = 1.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
+	{ Position = 0.50, SunColour = Color(255, 217, 179, 255), SunBrightness = 1.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.18, 1.00), SkyBottomColor = Vector(0.00, 0.34, 0.67), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
+	{ Position = 0.65, SunColour = Color(255, 217, 179, 255), SunBrightness = 1.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.06, 0.21, 0.39), SkyBottomColor = Vector(0.02, 0.26, 0.39), SkyDuskColor = Vector(0.29, 0.31, 0.00), SkySunColor = Vector(0.27, 0.11, 0.05), FogColor = Vector( 94, 148, 199) },
+	{ Position = 0.70, SunColour = Color(255,  140,  0, 255), SunBrightness = 0.3, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.01, 0.00, 0.03), SkyBottomColor = Vector(0.00, 0.05, 0.11), SkyDuskColor = Vector(1.00, 0.16, 0.00), SkySunColor = Vector(0.73, 0.24, 0.00), FogColor = Vector(153, 110, 125) },
 	{ Position = 0.75, SunColour = Color(  0,   0,   0, 255), SunBrightness =  0.0, ScreenDarkenFactor = 0.0, SkyTopColor = Vector(0.00, 0.00, 0.00), SkyBottomColor = Vector(0.00, 0.00, 0.00), SkyDuskColor = Vector(0.00, 0.03, 0.03), SkySunColor = Vector(0.00, 0.00, 0.00), FogColor = Vector( 23,  36,  41) }
 }
 
@@ -789,6 +790,7 @@ function ENT:Think()
 		harshCutoffPrev = harshCutoff
 	end
 
+
 	if (furtherEnabledPrev != furtherEnabled) then
 		if (furtherEnabled) then
 			if (CLIENT) then
@@ -925,6 +927,11 @@ function ENT:Think()
 		end
 	end
 
+	if (GetConVar( "csm_nofar" ):GetBool() and CLIENT) then
+		if (self.ProjectedTextures[3] != nil) and (self.ProjectedTextures[3]:IsValid()) then
+			self.ProjectedTextures[3]:Remove()
+		end
+	end
 
 	local removestatsun = self:GetRemoveStaticSun()
 
@@ -1126,7 +1133,7 @@ function ENT:Think()
 			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 1) then
 				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
-				sunBright = self.CurrentAppearance.SunBrightness * GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat()
+				sunBright = (sunBright * self.CurrentAppearance.SunBrightness);//* GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat()
 				if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
 					sunBright = sunBright * 1;
 				else
