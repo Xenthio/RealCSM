@@ -1133,7 +1133,7 @@ function ENT:Think()
 			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 1) then
 				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
-				sunBright = (sunBright * self.CurrentAppearance.SunBrightness);//* GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat()
+				sunBright = (sunBright * self.CurrentAppearance.SunBrightness) * GetConVar( "csm_stormfox_brightness_multiplier" ):GetFloat()
 				if (GetConVar( "csm_hashdr" ):GetInt() == 1) then
 					sunBright = sunBright * 1;
 				else
