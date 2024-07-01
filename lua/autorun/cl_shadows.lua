@@ -25,8 +25,9 @@ CreateClientConVar(	"csm_sizescale", 1,  true, false)
 CreateClientConVar(	"csm_perfmode", 0,  true, false)
 CreateClientConVar(	"csm_redownloadonremove", 1,  true, false)
 CreateClientConVar(	"csm_depthresasmultiple", 0,  false, false)
-CreateClientConVar(	"csm_depthbias", 0.000002,  false, false)
-CreateClientConVar(	"csm_slopescaledepthbias", 2,  false, false)
+CreateClientConVar(	"csm_depthbias", 0.000035,  false, false)
+CreateClientConVar(	"csm_depthbias_slopescale", 2,  false, false)
+CreateClientConVar(	"csm_depthbias_distancescale", 0.0,  false, false)
 CreateClientConVar(	"csm_experimental_translucentshadows", 0,  true, false)
 
 CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
@@ -65,6 +66,9 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:ControlHelp( "Performance mode, when on CSM will only use 2 cascade rings, this will reduce perceived quality of nearby shadows." )
 
 		panel:CheckBox( "Super performance mode", "csm_farshadows")
+		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
+
+		panel:CheckBox( "Flashlight v2", "r_flashlight_version2")
 		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
 
 		qualityslider = panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 16384, 0 )
@@ -137,7 +141,7 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:NumSlider( "Shadowmap Depth Bias", "csm_depthbias", -1, 1, 6)
 		panel:ControlHelp( "The amount to bias the depth of the shadowmap by." )
 		
-		panel:NumSlider( "Shadowmap Slope Scale Depth Bias", "csm_slopescaledepthbias", 0, 6, 1)
+		panel:NumSlider( "Shadowmap Slope Scale Depth Bias", "csm_depthbias_slopescale", 0, 6, 1)
 		panel:ControlHelp( "The sloped scale of the amount the depth of the shadowmap is biased by." )
 
 		panel:CheckBox( "Cascade Debug", "csm_debug_cascade")

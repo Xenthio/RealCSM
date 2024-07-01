@@ -233,6 +233,7 @@ function ENT:Initialize()
 			v:Remove()
 		end
 	end
+	RunConsoleCommand("r_flashlight_version2", "1")
 	RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	if !GetConVar( "csm_blobbyao" ):GetBool() then
 		DisableRTT()
@@ -1123,13 +1124,12 @@ function ENT:Think()
 		end
 
 		depthBias = GetConVar( "csm_depthbias" ):GetFloat()
-		slopeScaleDepthBias = GetConVar( "csm_slopescaledepthbias" ):GetFloat()
+		distanceBias = GetConVar("csm_depthbias_distancescale"):GetFloat()
+		slopeScaleDepthBias = GetConVar( "csm_depthbias_slopescale" ):GetFloat()
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
 			if (shadfiltChanged) then
 				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
 			end
-			projectedTexture:SetShadowDepthBias(depthBias)
-			projectedTexture:SetShadowSlopeScaleDepthBias(slopeScaleDepthBias)
 			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 1) then
 				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
@@ -1189,6 +1189,11 @@ function ENT:Think()
 				mtest:Rotate(offset3 + offset4)
 				projectedTexture:SetAngles(mtest:GetAngles())
 			end
+
+			-- Unfortunately we cant scale the bias for each ring indivudually :(
+			depthdistscale = distanceBias * (i-1) 
+			projectedTexture:SetShadowDepthBias(depthBias + depthdistscale)
+			projectedTexture:SetShadowSlopeScaleDepthBias(slopeScaleDepthBias)
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
 			projectedTexture:SetFarZ(self:GetSunFarZ() * 1.025)
