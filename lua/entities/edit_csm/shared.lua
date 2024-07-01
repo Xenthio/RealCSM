@@ -1209,7 +1209,7 @@ function ENT:Think()
 				filtscale = 8^(distance-1)
 			end
 			--filtscale = math.pow(GetConVar( "csm_filter_distancescale" ):GetFloat(),i)
-			print(filtscale)
+			--print(filtscale)
 			projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat() / filtscale)
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
