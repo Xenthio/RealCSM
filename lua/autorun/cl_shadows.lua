@@ -68,9 +68,6 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		panel:CheckBox( "Super performance mode", "csm_farshadows")
 		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
 
-		panel:CheckBox( "Flashlight v2", "r_flashlight_version2")
-		panel:ControlHelp( "Disable shadows on the far cascade, for more performance.")
-
 		qualityslider = panel:NumSlider( "Shadow Quality", "r_flashlightdepthres", 0, 16384, 0 )
 		panel:ControlHelp( "Shadow map resolution." )
 		qualityslider.OnValueChanged = function(self, value)
