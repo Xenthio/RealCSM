@@ -30,6 +30,7 @@ cvar_csm_enabled = CreateClientConVar(	 "csm_enabled", 1,  false, false)
 
 CreateClientConVar(	 "csm_update", 1,  false, false)
 CreateClientConVar(	 "csm_filter", 0.08,  false, false)
+CreateClientConVar(	 "csm_filter_distancescale", 1,  false, false)
 CreateClientConVar(	 "csm_spread_layer_alloctype", 0,  false, false)
 CreateClientConVar(	 "csm_spread_layer_reservemiddle", 1,  false, false)
 CreateClientConVar(	 "csm_nofar", 0,  false, false)
@@ -233,8 +234,7 @@ function ENT:Initialize()
 			v:Remove()
 		end
 	end
-	RunConsoleCommand("r_flashlight_version2", "1")
-	RunConsoleCommand("r_projectedtexture_filter", "0.1")
+	--RunConsoleCommand("r_projectedtexture_filter", "0.1")
 	if !GetConVar( "csm_blobbyao" ):GetBool() then
 		DisableRTT()
 	else
@@ -551,7 +551,7 @@ function ENT:OnRemove()
 			RunConsoleCommand("r_shadowrendertotexture", "1")
 			RunConsoleCommand("r_shadowdist", "10000")
 		end
-		RunConsoleCommand("r_projectedtexture_filter", "1")
+		--RunConsoleCommand("r_projectedtexture_filter", "1")
 
 		if (self:GetRemoveStaticSun()) then
 
@@ -987,11 +987,10 @@ function ENT:Think()
 			HideRTTShadowsPrev = hiderttshad
 		end
 		sun = util.GetSunInfo()
-		local shadfilt = GetConVar( "r_projectedtexture_filter" ):GetFloat()
+		local shadfilt = GetConVar( "csm_filter" ):GetFloat()
 		if (ShadowFilterPrev != shadfilt) then
 			ShadowFilterPrev = shadfilt
 			shadfiltChanged = true
-			RunConsoleCommand("csm_filter", shadfilt)
 		end
 
 		if (BlobShadowsPrev != BlobShadows) and GetConVar( "csm_enabled" ):GetBool() then
@@ -1093,9 +1092,19 @@ function ENT:Think()
 	debugColours[5] = Color(0, 255, 255, 255)
 	debugColours[6] = Color(255, 0, 255, 255)
 	debugColours[7] = Color(255, 255, 255, 255)
-
+	
+	local mainpos = Vector()
+	if CLIENT then
+		mainpos = GetViewEntity():GetPos()
+		if (GetConVar( "csm_experimental_positionrounding" ):GetFloat() != 0) then
+			rnd = GetConVar( "csm_experimental_positionrounding" ):GetFloat()
+			mainpos.x = math.Round(mainpos.x * rnd) / rnd
+			mainpos.y = math.Round(mainpos.y * rnd) / rnd
+			mainpos.z = math.Round(mainpos.z * rnd) / rnd
+		end
+	end
 	if CLIENT and (GetConVar( "csm_enabled" ):GetInt() == 1) and (GetConVar( "csm_update" ):GetInt() == 1) then
-		local position = GetViewEntity():GetPos() + offset
+		local position = mainpos + offset
 
 		if (self.ProjectedTextures[1] == nil) and !perfMode then
 			self:createlamps()
@@ -1127,9 +1136,6 @@ function ENT:Think()
 		distanceBias = GetConVar("csm_depthbias_distancescale"):GetFloat()
 		slopeScaleDepthBias = GetConVar( "csm_depthbias_slopescale" ):GetFloat()
 		for i, projectedTexture in pairs(self.ProjectedTextures) do
-			if (shadfiltChanged) then
-				projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat())
-			end
 			sunBright = (self:GetSunBrightness()) / 400
 			if (GetConVar( "csm_stormfoxsupport" ):GetInt() == 1) then
 				self.CurrentAppearance = CalculateAppearance((pitch + -180) / 360)
@@ -1194,12 +1200,23 @@ function ENT:Think()
 			depthdistscale = distanceBias * (i-1) 
 			projectedTexture:SetShadowDepthBias(depthBias + depthdistscale)
 			projectedTexture:SetShadowSlopeScaleDepthBias(slopeScaleDepthBias)
+			local filtscale = 1
+			if (GetConVar("csm_filter_distancescale"):GetBool()) and ((i <= 3) or (i > 4)) then
+				local distance = i
+				if (i > 4) then
+					distance = 1
+				end
+				filtscale = 8^(distance-1)
+			end
+			--filtscale = math.pow(GetConVar( "csm_filter_distancescale" ):GetFloat(),i)
+			print(filtscale)
+			projectedTexture:SetShadowFilter(GetConVar( "csm_filter" ):GetFloat() / filtscale)
 
 			projectedTexture:SetNearZ(self:GetSunNearZ())
-			projectedTexture:SetFarZ(self:GetSunFarZ() * 1.025)
+			projectedTexture:SetFarZ(self:GetSunFarZ() * 1.025) --???????? why the fuck did I do this?
 			projectedTexture:SetQuadraticAttenuation(0)
 			projectedTexture:SetLinearAttenuation(0)
-			projectedTexture:SetConstantAttenuation(1) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
+			projectedTexture:SetConstantAttenuation(11111) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
 			projectedTexture:Update()
 		end
 

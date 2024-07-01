@@ -29,6 +29,7 @@ CreateClientConVar(	"csm_depthbias", 0.000035,  false, false)
 CreateClientConVar(	"csm_depthbias_slopescale", 2,  false, false)
 CreateClientConVar(	"csm_depthbias_distancescale", 0.0,  false, false)
 CreateClientConVar(	"csm_experimental_translucentshadows", 0,  true, false)
+CreateClientConVar(	"csm_experimental_positionrounding", 0,  true, false)
 
 CreateClientConVar(	"csm_debug_cascade", 0,  false, false)
 CreateClientConVar(	"csm_disable_warnings", 0,  false, false)
@@ -86,8 +87,11 @@ hook.Add( "PopulateToolMenu", "CSMClient", function()
 		end
 		multslider:SetValue(math.log(qualityslider:GetValue()) / math.log (2) - 6)
 
-		panel:NumSlider( "Shadow Filter", "r_projectedtexture_filter", 0, 10)
-		panel:ControlHelp( "Default Source engine shadow filter, It's quite grainy, it's best you leave this at 0.10 unless you know what you're doing." )
+		panel:NumSlider( "Shadow Filter", "csm_filter", 0, 20)
+		panel:ControlHelp( "Default Source engine shadow filter, It's quite grainy, it's best you leave this at 0.10, or use 1.00 for lower shadow qualities." )
+		
+		panel:CheckBox( "Filter distance correction", "csm_filter_distancescale")
+		panel:ControlHelp( "Scale the filter per cascade, stops the filter from being too strong on the futher away rings.")
 
 		local combobox = panel:ComboBox( "Prop Radiosity", "csm_propradiosity" )
 		combobox:AddChoice( "0: no radiosity", 0 )
