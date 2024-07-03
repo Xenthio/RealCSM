@@ -1216,7 +1216,7 @@ function ENT:Think()
 			projectedTexture:SetFarZ(self:GetSunFarZ() * 1.025) --???????? why the fuck did I do this?
 			projectedTexture:SetQuadraticAttenuation(0)
 			projectedTexture:SetLinearAttenuation(0)
-			projectedTexture:SetConstantAttenuation(11111) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
+			projectedTexture:SetConstantAttenuation(1) -- TODO: FIX STORMFOX BRIGHTNESS WHEN THIS IS SET TO 1
 			projectedTexture:Update()
 		end
 
