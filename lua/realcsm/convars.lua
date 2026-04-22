@@ -39,7 +39,7 @@ local clientDefs = {
 	{ "csm_depthbias_slopescale",             2,        false, false },
 	{ "csm_depthbias_distancescale",          0.0,      false, false },
 	{ "csm_experimental_translucentshadows",  0,        true,  false },
-	{ "csm_experimental_positionrounding",    0,        true,  false },
+	{ "csm_texelsnap",                         1,        true,  false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },

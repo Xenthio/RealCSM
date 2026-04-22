@@ -722,11 +722,28 @@ function ENT:Think()
 	local viewPos = GetViewEntity():GetPos()
 	local position = viewPos + offset * self:GetHeight()
 
-	local rounding = GetConVar("csm_experimental_positionrounding"):GetFloat()
-	if rounding ~= 0 then
-		position.x = math.Round(position.x / rounding) * rounding
-		position.y = math.Round(position.y / rounding) * rounding
-		position.z = math.Round(position.z / rounding) * rounding
+	-- ── Texel snapping ───────────────────────────────────────────────────────────
+	-- Snaps position to the shadow-map texel grid in light space, eliminating
+	-- sub-texel shadow shimmer as the camera moves.
+	--
+	-- KEY: all cascades snap to the SAME grid (the largest/coarsest cascade's
+	-- texel size). If each cascade snaps independently to its own finer grid,
+	-- the cascade mask boundaries drift relative to each other at low resolutions
+	-- causing a visible flicker seam. Using the coarsest grid keeps all cascades
+	-- in lock-step while still eliminating the shimmer.
+	local depthRes = GetConVar("r_flashlightdepthres"):GetFloat()
+	if depthRes <= 0 then depthRes = 1024 end
+
+	local function texelSnap(pos, orthoSize, ang)
+		if orthoSize <= 0 then return pos end
+		local worldUnitsPerTexel = (orthoSize * 2) / depthRes
+		local fwd, right, up = ang:Forward(), ang:Right(), ang:Up()
+		local lx = pos:Dot(right)
+		local ly = pos:Dot(up)
+		local lz = pos:Dot(fwd)
+		lx = math.floor(lx / worldUnitsPerTexel + 0.5) * worldUnitsPerTexel
+		ly = math.floor(ly / worldUnitsPerTexel + 0.5) * worldUnitsPerTexel
+		return right * lx + up * ly + fwd * lz
 	end
 
 	-- Ensure cascade 1 exists (might have been removed then perf mode toggled off).
@@ -739,6 +756,19 @@ function ENT:Think()
 	local sizeMid      = self:GetSizeMid()   * sizeScale
 	local sizeFar      = self:GetSizeFar()   * sizeScale
 	local sizeFurther  = self:GetSizeFurther() * sizeScale
+
+	-- Per-cascade ortho size lookup (used for texel snapping below).
+	local cascadeSize = {
+		[1] = spreadEnabled and sizeMid or sizeNear,
+		[2] = sizeMid,
+		[3] = sizeFar,
+		[4] = sizeFurther,
+	}
+	-- Spread extra lights all use sizeMid.
+	if spreadEnabled then
+		local extra = GetConVar("csm_spread_samples"):GetInt() - 2
+		for i = 1, extra do cascadeSize[4 + i] = sizeMid end
+	end
 
 	-- Set orthographic extents.
 	local function setOrtho(pt, s)
@@ -807,7 +837,16 @@ function ENT:Think()
 		end
 
 		-- Position and angle.
-		pt:SetPos(position)
+		-- Apply texel snapping if enabled: snap position to shadow-map texel grid
+		-- in light space to eliminate sub-texel shadow shimmer as the camera moves.
+		local ptPos = position
+		if GetConVar("csm_texelsnap"):GetBool() then
+			-- All cascades snap to the FAR cascade's (coarsest) texel grid so
+			-- they move in lockstep and the mask boundaries don't drift.
+			local coarseSize = sizeFurther > 0 and sizeFurther or sizeFar
+			ptPos = texelSnap(position, coarseSize, sunAngle)
+		end
+		pt:SetPos(ptPos)
 		pt:SetAngles(sunAngle)
 
 		-- Spread: rotate each sample around the sun axis.

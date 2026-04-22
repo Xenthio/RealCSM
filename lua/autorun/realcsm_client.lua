@@ -221,6 +221,9 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:NumSlider("Shadowmap Slope Scale Depth Bias", "csm_depthbias_slopescale", 0, 6, 1)
 
 		panel:CheckBox("Cascade Debug Colors", "csm_debug_cascade")
+
+		panel:CheckBox("Texel Snapping", "csm_texelsnap")
+		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves. More accurate than the legacy position rounding option.")
 		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
 		local resetBtn = panel:Button("Open First-Time Setup")
