@@ -5,8 +5,9 @@
 -- TODO: Use a single ProjectedTexture when r_flashlightdepthres is 0 (no shadows anyway).
 
 AddCSLuaFile()
-DEFINE_BASECLASS("base_edit_csm")
 
+ENT.Type      = "anim"
+ENT.Base      = "base_edit_csm"
 ENT.Spawnable = true
 ENT.AdminOnly = true
 ENT.PrintName = "CSM Editor"

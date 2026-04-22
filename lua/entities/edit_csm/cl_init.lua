@@ -1,5 +1,5 @@
--- lua/entities/edit_csm/cl_init.lua
--- CLIENT ONLY. All rendering: ProjectedTexture management, Think loop, first-time spawn UI.
+include("shared.lua")
+DEFINE_BASECLASS("base_edit_csm")
 
 include("realcsm/convars.lua")
 include("realcsm/util.lua")
@@ -126,6 +126,10 @@ function ENT:createLamps()
 			self.ProjectedTextures[4 + i]:SetTexture("csm/mask_center")
 		end
 	end
+
+	-- Expose lamps globally so other addons can read them.
+	-- RealCSM.Lamps is a read-only view; don't modify it externally.
+	RealCSM.Lamps = self.ProjectedTextures
 end
 
 -- ── Initialize ────────────────────────────────────────────────────────────────
@@ -150,6 +154,8 @@ function ENT:Initialize()
 	self._prevFPShadows             = not GetConVar("csm_localplayershadow"):GetBool()
 	self._lightPoints               = {}
 	self._warnedNoSun               = false
+	-- Save r_radiosity before we touch it so we can restore it on remove/disable.
+	self._prevRadiosity             = GetConVar("r_radiosity"):GetString()
 
 	self:SetMaterial("csm/edit_csm")
 	BaseClass.Initialize(self)
@@ -166,6 +172,7 @@ function ENT:Initialize()
 	end
 
 	RunConsoleCommand("csm_enabled", "1")
+	self._prevCSMEnabled = true -- already setting up, don't double-create lamps in Think
 
 	-- Warn if no light_environment.
 	timer.Simple(0.1, function()
@@ -304,7 +311,7 @@ function ENT:OnRemove()
 		end
 
 		if self:GetRemoveStaticSun() then
-			RunConsoleCommand("r_radiosity", "3")
+			RunConsoleCommand("r_radiosity", self._prevRadiosity or "4")
 			if GetConVar("csm_wakeprops"):GetBool() then
 				net.Start("RealCSMPropWakeup")
 				net.SendToServer()
@@ -316,7 +323,7 @@ function ENT:OnRemove()
 					if render then render.RedownloadAllLightmaps(false, true) end
 				end)
 			end
-			-- Server side handles SUNOn() and broadcasting.
+			-- Server Think watches csm_enabled and calls SUNOn() when it changes.
 		end
 	end
 
@@ -326,6 +333,9 @@ function ENT:OnRemove()
 		end
 		self.ProjectedTextures = nil
 	end
+
+	-- Clear the global lamp reference when CSM is removed.
+	RealCSM.Lamps = nil
 end
 
 -- ── Think ──────────────────────────────────────────────────────────────────────
@@ -382,7 +392,7 @@ function ENT:Think()
 			end
 		end
 
-		RunConsoleCommand("r_radiosity", "3")
+		RunConsoleCommand("r_radiosity", self._prevRadiosity or "4")
 		if GetConVar("csm_wakeprops"):GetBool() then
 			net.Start("RealCSMPropWakeup")
 			net.SendToServer()
@@ -390,6 +400,11 @@ function ENT:Think()
 		RunConsoleCommand("r_shadowrendertotexture", "1")
 		RunConsoleCommand("r_shadowdist", "10000")
 		if self:GetHideRTTShadows() then RTT.Enable() end
+
+		-- Reload lightmaps so static lighting comes back after sun was removed.
+		timer.Simple(0.1, function()
+			if render then render.RedownloadAllLightmaps(false, true) end
+		end)
 
 		if self.ProjectedTextures then
 			for _, pt in pairs(self.ProjectedTextures) do
@@ -542,13 +557,13 @@ function ENT:Think()
 	end
 
 	-- ── Far cascade shadows toggle ("super perf mode") ─────────────────────────
-	-- Note: original logic was inverted – csm_farshadows=1 means shadows ON.
-	local farShadows = GetConVar("csm_farshadows"):GetBool()
-	if self._prevFarShadows ~= farShadows then
+	-- csm_farshadows=1 = SUPER PERF MODE (shadows OFF); 0 = shadows ON.
+	local superPerfMode = GetConVar("csm_farshadows"):GetBool()
+	if self._prevFarShadows ~= superPerfMode then
 		if self.ProjectedTextures and IsValid(self.ProjectedTextures[3]) then
-			self.ProjectedTextures[3]:SetEnableShadows(farShadows)
+			self.ProjectedTextures[3]:SetEnableShadows(not superPerfMode)
 		end
-		self._prevFarShadows = farShadows
+		self._prevFarShadows = superPerfMode
 	end
 
 	-- ── csm_nofar: kill cascade 3 if requested ────────────────────────────────
@@ -580,7 +595,7 @@ function ENT:Think()
 			end
 			-- Server handles SUNOff.
 		else
-			RunConsoleCommand("r_radiosity", "3")
+			RunConsoleCommand("r_radiosity", self._prevRadiosity or "4")
 			if GetConVar("csm_wakeprops"):GetBool() then
 				net.Start("RealCSMPropWakeup")
 				net.SendToServer()
@@ -848,3 +863,4 @@ function ENT:Think()
 		end
 	end
 end
+

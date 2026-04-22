@@ -4,6 +4,14 @@
 
 RealCSM = RealCSM or {}
 
+-- Send module files to clients (needed for cl_init.lua and realcsm_client.lua includes).
+if SERVER then
+	AddCSLuaFile("realcsm/convars.lua")
+	AddCSLuaFile("realcsm/util.lua")
+	AddCSLuaFile("realcsm/rtt.lua")
+	AddCSLuaFile("realcsm/skyboxfix.lua")
+end
+
 -- ── Net strings (server registers, client just receives) ────────────────────
 if SERVER then
 	util.AddNetworkString("RealCSMPlayerSpawnedFully")  -- tell client they are fully in
@@ -13,6 +21,7 @@ if SERVER then
 	util.AddNetworkString("RealCSMReloadLightmaps")     -- server→client: redownload lightmaps
 	util.AddNetworkString("RealCSMSunInfo")             -- server→client: broadcast sun angles (StormFox / server-driven)
 	util.AddNetworkString("RealCSMEnforceDepthRes")     -- server→client: cap shadow quality
+	util.AddNetworkString("RealCSMSunOn")               -- client→server: re-enable static sun
 end
 
 -- ── PlayerInitialSpawn full-load trick ─────────────────────────────────────

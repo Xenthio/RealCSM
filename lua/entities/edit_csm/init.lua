@@ -1,5 +1,7 @@
--- lua/entities/edit_csm/init.lua
--- SERVER ONLY. Handles entity lifecycle, sun on/off, fp-shadow controller.
+AddCSLuaFile("cl_init.lua")
+AddCSLuaFile("shared.lua")
+include("shared.lua")
+DEFINE_BASECLASS("base_edit_csm")
 
 include("realcsm/convars.lua")
 
@@ -10,6 +12,12 @@ end
 -- ── Sun control ───────────────────────────────────────────────────────────────
 
 function ENT:SUNOff()
+	-- TODO: This is a serverside Fire("turnoff") on light_environment, which means ALL clients
+	-- lose the static sun simultaneously. There's no per-client way to toggle it in Source.
+	-- This means on a multiplayer server, if one client disables CSM via csm_enabled, it turns
+	-- off the sun for *everyone*. There's no clean fix for this without engine-level changes.
+	-- A partial workaround would be to not touch light_environment at all and instead rely purely
+	-- on the projected textures overriding the static lighting, but that changes the look significantly.
 	for _, v in ipairs(ents.FindByClass("light_environment")) do
 		v:Fire("turnoff")
 	end
@@ -122,7 +130,7 @@ function ENT:OnRemove()
 
 	if GetConVar("csm_spawnalways"):GetInt() == 0 then
 		if self:GetRemoveStaticSun() then
-			RunConsoleCommand("r_radiosity", "3")
+			RunConsoleCommand("r_radiosity", "4")
 			if GetConVar("csm_legacydisablesun"):GetInt() == 1 then
 				RunConsoleCommand("r_ambientlightingonly", "0")
 				RunConsoleCommand("r_lightstyle", "-1")
@@ -133,4 +141,30 @@ function ENT:OnRemove()
 			end
 		end
 	end
+end
+
+
+
+
+-- Watch csm_enabled serverside so SUNOn/SUNOff fire when the client toggles the checkbox.
+function ENT:Think()
+	local enabled = GetConVar("csm_enabled"):GetBool()
+	if self._svPrevCSMEnabled == nil then
+		self._svPrevCSMEnabled = enabled
+	end
+
+	if enabled and not self._svPrevCSMEnabled then
+		self._svPrevCSMEnabled = true
+		if self:GetRemoveStaticSun() then
+			self:SUNOff()
+		end
+	elseif not enabled and self._svPrevCSMEnabled then
+		self._svPrevCSMEnabled = false
+		if self:GetRemoveStaticSun() then
+			self:SUNOn()
+		end
+	end
+
+	self:NextThink(CurTime() + 0.1)
+	return true
 end

@@ -95,23 +95,3 @@ hook.Add("RealCSMPlayerFullLoad", "RealCSMAutoSpawn", spawnCSM)
 hook.Add("RealCSMPlayerFullLoad", "RealCSMQualityCap", function(ply)
 	enforceQualityCap(ply)
 end)
-
--- ── Server toolmenu ──────────────────────────────────────────────────────────
-
-hook.Add("PopulateToolMenu", "RealCSMServer", function()
-	spawnmenu.AddToolMenuOption("Utilities", "Admin", "CSM_Server", "#CSM", "", "", function(panel)
-		panel:ClearControls()
-
-		panel:ControlHelp("Thanks for using Real CSM! Please consider donating to support development:")
-		panel:ControlHelp("https://www.patreon.com/xenthio")
-
-		panel:CheckBox("Auto-spawn CSM on map load (Experimental)",                "csm_spawnalways")
-		panel:CheckBox("Only spawn if map has a light_environment (Experimental)", "csm_spawnwithlightenv")
-		panel:CheckBox("Allow clients to wake up all props",                        "csm_allowwakeprops")
-		panel:CheckBox("Allow legacy firstperson shadow entity",                    "csm_allowfpshadows_old")
-		panel:CheckBox("Read env_sun colour on spawn",                              "csm_getENVSUNcolour")
-
-		panel:NumSlider("Max client shadow map resolution (0 = unlimited)", "csm_sv_maxdepthres", 0, 16384, 0)
-		panel:ControlHelp("Caps r_flashlightdepthres on clients when they join. Useful on low-spec servers.")
-	end)
-end)
