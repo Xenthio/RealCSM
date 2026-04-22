@@ -268,3 +268,100 @@ hook.Add("PopulateToolMenu", "RealCSMServer", function()
 		panel:ControlHelp("Caps r_flashlightdepthres on clients when they join. Useful on low-spec servers.")
 	end)
 end)
+
+-- ── RealCSM 2.0 Changelog popup ──────────────────────────────────────────────
+
+local function ShowChangelog()
+	local W, H = 480, 520
+	local Frame = vgui.Create("DFrame")
+	Frame:SetSize(W, H)
+	Frame:Center()
+	Frame:SetTitle("Real CSM 2.0 — What's New")
+	Frame:SetDraggable(true)
+	Frame:ShowCloseButton(true)
+	Frame:MakePopup()
+
+	local scroll = vgui.Create("DScrollPanel", Frame)
+	scroll:SetPos(8, 28)
+	scroll:SetSize(W - 16, H - 70)
+
+	local function heading(text, y)
+		local lbl = vgui.Create("DLabel", scroll)
+		lbl:SetPos(8, y)
+		lbl:SetSize(W - 40, 22)
+		lbl:SetText(text)
+		lbl:SetFont("DermaDefaultBold")
+		lbl:SetTextColor(Color(255, 220, 80))
+		return lbl
+	end
+	local function item(text, y)
+		local lbl = vgui.Create("DLabel", scroll)
+		lbl:SetPos(16, y)
+		lbl:SetSize(W - 48, 18)
+		lbl:SetText(text)
+		lbl:SetTextColor(Color(220, 220, 220))
+		lbl:SetWrap(true)
+		lbl:SetAutoStretchVertical(true)
+		return lbl
+	end
+
+	local y = 4
+	local function h(t) heading(t, y) y = y + 24 end
+	local function li(t) item(t, y) y = y + 20 end
+	local function gap() y = y + 8 end
+
+	h("Real CSM 2.0 — Full Rewrite")
+	li("The entire codebase has been rewritten from scratch.")
+	li("Cleaner architecture, no global pollution, proper client/server split.")
+	li("You might find that A LOT less addons are broken now.")
+	gap()
+
+	h("New Features")
+	li("- Texel Snapping — eliminates shadow shimmer as you move (on by default)")
+	li("- Cascade Mode dropdown — Normal / Performance / Shadow Mapping (1 lamp)")
+	li("- Spread Sample Patterns — Optimal, Vogel spiral, or Legacy layer-based")
+	li("- Server sun override API — RealCSM.BroadcastSunInfo() for other addons")
+	li("- Server quality cap — csm_sv_maxdepthres to limit client shadow res")
+	li("- RealCSM.Lamps — global table of active ProjectedTextures for other addons")
+	gap()
+
+	h("Bug Fixes")
+	li("- Radiosity now restores to previous value instead of hardcoded 3")
+	li("- Disabling CSM via checkbox now properly restores lighting")
+	li("- Double lamp creation on spawn fixed")
+	gap()
+
+	h("Reporting Bugs (Please report any!)")
+	li("GitHub: https://github.com/Xenthio/RealCSM/issues")
+	li("Discord: https://discord.gg/VkZjdjsSjJ")
+	li("Please include your csm_ convar values and any console errors.")
+	gap()
+
+	h("Settings")
+	li("All settings are in Spawnmenu -> Utilities -> User -> CSM")
+	li("Server settings: Utilities -> Admin -> CSM")
+
+	local closeBtn = vgui.Create("DButton", Frame)
+	closeBtn:SetText("Got it!")
+	closeBtn:SetPos(W/2 - 60, H - 38)
+	closeBtn:SetSize(120, 28)
+	closeBtn.DoClick = function()
+		file.Write("realcsm_v2.txt", "seen")
+		Frame:Close()
+	end
+end
+
+local function ChangelogCheck()
+	if file.Read("realcsm_v2.txt", "DATA") ~= "seen" then
+		timer.Simple(2, function()
+			if IsValid(LocalPlayer()) then ShowChangelog() end
+		end)
+	end
+end
+
+hook.Add("InitPostEntity", "RealCSMChangelog", ChangelogCheck)
+
+-- Console command to re-show the changelog at any time.
+concommand.Add("csm_show_changelog", function()
+	ShowChangelog()
+end)
