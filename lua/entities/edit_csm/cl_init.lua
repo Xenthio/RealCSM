@@ -5,6 +5,7 @@ include("realcsm/convars.lua")
 include("realcsm/util.lua")
 include("realcsm/rtt.lua")
 include("realcsm/skyboxfix.lua")
+include("realcsm/spread.lua")
 
 local Util      = RealCSM.Util
 local RTT       = RealCSM.RTT
@@ -18,65 +19,17 @@ local SkyboxFix = RealCSM.SkyboxFix
 
 function ENT:allocLights()
 	local samples = GetConVar("csm_spread_samples"):GetInt()
-	local layers  = GetConVar("csm_spread_layers"):GetInt()
-	local density = GetConVar("csm_spread_layer_density"):GetFloat()
 	local radius  = GetConVar("csm_spread_radius"):GetFloat()
-	local alloctype     = GetConVar("csm_spread_layer_alloctype"):GetInt()
-	local reserveMiddle = GetConVar("csm_spread_layer_reservemiddle"):GetBool()
+	local method  = GetConVar("csm_spread_method"):GetInt()
 
-	-- Distribute samples across layers.
-	local samplesPerLayer = {}
-	for i = 1, layers do
-		local n = samples / layers
-		samplesPerLayer[i] = (i == 1) and math.ceil(n) or math.floor(n)
-	end
+	local legacyParams = {
+		layers        = GetConVar("csm_spread_layers"):GetInt(),
+		density       = GetConVar("csm_spread_layer_density"):GetFloat(),
+		reserveMiddle = GetConVar("csm_spread_layer_reservemiddle"):GetBool(),
+		allocType     = GetConVar("csm_spread_layer_alloctype"):GetInt(),
+	}
 
-	-- Fixup rounding so sum == samples exactly.
-	local failsafe = 0
-	local sum = 0
-	repeat
-		failsafe = failsafe + 1
-		sum = 0
-		for _, v in pairs(samplesPerLayer) do sum = sum + v end
-		if sum > samples then
-			samplesPerLayer[layers] = samplesPerLayer[layers] - 1
-		elseif sum < samples then
-			samplesPerLayer[failsafe] = samplesPerLayer[failsafe] + 1
-		end
-	until sum == samples or failsafe == 2
-
-	-- Optional density re-weighting.
-	if alloctype == 1 and layers > 2 then
-		for k in pairs(samplesPerLayer) do
-			if samplesPerLayer[k] > 2 then
-				samplesPerLayer[k] = samplesPerLayer[k] - (k - 2)
-			end
-		end
-	elseif layers > 1 and samplesPerLayer[layers] > 3 then
-		samplesPerLayer[layers] = samplesPerLayer[layers] - 1
-		samplesPerLayer[1]      = samplesPerLayer[1] + 1
-	end
-
-	if samplesPerLayer[layers] > 3 and layers > 1 and reserveMiddle then
-		samplesPerLayer[layers] = samplesPerLayer[layers] - 1
-	end
-
-	-- Build lightPoints angle table.
-	local lightPoints = {}
-	for i = 1, layers do
-		local count    = samplesPerLayer[i]
-		local layerRev = layers - (i - 1)
-		local r        = ((layerRev - (density * -1 * (i - 1))) / layers) * radius
-		for deg = 1, 360, 360 / count do
-			local x, y = Util.PointOnCircle(deg, r, 0, 0)
-			table.insert(lightPoints, Angle(x, y, 0))
-		end
-		if layers > 1 and samplesPerLayer[layers] > 1 and i == layers and reserveMiddle then
-			table.insert(lightPoints, Angle(0, 0, 0))
-		end
-	end
-
-	self._lightPoints = lightPoints
+	self._lightPoints = RealCSM.Spread.GetPoints(method, samples, radius, legacyParams)
 end
 
 -- ── ProjectedTexture creation ─────────────────────────────────────────────────
@@ -149,6 +102,7 @@ function ENT:Initialize()
 	self._prevSpreadSamples         = -1
 	self._prevSpreadLayers          = -1
 	self._prevSpreadRadius          = -1
+	self._prevSpreadMethod          = -1
 	self._prevPropRadiosity         = -1
 	self._prevPerfMode              = false
 	self._prevFPShadows             = not GetConVar("csm_localplayershadow"):GetBool()
@@ -496,13 +450,15 @@ function ENT:Think()
 		self._prevSpreadSamples = spreadSamples
 	end
 
-	-- ── Spread layer / radius change (just recompute angle table) ───────────────
+	-- ── Spread layer / radius / method change (recompute angle table) ────────────
 	local spreadLayers = GetConVar("csm_spread_layers"):GetInt()
 	local spreadRadius = GetConVar("csm_spread_radius"):GetFloat()
-	if self._prevSpreadLayers ~= spreadLayers or self._prevSpreadRadius ~= spreadRadius then
+	local spreadMethod = GetConVar("csm_spread_method"):GetInt()
+	if self._prevSpreadLayers ~= spreadLayers or self._prevSpreadRadius ~= spreadRadius or self._prevSpreadMethod ~= spreadMethod then
 		self:allocLights()
 		self._prevSpreadLayers = spreadLayers
 		self._prevSpreadRadius = spreadRadius
+		self._prevSpreadMethod = spreadMethod
 	end
 
 	-- ── Perf mode toggle ───────────────────────────────────────────────────────

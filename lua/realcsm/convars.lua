@@ -22,6 +22,7 @@ local clientDefs = {
 	{ "csm_spread_layer_density",             0,        true,  false },
 	{ "csm_spread_layer_alloctype",           0,        false, false },
 	{ "csm_spread_layer_reservemiddle",       1,        false, false },
+	{ "csm_spread_method",                    0,        true,  false }, -- 0=Optimal 1=Vogel 2=Legacy
 	{ "csm_localplayershadow",                0,        true,  false },
 	{ "csm_localplayershadow_old",            0,        false, false },
 	{ "csm_further",                          0,        true,  false },

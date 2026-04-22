@@ -201,8 +201,15 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Spread radius in degrees. Real-world value: 0.5. Artistic: up to 1.0.")
 		panel:NumSlider("Spread Samples", "csm_spread_samples", 2, 16, 0)
 		panel:ControlHelp("WARNING: above 7 requires launching GMod with extra shadow maps. High values may crash!")
-		panel:NumSlider("Spread Circle Layers", "csm_spread_layers", 1, 6, 0)
-		panel:ControlHelp("Layers of circles packing the spread. 1 = softer, 2 = more accurate.")
+
+		local spreadMethodCombo = panel:ComboBox("Spread Sample Pattern", "csm_spread_method")
+		spreadMethodCombo:AddChoice("0: Optimal (hardcoded ideal packing, best quality)", 0)
+		spreadMethodCombo:AddChoice("1: Vogel / Golden-angle spiral (good for any count)", 1)
+		spreadMethodCombo:AddChoice("2: Legacy layer-based (original algorithm)", 2)
+		panel:ControlHelp("Optimal uses pre-computed Vogel spiral packings for N=1-32, exact analytical for small N. Falls back to Vogel above 32. Legacy exposes the layer controls below.")
+
+		panel:NumSlider("Spread Circle Layers (Legacy only)", "csm_spread_layers", 1, 6, 0)
+		panel:ControlHelp("Only used by the Legacy pattern method.")
 
 		panel:CheckBox("Draw Firstperson Shadows (Experimental)", "csm_localplayershadow")
 		panel:ControlHelp("See your own shadow in firstperson.")
