@@ -232,6 +232,11 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Adds a fourth cascade for greater shadow draw distance.")
 		panel:CheckBox("Enable shadows on further cascade", "csm_furthershadows")
 
+		local depthFmtCombo = panel:ComboBox("Shadow Depth Buffer Format", "csm_depthformat")
+		depthFmtCombo:AddChoice("D16 (default, 16-bit, no code needed)", 16)
+		depthFmtCombo:AddChoice("D24 (higher precision, less acne — requires spawn)", 24)
+		panel:ControlHelp("D24 reduces shadow acne on large cascades. Applied once at CSM spawn; requires map reload to revert. Experimental.")
+
 		panel:NumSlider("Shadowmap Depth Bias", "csm_depthbias", -1, 1, 6)
 		panel:NumSlider("Shadowmap Slope Scale Depth Bias", "csm_depthbias_slopescale", 0, 6, 1)
 
@@ -323,6 +328,7 @@ local function ShowChangelog()
 	li("- Server sun override API — RealCSM.BroadcastSunInfo() for other addons")
 	li("- Server quality cap — csm_sv_maxdepthres to limit client shadow res")
 	li("- RealCSM.Lamps — global table of active ProjectedTextures for other addons")
+	li("- D24 depth buffer upgrade (opt-in) — reduces shadow acne on large cascades")
 	gap()
 
 	h("Bug Fixes")

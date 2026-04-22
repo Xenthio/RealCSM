@@ -94,6 +94,50 @@ function ENT:createLamps()
 	RealCSM.Lamps = self.ProjectedTextures
 end
 
+-- ── Shadow depth buffer upgrade ────────────────────────────────────────────────────
+-- Re-registers GMod's shadow depth render targets with a higher bit-depth format.
+-- D24 gives better precision, reducing shadow acne on large cascades.
+-- This is a one-shot operation: re-running has no effect; only a game restart undoes it.
+-- Called with pcall so a failure on unsupported GPUs doesn't break anything.
+local _depthFormatUpgraded = false
+local function UpgradeDepthFormat(want24)
+	if _depthFormatUpgraded then return end
+	if not want24 then return end  -- D16 = default, nothing to do
+
+	-- Format IDs differ between x86-64 (CS:GO era) and x86 (TF2 era) branches.
+	local fmt
+	if BRANCH == "x86-64" then
+		fmt = 48  -- IMAGE_FORMAT_D24X8_SHADOW
+	else
+		fmt = 31  -- IMAGE_FORMAT_NV_DST24
+	end
+
+	local size    = GetConVar("r_flashlightdepthres"):GetInt()
+	if size <= 0 then size = 1024 end
+	local rtFlags = render.GetHDREnabled() and CREATERENDERTARGETFLAGS_HDR or 0
+
+	local ok, err = pcall(function()
+		for i = 0, 7 do  -- cover up to 8 shadow maps (spread mode can use more)
+			GetRenderTargetEx(
+				"_rt_shadowdepthtexture_" .. i,
+				size, size,
+				RT_SIZE_LITERAL,
+				MATERIAL_RT_DEPTH_ONLY,
+				bit.bor(1, 4, 8),
+				rtFlags,
+				fmt
+			)
+		end
+	end)
+
+	if ok then
+		print("[Real CSM] Shadow depth buffer upgraded to D24 (" .. (BRANCH == "x86-64" and "D24X8_SHADOW" or "NV_DST24") .. ")")
+		_depthFormatUpgraded = true
+	else
+		print("[Real CSM] Depth buffer upgrade failed (non-fatal): " .. tostring(err))
+	end
+end
+
 -- ── Initialize ────────────────────────────────────────────────────────────────
 
 function ENT:Initialize()
@@ -163,6 +207,9 @@ function ENT:Initialize()
 			end)
 		end
 	end
+
+	-- Upgrade shadow depth buffer to D24 if configured (one-shot).
+	UpgradeDepthFormat(GetConVar("csm_depthformat"):GetInt() == 24)
 
 	self:createLamps()
 end

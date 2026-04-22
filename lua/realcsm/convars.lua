@@ -38,6 +38,7 @@ local clientDefs = {
 	{ "csm_filter",                           0.08,     false, false },
 	{ "csm_filter_distancescale",             1,        false, false },
 	{ "csm_depthresasmultiple",               0,        false, false },
+	{ "csm_depthformat",                      16,       true,  false }, -- shadow depth buffer bits: 16 or 24
 	{ "csm_depthbias",                        0.000035, false, false },
 	{ "csm_depthbias_slopescale",             2,        false, false },
 	{ "csm_depthbias_distancescale",          0.0,      false, false },
