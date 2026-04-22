@@ -31,7 +31,9 @@ local clientDefs = {
 	{ "csm_farshadows",                       1,        true,  false },
 	{ "csm_nofar",                            0,        false, false },
 	{ "csm_sizescale",                        1,        true,  false },
-	{ "csm_perfmode",                         0,        true,  false },
+	{ "csm_perfmode",                         0,        true,  false }, -- legacy alias; use csm_cascade_count instead
+	{ "csm_singlecascade",                    0,        true,  false }, -- legacy alias; use csm_cascade_count instead
+	{ "csm_cascade_count",                    3,        true,  false }, -- 1=single, 2=perf, 3=normal
 	{ "csm_redownloadonremove",               1,        true,  false },
 	{ "csm_filter",                           0.08,     false, false },
 	{ "csm_filter_distancescale",             1,        false, false },

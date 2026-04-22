@@ -37,24 +37,33 @@ end
 function ENT:createLamps()
 	self.ProjectedTextures = {}
 
-	local perfMode     = GetConVar("csm_perfmode"):GetBool()
+	local cascadeCount   = GetConVar("csm_cascade_count"):GetInt()
 	local furtherEnabled = GetConVar("csm_further"):GetBool()
-	local harshCutoff  = GetConVar("csm_harshcutoff"):GetBool()
-	local spreadEnabled = GetConVar("csm_spread"):GetBool()
+	local harshCutoff    = GetConVar("csm_harshcutoff"):GetBool()
+	local spreadEnabled  = GetConVar("csm_spread"):GetBool()
 
-	-- Cascade 1 (near): skipped in perf mode.
+	-- Single cascade mode (count=1): one full-frame PT, no ring masks.
+	if cascadeCount == 1 then
+		self.ProjectedTextures[1] = ProjectedTexture()
+		self.ProjectedTextures[1]:SetEnableShadows(true)
+		self.ProjectedTextures[1]:SetTexture("csm/mask_center")
+		RealCSM.Lamps = self.ProjectedTextures
+		return
+	end
+
+	-- Cascade 1 (near): skipped in perf mode (count=2).
 	self.ProjectedTextures[1] = ProjectedTexture()
 	self.ProjectedTextures[1]:SetEnableShadows(true)
 	self.ProjectedTextures[1]:SetTexture("csm/mask_center")
-	if perfMode then
+	if cascadeCount == 2 then
 		self.ProjectedTextures[1]:Remove()
 		self.ProjectedTextures[1] = nil
 	end
 
-	-- Cascade 2 (mid): acts as near in perf mode; acts as center for spread.
+	-- Cascade 2 (mid): acts as near in perf/2-cascade mode; center for spread.
 	self.ProjectedTextures[2] = ProjectedTexture()
 	self.ProjectedTextures[2]:SetEnableShadows(true)
-	if perfMode or spreadEnabled then
+	if cascadeCount == 2 or spreadEnabled then
 		self.ProjectedTextures[2]:SetTexture("csm/mask_center")
 	else
 		self.ProjectedTextures[2]:SetTexture("csm/mask_ring")
@@ -99,12 +108,12 @@ function ENT:Initialize()
 	self._prevHarshCutoff           = false
 	self._prevFarShadows            = true
 	self._prevSpreadEnabled         = false
-	self._prevSpreadSamples         = -1
-	self._prevSpreadLayers          = -1
-	self._prevSpreadRadius          = -1
-	self._prevSpreadMethod          = -1
+	self._prevSpreadSamples         = GetConVar("csm_spread_samples"):GetInt()
+	self._prevSpreadLayers          = GetConVar("csm_spread_layers"):GetInt()
+	self._prevSpreadRadius          = GetConVar("csm_spread_radius"):GetFloat()
+	self._prevSpreadMethod          = GetConVar("csm_spread_method"):GetInt()
 	self._prevPropRadiosity         = -1
-	self._prevPerfMode              = false
+	self._prevCascadeCount          = GetConVar("csm_cascade_count"):GetInt()
 	self._prevFPShadows             = not GetConVar("csm_localplayershadow"):GetBool()
 	self._lightPoints               = {}
 	self._warnedNoSun               = false
@@ -461,24 +470,17 @@ function ENT:Think()
 		self._prevSpreadMethod = spreadMethod
 	end
 
-	-- ── Perf mode toggle ───────────────────────────────────────────────────────
-	local perfMode = GetConVar("csm_perfmode"):GetBool()
-	if self._prevPerfMode ~= perfMode and csmEnabled then
-		if perfMode then
-			if IsValid(self.ProjectedTextures and self.ProjectedTextures[1]) then
-				self.ProjectedTextures[2]:SetTexture("csm/mask_center")
-				self.ProjectedTextures[1]:Remove()
-				self.ProjectedTextures[1] = nil
-			end
-		else
-			for _, pt in pairs(self.ProjectedTextures or {}) do
-				if IsValid(pt) then pt:Remove() end
-			end
-			self.ProjectedTextures = {}
-			self:createLamps()
+	-- ── Single cascade toggle ───────────────────────────────────────────────────
+	local cascadeCount = GetConVar("csm_cascade_count"):GetInt()
+	if self._prevCascadeCount ~= cascadeCount and csmEnabled then
+		for _, pt in pairs(self.ProjectedTextures or {}) do
+			if IsValid(pt) then pt:Remove() end
 		end
-		self._prevPerfMode = perfMode
+		self.ProjectedTextures = {}
+		self:createLamps()
+		self._prevCascadeCount = cascadeCount
 	end
+
 
 	-- ── Spread enabled toggle ──────────────────────────────────────────────────
 	local spreadEnabled = GetConVar("csm_spread"):GetBool()
@@ -702,8 +704,8 @@ function ENT:Think()
 		return right * lx + up * ly + fwd * lz
 	end
 
-	-- Ensure cascade 1 exists (might have been removed then perf mode toggled off).
-	if not self.ProjectedTextures[1] and not GetConVar("csm_perfmode"):GetBool() then
+	-- Ensure cascade 1 exists when in normal (3-cascade) mode.
+	if not self.ProjectedTextures[1] and GetConVar("csm_cascade_count"):GetInt() == 3 then
 		self:createLamps()
 	end
 
@@ -737,6 +739,11 @@ function ENT:Think()
 	setOrtho(self.ProjectedTextures[2], sizeMid)
 	if IsValid(self.ProjectedTextures[3]) then setOrtho(self.ProjectedTextures[3], sizeFar) end
 	if IsValid(self.ProjectedTextures[4]) then setOrtho(self.ProjectedTextures[4], sizeFurther) end
+
+	-- Single cascade: use far size for the single frustum.
+	if GetConVar("csm_cascade_count"):GetInt() == 1 then
+		if self.ProjectedTextures[1] then setOrtho(self.ProjectedTextures[1], sizeFar) end
+	end
 
 	if spreadEnabled then
 		if IsValid(self.ProjectedTextures[1]) then setOrtho(self.ProjectedTextures[1], sizeMid) end
