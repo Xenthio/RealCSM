@@ -348,6 +348,7 @@ local function ShowChangelog()
 	li("- Server quality cap — csm_sv_maxdepthres to limit client shadow res")
 	li("- RealCSM.Lamps — global table of active ProjectedTextures for other addons")
 	li("- D24 depth buffer upgrade (opt-in) — reduces shadow acne on large cascades")
+	li("- Variable rate shadowmapping on far cascade (experimental, requires dev or x86-64 branch)")
 	gap()
 
 	h("Bug Fixes")
