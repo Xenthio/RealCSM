@@ -1,10 +1,13 @@
--- this is here so the editor works in other gamemodes than sandbox
+-- this is here so the editor works in any gamemode
 AddCSLuaFile()
-DEFINE_BASECLASS( "base_anim" )
 
+ENT.Type      = "anim"
+ENT.Base      = "base_anim"
 ENT.Spawnable = false
 ENT.AdminOnly = false
-ENT.Editable = true
+ENT.Editable  = true
+
+DEFINE_BASECLASS("base_anim")
 
 function ENT:Initialize()
 
