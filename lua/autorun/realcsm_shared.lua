@@ -22,6 +22,7 @@ if SERVER then
 	util.AddNetworkString("RealCSMSunInfo")             -- server→client: broadcast sun angles (StormFox / server-driven)
 	util.AddNetworkString("RealCSMEnforceDepthRes")     -- server→client: cap shadow quality
 	util.AddNetworkString("RealCSMSunOn")               -- client→server: re-enable static sun
+	util.AddNetworkString("RealCSMSunOff")              -- client→server: disable static sun
 
 	AddCSLuaFile("realcsm/spread.lua")
 end

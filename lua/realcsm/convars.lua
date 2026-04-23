@@ -44,6 +44,17 @@ local clientDefs = {
 	{ "csm_depthbias_distancescale",          0.0,      false, false },
 	{ "csm_experimental_translucentshadows",  0,        true,  false },
 	{ "csm_texelsnap",                         1,        true,  false },
+	-- Far cascade shadow update skipping (x86-64/dev branch feature).
+	-- Value = max seconds between far cascade updates. Updates also trigger on
+	-- texel snap (cascade moved) or sun angle change. 0 = disabled (update every frame).
+	-- 1-2 seconds is a good range — shadows only re-render when they visibly need to.
+	{ "csm_farskip",                          0.3,      true,  false },
+	{ "csm_midskip",                          0,        true,  false },
+	{ "csm_nearskip",                         0,        true,  false },
+	-- Multiplier for the cascade snap grid size. Applied to ALL cascades so
+	-- they stay in lockstep and masks don't drift. Higher = snap less often,
+	-- shadow stays locked across more movement. Pairs with *_skip convars.
+	{ "csm_skip_snapmult",                    1,        true,  false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },

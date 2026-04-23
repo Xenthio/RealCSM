@@ -366,8 +366,11 @@ function ENT:Think()
 				timer.Simple(0.1, function()
 					if render then render.RedownloadAllLightmaps(false, true) end
 				end)
+			else
+				-- Ask server to disable the light_environment entity.
+				net.Start("RealCSMSunOff")
+				net.SendToServer()
 			end
-			-- Server handles actual SUNOff.
 		end
 
 		RunConsoleCommand("r_radiosity", GetConVar("csm_propradiosity"):GetString())
@@ -399,6 +402,13 @@ function ENT:Think()
 				timer.Simple(0.1, function()
 					if render then render.RedownloadAllLightmaps(false, true) end
 				end)
+			else
+				-- Ask server to re-enable the light_environment entity. Server-side
+				-- convar-watching in Think is unreliable on dedicated servers and
+				-- has race conditions on listenservers; explicit net message is
+				-- the only way to guarantee SUNOn fires.
+				net.Start("RealCSMSunOn")
+				net.SendToServer()
 			end
 		end
 
@@ -857,8 +867,71 @@ function ENT:Think()
 			-- otherwise sizeFurther (default 65536) makes the grid absurdly coarse.
 			local furtherActive = GetConVar("csm_further"):GetBool()
 			local coarseSize = (furtherActive and sizeFurther > 0) and sizeFurther or sizeFar
+
+			-- Global snap multiplier: coarsens ALL cascade snap grids together so
+			-- they stay in lockstep (masks don't drift). Pairs with *_skip convars
+			-- to keep shadows locked during skipped frames.
+			local snapMult = GetConVar("csm_skip_snapmult"):GetFloat()
+			if snapMult > 1 then
+				coarseSize = coarseSize * snapMult
+			end
+
 			ptPos = texelSnap(position, coarseSize, sunAngle)
 		end
+
+		-- Decide shadow-skip for THIS cascade BEFORE we SetPos, so that if we're
+		-- skipping we can pin the projected texture to its last-rendered position.
+		-- Otherwise the shadow map is cached from position A but projected from
+		-- position B, which slides shadows around with the camera (very visible
+		-- at higher r_flashlightdepthres).
+		local shouldSkip = false
+		if pt.SetSkipShadowUpdates then
+			local skipCvarName
+			if     i == 1 then skipCvarName = "csm_nearskip"
+			elseif i == 2 then skipCvarName = "csm_midskip"
+			elseif i == 3 then skipCvarName = "csm_farskip"
+			end
+
+			local skipSecs = skipCvarName and GetConVar(skipCvarName):GetFloat() or 0
+			if skipSecs > 0 then
+				self._skipState = self._skipState or {}
+				local s = self._skipState[i]
+				if not s then s = {} self._skipState[i] = s end
+
+				local now = RealTime()
+				-- Position threshold: larger than sub-texel float jitter from the snap
+				-- math. 16 units prevents smooth player movement between snap steps
+				-- from re-triggering shadow updates every frame.
+				local positionChanged = s.lastPos == nil or
+					s.lastPos:DistToSqr(ptPos) > 256 -- 16^2
+				-- Angle threshold larger to avoid Stormfox sun-movement triggering
+				-- every frame. Half a degree is barely visible on shadows anyway.
+				local angleChanged = s.lastAng == nil or
+					math.abs(s.lastAng.p - sunAngle.p) > 0.5 or
+					math.abs(s.lastAng.y - sunAngle.y) > 0.5
+				local timeExpired = s.lastUpdate == nil or
+					(now - s.lastUpdate) > skipSecs
+
+				local shouldUpdate = positionChanged or angleChanged or timeExpired
+				shouldSkip = not shouldUpdate
+
+				if shouldUpdate then
+					s.lastPos    = ptPos
+					s.lastAng    = Angle(sunAngle.p, sunAngle.y, sunAngle.r)
+					s.lastUpdate = now
+				else
+					-- Pin the PT to where it was when the shadow map was last
+					-- rendered. Without this the frustum moves while the cached
+					-- depth texture doesn't, causing shadows to slide.
+					ptPos = s.lastPos or ptPos
+				end
+
+				pt:SetSkipShadowUpdates(shouldSkip)
+			else
+				pt:SetSkipShadowUpdates(false)
+			end
+		end
+
 		pt:SetPos(ptPos)
 		pt:SetAngles(sunAngle)
 
@@ -893,6 +966,7 @@ function ENT:Think()
 		pt:SetQuadraticAttenuation(0)
 		pt:SetLinearAttenuation(0)
 		pt:SetConstantAttenuation(1)
+
 		pt:Update()
 	end
 

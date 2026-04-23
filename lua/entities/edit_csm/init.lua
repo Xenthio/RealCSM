@@ -147,28 +147,29 @@ end
 
 
 
+-- Sun on/off driven by clients via net messages. More reliable than watching
+-- csm_enabled serverside (client convar, async, not usable on dedicated).
+-- Each CSM entity listens and acts on its own Fire(turnon/turnoff) state.
+net.Receive("RealCSMSunOn", function(_, ply)
+	for _, ent in ipairs(ents.FindByClass("edit_csm")) do
+		if ent:GetRemoveStaticSun() then
+			ent:SUNOn()
+		end
+	end
+end)
+
+net.Receive("RealCSMSunOff", function(_, ply)
+	for _, ent in ipairs(ents.FindByClass("edit_csm")) do
+		if ent:GetRemoveStaticSun() then
+			ent:SUNOff()
+		end
+	end
+end)
+
 -- Watch csm_enabled serverside so SUNOn/SUNOff fire when the client toggles the checkbox.
 -- NOTE: csm_enabled is a client convar. On dedicated servers GetConVar returns nil.
--- We use a safe fallback so it doesn't crash; dedicated server sun control requires net messages.
+-- Kept as a safety net for single-player; real work is done via RealCSMSun{On,Off} net msgs.
 function ENT:Think()
-	local cv = GetConVar("csm_enabled")
-	local enabled = cv and cv:GetBool() or true  -- default true on dedicated (no client to toggle)
-	if self._svPrevCSMEnabled == nil then
-		self._svPrevCSMEnabled = enabled
-	end
-
-	if enabled and not self._svPrevCSMEnabled then
-		self._svPrevCSMEnabled = true
-		if self:GetRemoveStaticSun() then
-			self:SUNOff()
-		end
-	elseif not enabled and self._svPrevCSMEnabled then
-		self._svPrevCSMEnabled = false
-		if self:GetRemoveStaticSun() then
-			self:SUNOn()
-		end
-	end
-
 	self:NextThink(CurTime() + 0.1)
 	return true
 end

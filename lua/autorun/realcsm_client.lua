@@ -250,6 +250,18 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:CheckBox("Cascade Debug Colors", "csm_debug_cascade")
 
 		panel:CheckBox("Texel Snapping", "csm_texelsnap")
+		local ptMeta = FindMetaTable("ProjectedTexture")
+		local hasSkipAPI = ptMeta and ptMeta.SetSkipShadowUpdates ~= nil
+		if hasSkipAPI then
+			panel:NumSlider("Far Cascade Skip (s)", "csm_farskip", 0, 5, 2)
+			panel:NumSlider("Mid Cascade Skip (s)", "csm_midskip", 0, 5, 2)
+			panel:NumSlider("Near Cascade Skip (s)", "csm_nearskip", 0, 5, 2)
+			panel:ControlHelp("Max seconds between shadow updates per cascade. 0 = update every frame (default). Updates still trigger on texel snap or sun angle change.")
+			panel:NumSlider("Snap Multiplier", "csm_skip_snapmult", 1, 32, 1)
+			panel:ControlHelp("Coarsens the snap grid for all cascades (they stay in lockstep). Higher = shadows stay locked across more camera movement. Pair with skip sliders to prevent shadow drag during skipped frames.")
+		else
+			local lbl = panel:Help("Far Cascade Skip: unavailable on this GMod branch (requires x86-64 or dev).")
+		end
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves. More accurate than the legacy position rounding option.")
 		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
