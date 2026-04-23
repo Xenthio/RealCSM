@@ -257,6 +257,7 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 			panel:NumSlider("Mid Cascade Skip (s)", "csm_midskip", 0, 5, 2)
 			panel:NumSlider("Near Cascade Skip (s)", "csm_nearskip", 0, 5, 2)
 			panel:ControlHelp("Max seconds between shadow updates per cascade. 0 = update every frame (default). Updates still trigger on texel snap or sun angle change.")
+			panel:ControlHelp("WARNING: skip uses an engine feature (SetSkipShadowUpdates) that shares a shadow render queue across all projected textures. Enabling skip on multiple cascades simultaneously can cause stutter between cascades. Skip is automatically disabled while the flashlight is on to prevent flashlight shadow lag.")
 			panel:NumSlider("Snap Multiplier", "csm_skip_snapmult", 1, 32, 1)
 			panel:ControlHelp("Coarsens the snap grid for all cascades (they stay in lockstep). Higher = shadows stay locked across more camera movement. Pair with skip sliders to prevent shadow drag during skipped frames.")
 		else

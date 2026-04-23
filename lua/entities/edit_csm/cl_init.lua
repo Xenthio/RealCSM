@@ -893,6 +893,17 @@ function ENT:Think()
 			end
 
 			local skipSecs = skipCvarName and GetConVar(skipCvarName):GetFloat() or 0
+
+			-- Auto-disable skip while the flashlight is on. SetSkipShadowUpdates
+			-- interacts with the engine's shared shadow depth render queue, so
+			-- skipping cascade shadows makes the flashlight shadow stutter/lag.
+			-- Rather than forcing users to pick between features, just disable
+			-- skipping while the flashlight is active.
+			local lp = LocalPlayer()
+			if IsValid(lp) and lp.FlashlightIsOn and lp:FlashlightIsOn() then
+				skipSecs = 0
+			end
+
 			if skipSecs > 0 then
 				self._skipState = self._skipState or {}
 				local s = self._skipState[i]
