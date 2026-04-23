@@ -48,7 +48,7 @@ local clientDefs = {
 	-- Value = max seconds between far cascade updates. Updates also trigger on
 	-- texel snap (cascade moved) or sun angle change. 0 = disabled (update every frame).
 	-- 1-2 seconds is a good range — shadows only re-render when they visibly need to.
-	{ "csm_farskip",                          0.3,      true,  false },
+	{ "csm_farskip",                          0.03,     true,  false },
 	{ "csm_midskip",                          0,        true,  false },
 	{ "csm_nearskip",                         0,        true,  false },
 	-- Multiplier for the cascade snap grid size. Applied to ALL cascades so
