@@ -47,11 +47,8 @@ local clientDefs = {
 	-- Per-cascade shadow update skipping (x86-64/dev branch feature).
 	-- Value = max seconds between that cascade's shadow updates. Updates also
 	-- trigger on texel snap (cascade moved) or sun angle change. 0 = disabled
-	-- (update every frame). Try 0.03-0.1 on far cascade for cheap perf wins.
-	-- CAVEAT: SetSkipShadowUpdates shares engine queue across all PTs; enabling
-	-- multiple *_skip simultaneously can cause cross-cascade stutter, and skip
-	-- is auto-disabled while flashlight is on (would otherwise lag flashlight).
-	{ "csm_farskip",                          0,        true,  false },
+	-- (update every frame). 0.03s on far cascade is a cheap perf win.
+	{ "csm_farskip",                          0.03,     true,  false },
 	{ "csm_midskip",                          0,        true,  false },
 	{ "csm_nearskip",                         0,        true,  false },
 	-- Multiplier for the cascade snap grid size. Applied to ALL cascades so
