@@ -62,7 +62,9 @@ local serverDefs = {
 	{ "csm_stormfoxsupport",                0, FCVAR_ARCHIVE },
 	{ "csm_stormfox_brightness_multiplier", 1, FCVAR_ARCHIVE },
 	{ "csm_stormfox_coloured_sun",          0, FCVAR_ARCHIVE },
-	-- If nonzero, clients are told not to exceed this shadow map resolution.
+	-- Server-readable mirrors of client convars (needed on dedicated servers).
+	{ "csm_propradiosity",                  4, FCVAR_ARCHIVE },
+	{ "csm_legacydisablesun",               0, FCVAR_ARCHIVE },
 	{ "csm_sv_maxdepthres",                 0, FCVAR_ARCHIVE },
 }
 

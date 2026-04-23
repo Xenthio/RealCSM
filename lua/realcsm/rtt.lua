@@ -27,12 +27,12 @@ end
 
 local function applyToAll()
 	for _, v in pairs(ents.GetAll()) do
-		v:DrawShadow(v._realcsm_storedShadow or true)
+		v:DrawShadow(v._realcsm_storedShadow ~= false)
 	end
 end
 
 local function onEntityCreated(ent)
-	ent:DrawShadow(ent._realcsm_storedShadow or true)
+	ent:DrawShadow(ent._realcsm_storedShadow ~= false)
 	-- Experimental: translucent entity shadow fix.
 	if ent:GetRenderGroup() == RENDERGROUP_TRANSLUCENT
 	   and RealCSM.CVar("csm_experimental_translucentshadows"):GetBool() then

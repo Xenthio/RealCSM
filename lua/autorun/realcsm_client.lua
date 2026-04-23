@@ -32,6 +32,11 @@ net.Receive("RealCSMSunInfo", function()
 end)
 
 -- ── Net: reload lightmaps when the server says so ───────────────────────────
+net.Receive("RealCSMHasLightEnv", function()
+	local hasLightEnv = net.ReadBool()
+	RunConsoleCommand("csm_haslightenv", hasLightEnv and "1" or "0")
+end)
+
 net.Receive("RealCSMReloadLightmaps", function()
 	if GetConVar("csm_redownloadonremove"):GetBool() then
 		render.RedownloadAllLightmaps(false, true)
@@ -169,7 +174,9 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		local qualitySlider = panel:NumSlider("Shadow Quality", "r_flashlightdepthres", 0, 16384, 0)
 		panel:ControlHelp("Shadow map resolution.")
 		qualitySlider.OnValueChanged = function(self, value)
-			RunConsoleCommand("csm_depthresasmultiple", math.floor((math.log(value) / math.log(2)) - 6))
+			if value > 0 then
+				RunConsoleCommand("csm_depthresasmultiple", math.floor((math.log(value) / math.log(2)) - 6))
+			end
 			RunConsoleCommand("r_flashlightdepthres", value)
 		end
 

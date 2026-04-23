@@ -45,7 +45,7 @@ function M.HexToRgb(hex)
 		tonumber(string.sub(hex, 1, 2), 16),
 		tonumber(string.sub(hex, 3, 4), 16),
 		tonumber(string.sub(hex, 5, 6), 16),
-		1.0
+		255
 	)
 end
 
@@ -53,7 +53,7 @@ end
 function M.CalculateAppearance(position)
 	local from, to
 
-	for _, key in pairs(AppearanceKeys) do
+	for _, key in ipairs(AppearanceKeys) do
 		if key.Position == position then return key end
 		if key.Position < position then from = key end
 		if key.Position > position then to = key; break end
@@ -66,10 +66,13 @@ function M.CalculateAppearance(position)
 	local result = {}
 
 	for k, v in pairs(from) do
-		if type(v) == "table" then
-			result[k] = M.LerpColor(t, from[k], to[k])
+		local fv, tv = from[k], to[k]
+		if type(fv) == "table" then
+			result[k] = M.LerpColor(t, fv, tv)
+		elseif isvector(fv) then
+			result[k] = LerpVector(t, fv, tv)
 		else
-			result[k] = Lerp(t, from[k], to[k])
+			result[k] = Lerp(t, fv, tv)
 		end
 	end
 

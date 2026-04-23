@@ -91,6 +91,7 @@ function ENT:Initialize()
 		self:SetRemoveStaticSun(true)
 		-- Broadcast to all clients so their csm_haslightenv updates.
 		net.Start("RealCSMHasLightEnv")
+		net.WriteBool(hasLightEnv)
 		net.Broadcast()
 	else
 		self:SetRemoveStaticSun(false)
@@ -147,8 +148,11 @@ end
 
 
 -- Watch csm_enabled serverside so SUNOn/SUNOff fire when the client toggles the checkbox.
+-- NOTE: csm_enabled is a client convar. On dedicated servers GetConVar returns nil.
+-- We use a safe fallback so it doesn't crash; dedicated server sun control requires net messages.
 function ENT:Think()
-	local enabled = GetConVar("csm_enabled"):GetBool()
+	local cv = GetConVar("csm_enabled")
+	local enabled = cv and cv:GetBool() or true  -- default true on dedicated (no client to toggle)
 	if self._svPrevCSMEnabled == nil then
 		self._svPrevCSMEnabled = enabled
 	end

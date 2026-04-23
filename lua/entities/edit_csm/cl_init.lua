@@ -853,7 +853,10 @@ function ENT:Think()
 		if GetConVar("csm_texelsnap"):GetBool() then
 			-- All cascades snap to the FAR cascade's (coarsest) texel grid so
 			-- they move in lockstep and the mask boundaries don't drift.
-			local coarseSize = sizeFurther > 0 and sizeFurther or sizeFar
+			-- Use sizeFurther only when the further cascade is actually active;
+			-- otherwise sizeFurther (default 65536) makes the grid absurdly coarse.
+			local furtherActive = GetConVar("csm_further"):GetBool()
+			local coarseSize = (furtherActive and sizeFurther > 0) and sizeFurther or sizeFar
 			ptPos = texelSnap(position, coarseSize, sunAngle)
 		end
 		pt:SetPos(ptPos)
