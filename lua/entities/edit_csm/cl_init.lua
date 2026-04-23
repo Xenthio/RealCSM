@@ -122,7 +122,7 @@ local function UpgradeDepthFormat(want24)
 				"_rt_shadowdepthtexture_" .. i,
 				size, size,
 				RT_SIZE_LITERAL,
-				MATERIAL_RT_DEPTH_ONLY,
+				MATERIAL_RT_DEPTH_NONE,
 				bit.bor(1, 4, 8),
 				rtFlags,
 				fmt
