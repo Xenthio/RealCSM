@@ -267,6 +267,8 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
 		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners. MVP uses axis-aligned rectangles.")
+		panel:CheckBox("Debug: log cascade placement", "csm_frustum_debug")
+		panel:CheckBox("Debug: draw cascade AABBs on HUD", "csm_frustum_viz")
 
 		local resetBtn = panel:Button("Open First-Time Setup")
 		resetBtn.DoClick = FirstTimeSetup

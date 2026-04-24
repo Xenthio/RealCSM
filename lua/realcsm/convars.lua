@@ -61,6 +61,7 @@ local clientDefs = {
 	-- without wasting texels on empty corners. MVP uses AABB cutouts.
 	{ "csm_frustum_masks",                    0,        true,  false },
 	{ "csm_frustum_debug",                    0,        true,  false },
+	{ "csm_frustum_viz",                      0,        true,  false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },

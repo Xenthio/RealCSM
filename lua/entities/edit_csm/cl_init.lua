@@ -855,11 +855,16 @@ function ENT:Think()
 			local pt = self.ProjectedTextures[ci]
 			if IsValid(pt) and cascadeSize[ci] then
 				cascades[#cascades + 1] = { pt = pt }
-				-- Use the existing ortho size as the cumulative far-depth hint.
-				-- (Eventually we want to derive splits from actual perf budget.)
-				splits[#splits + 1]     = cascadeSize[ci]
 			end
 		end
+
+		-- Proper cascade splits (PSSM-style, pure log distribution for
+		-- tight near cascade). Covers nearZ..maxViewDist along view.
+		-- Use a fixed reasonable far distance; don't use sizeFar which is
+		-- an ortho half-size, not a view-depth.
+		local maxViewDist = math.min(sizeFar > 0 and sizeFar or 4000, 4000)
+		splits = RealCSM.FrustumMasks.ComputeSplits(7, maxViewDist, #cascades, 1.0)
+
 		if #cascades > 1 then
 			-- GetViewEntity():GetPos() is reliable in Think; EyePos() isn't.
 			local viewEnt = GetViewEntity()
@@ -873,8 +878,28 @@ function ENT:Think()
 		end
 	end
 
+	-- Track frustum-placement state transitions so we only restore default
+	-- textures once when turning OFF (not every frame).
+	local wasActive = self._frustumPlacementWas or false
+	local needsRestore = wasActive and not frustumPlacementActive
+	self._frustumPlacementWas = frustumPlacementActive
+
 	for i, pt in pairs(self.ProjectedTextures) do
 		if not IsValid(pt) then continue end
+
+		-- When frustum placement transitions from ACTIVE -> INACTIVE, restore
+		-- the original per-cascade textures so we don't keep stale mask RTs.
+		if needsRestore then
+			if i == 1 or i == 2 then
+				pt:SetTexture("csm/mask_center")
+			elseif i == 3 then
+				pt:SetTexture("csm/mask_ring")
+			elseif i == 4 then
+				pt:SetTexture("csm/mask_end")
+			else
+				pt:SetTexture("csm/mask_center")
+			end
+		end
 
 		-- Brightness.
 		local sunBright = sunBrightBase
