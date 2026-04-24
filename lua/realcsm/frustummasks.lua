@@ -4,10 +4,10 @@
 -- Per cascade:
 --   1. View-frustum corners at cumulative depth (nearZ → splits[i])
 --   2. Project into light-space 2D (perpendicular to sun direction)
---   3. AABB of projected corners → asymmetric ortho box
+--   3. AABB of projected corners → light-space coverage box
 --   4. Lamp at AABB center, lifted along -sunFwd by sunHeight
---   5. ortho = SetOrthographic(true, -hx, hy, hx, -hy) (L/T/R/B)
---      (Source's "top" is upward in light-space Y, so swap sign of Y)
+--   5. ortho = SetOrthographic(true, h, h, h, h) for the actual PT call
+--      (or hx/hy if asymmetric ortho experiment is enabled)
 --   6. Paint RT mask: soft-edge white rect (this cascade's full bounds)
 --      minus soft-edge black rect (inner cascade's bounds reprojected
 --      into this cascade's UV frame). Prevents double-coverage.
@@ -167,7 +167,7 @@ local function rebuildSoftRT()
 			-- Each pixel is covered by exactly ONE ring → its alpha IS smoothstep(t).
 			-- No cumulative drift, no leakage.
 			local x0, y0, x1, y1 = 
-				math.floor(outer_inset * MASK_SIZE - 0.5),
+				math.floor(outer_inset * MASK_SIZE + 0.5),
 				math.floor(outer_inset * MASK_SIZE + 0.5),
 				math.floor((1 - outer_inset) * MASK_SIZE + 0.5),
 				math.floor((1 - outer_inset) * MASK_SIZE + 0.5)
@@ -614,7 +614,7 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 	-- Cascade i appears in its OWN shadow-depth RT (texel = 2*half_i/depthRes)
 	-- AND in the outer cascade's MASK RT (pixel = 2*half_{i+1}/MASK_SIZE).
 	-- Snap to whichever is larger so alignment is pixel-perfect in both.
-	local depthRes = GetConVar("csm_depth_res") and GetConVar("csm_depth_res"):GetInt() or 512
+	local depthRes = GetConVar("r_flashlightdepthres") and GetConVar("r_flashlightdepthres"):GetInt() or 512
 	for i, info in ipairs(perCascade) do
 		local h = info.half
 		local depthTexel = (2 * h) / depthRes

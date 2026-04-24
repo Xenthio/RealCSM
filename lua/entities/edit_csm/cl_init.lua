@@ -786,20 +786,16 @@ function ENT:Think()
 		for i = 1, extra do cascadeSize[4 + i] = sizeMid end
 	end
 
-	-- Set orthographic extents.
+	-- Set default orthographic extents first. If runtime frustum placement is
+	-- active later in this Think, it will override these values. Doing the base
+	-- setup unconditionally preserves correct fallback extents on frames where
+	-- frustum masks are enabled but UpdatePlacement bails/returns false.
 	local function setOrtho(pt, s)
 		if IsValid(pt) then
 			pt:SetOrthographic(true, s, s, s, s)
 		end
 	end
 
-	-- Skip base ortho setup when frustum placement is active (done below).
-	local frustumMasksOn = GetConVar("csm_frustum_masks"):GetBool()
-		and GetConVar("csm_cascade_count"):GetInt() > 1
-		and not spreadEnabled
-		and RealCSM.FrustumMasks ~= nil
-
-	if not frustumMasksOn then
 	if self.ProjectedTextures[1] then setOrtho(self.ProjectedTextures[1], sizeNear) end
 	setOrtho(self.ProjectedTextures[2], sizeMid)
 	if IsValid(self.ProjectedTextures[3]) then setOrtho(self.ProjectedTextures[3], sizeFar) end
@@ -819,8 +815,6 @@ function ENT:Think()
 			end
 		end
 	end
-	end -- if not frustumMasksOn
-
 	local stormfoxEnabled  = GetConVar("csm_stormfoxsupport"):GetInt() == 1
 	local depthBias        = GetConVar("csm_depthbias"):GetFloat()
 	local slopeScaleBias   = GetConVar("csm_depthbias_slopescale"):GetFloat()
