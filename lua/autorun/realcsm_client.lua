@@ -265,6 +265,9 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves. More accurate than the legacy position rounding option.")
 		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
+		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
+		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners. MVP uses axis-aligned rectangles.")
+
 		local resetBtn = panel:Button("Open First-Time Setup")
 		resetBtn.DoClick = FirstTimeSetup
 	end)

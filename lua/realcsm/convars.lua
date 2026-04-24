@@ -55,6 +55,12 @@ local clientDefs = {
 	-- they stay in lockstep and masks don't drift. Higher = snap less often,
 	-- shadow stays locked across more movement. Pairs with *_skip convars.
 	{ "csm_skip_snapmult",                    1,        true,  false },
+	-- Experimental: replace static circular masks (csm/mask_center, mask_ring,
+	-- mask_end) with runtime render targets painted to match the camera view
+	-- frustum projected into light space. Cascades tile without overlap and
+	-- without wasting texels on empty corners. MVP uses AABB cutouts.
+	{ "csm_frustum_masks",                    0,        true,  false },
+	{ "csm_frustum_debug",                    0,        true,  false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },

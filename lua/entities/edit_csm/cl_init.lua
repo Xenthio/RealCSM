@@ -6,6 +6,7 @@ include("realcsm/util.lua")
 include("realcsm/rtt.lua")
 include("realcsm/skyboxfix.lua")
 include("realcsm/spread.lua")
+include("realcsm/frustummasks.lua")
 
 local Util      = RealCSM.Util
 local RTT       = RealCSM.RTT
@@ -792,6 +793,13 @@ function ENT:Think()
 		end
 	end
 
+	-- Skip base ortho setup when frustum placement is active (done below).
+	local frustumMasksOn = GetConVar("csm_frustum_masks"):GetBool()
+		and GetConVar("csm_cascade_count"):GetInt() > 1
+		and not spreadEnabled
+		and RealCSM.FrustumMasks ~= nil
+
+	if not frustumMasksOn then
 	if self.ProjectedTextures[1] then setOrtho(self.ProjectedTextures[1], sizeNear) end
 	setOrtho(self.ProjectedTextures[2], sizeMid)
 	if IsValid(self.ProjectedTextures[3]) then setOrtho(self.ProjectedTextures[3], sizeFar) end
@@ -811,6 +819,7 @@ function ENT:Think()
 			end
 		end
 	end
+	end -- if not frustumMasksOn
 
 	local stormfoxEnabled  = GetConVar("csm_stormfoxsupport"):GetInt() == 1
 	local depthBias        = GetConVar("csm_depthbias"):GetFloat()
@@ -829,6 +838,39 @@ function ENT:Think()
 	local stormfoxApp
 	if stormfoxEnabled then
 		stormfoxApp = Util.CalculateAppearance((pitch + -180) / 360)
+	end
+
+	-- ── Runtime frustum cutout masks + placement (experimental) ─────────────
+	-- When csm_frustum_masks is on, the FrustumMasks module OWNS per-cascade
+	-- SetPos / SetAngles / SetOrthographic, placing each PT at the center of
+	-- its view-frustum slice AABB in light space (proper CSM placement).
+	-- The base Think loop below skips those calls when this flag is set.
+	local frustumPlacementActive = false
+	if RealCSM.FrustumMasks
+		and GetConVar("csm_frustum_masks"):GetBool()
+		and GetConVar("csm_cascade_count"):GetInt() > 1
+		and not spreadEnabled then
+		local cascades, splits = {}, {}
+		for ci = 1, 4 do
+			local pt = self.ProjectedTextures[ci]
+			if IsValid(pt) and cascadeSize[ci] then
+				cascades[#cascades + 1] = { pt = pt }
+				-- Use the existing ortho size as the cumulative far-depth hint.
+				-- (Eventually we want to derive splits from actual perf budget.)
+				splits[#splits + 1]     = cascadeSize[ci]
+			end
+		end
+		if #cascades > 1 then
+			-- GetViewEntity():GetPos() is reliable in Think; EyePos() isn't.
+			local viewEnt = GetViewEntity()
+			local realEyePos = IsValid(viewEnt) and (viewEnt:EyePos() or viewEnt:GetPos()) or vector_origin
+			local realEyeAng = IsValid(viewEnt) and (viewEnt:EyeAngles() or viewEnt:GetAngles()) or angle_zero
+			local realFov    = (IsValid(LocalPlayer()) and LocalPlayer():GetFOV()) or 75
+			frustumPlacementActive = RealCSM.FrustumMasks.UpdatePlacement(
+				self, sunAngle, self:GetHeight(), splits, cascades,
+				realEyePos, realEyeAng, realFov
+			)
+		end
 	end
 
 	for i, pt in pairs(self.ProjectedTextures) do
@@ -932,8 +974,10 @@ function ENT:Think()
 			end
 		end
 
-		pt:SetPos(ptPos)
-		pt:SetAngles(sunAngle)
+		if not frustumPlacementActive then
+			pt:SetPos(ptPos)
+			pt:SetAngles(sunAngle)
+		end
 
 		-- Spread: rotate each sample around the sun axis.
 		if spreadEnabled and self._lightPoints then
