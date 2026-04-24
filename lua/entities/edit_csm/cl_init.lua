@@ -899,8 +899,16 @@ function ENT:Think()
 				end
 			elseif i == 3 then
 				pt:SetTexture("csm/mask_ring")
-			elseif i == 4 then
-				pt:SetTexture("csm/mask_end")
+				-- if the further cascade isn't enabled, the far cascade uses the end mask when harsh cutoff is enabled, so check that too
+				if GetConVar("csm_harshcutoff"):GetBool() and not GetConVar("csm_further"):GetBool() then
+					pt:SetTexture("csm/mask_end")
+				end
+			elseif i == 4 then -- further is enabled here
+				pt:SetTexture("csm/mask_ring")
+				-- harsh cutoff also uses mask_end for the further cascade, so check that too
+				if GetConVar("csm_harshcutoff"):GetBool() then
+					pt:SetTexture("csm/mask_end")
+				end
 			else
 				pt:SetTexture("csm/mask_center")
 			end

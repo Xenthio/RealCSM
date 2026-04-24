@@ -87,6 +87,14 @@ local cvEdgeUV    = CreateClientConVar("csm_edge_uv",    "0.25", true, false,
 	"Fraction of each cascade mask's UV used for the soft-edge band")
 local cvEdgeRings = CreateClientConVar("csm_edge_rings", "64",  true, false,
 	"Number of discrete rings used to render the soft edge")
+local cvRollStep  = CreateClientConVar("csm_roll_step", "360", true, false,
+	"Quantize lamp roll alignment to this many degrees (0 = continuous w/ shimmer, 360 = disabled)")
+local cvShiftFwd  = CreateClientConVar("csm_shift_forward", "1", true, false,
+	"Shift symmetric square cascade boxes along camera-forward so slack is in front, not behind the player (0-1)")
+local cvFarFovScale = CreateClientConVar("csm_far_fov_scale", "1.0", true, false,
+	"Scale the effective FOV for the outermost cascade (0.3-1.0). Smaller = tighter far cascade, more distance, less peripheral far-shadow coverage.")
+local cvAsymOrtho = CreateClientConVar("csm_asymmetric_ortho", "0", true, false,
+	"Use asymmetric ortho (hx != hy) for cascade boxes. Tighter fit but shadow texels are anisotropic.")
 
 local function getEdgeRings() return math.Clamp(cvEdgeRings:GetInt(), 1, 256) end
 local function getEdgeUV()    return math.Clamp(cvEdgeUV:GetFloat(), 0.0, 0.499) end
@@ -223,13 +231,21 @@ local function getSubtractMatForRT(rt)
 	return m
 end
 
-local function paintMask(rt, innerRT, innerUV)
+local function paintMask(rt, innerRT, innerUV, isOutermost)
 	render.PushRenderTarget(rt)
 	-- Transparent-black clear: we'll paint white where the mask should be
 	-- opaque. Alpha = coverage for the projected texture's soft falloff.
 	render.Clear(0, 0, 0, 0, false, false)
 	cam.Start2D()
-		paintSoftBorderedWhite()
+		if isOutermost then
+			-- Outermost cascade: no outer fade (nothing to blend into past the
+			-- edge). Paint solid white edge-to-edge so distant geometry still
+			-- gets full shadow coverage instead of fading out into ambient.
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.DrawRect(0, 0, MASK_SIZE, MASK_SIZE)
+		else
+			paintSoftBorderedWhite()
+		end
 
 		if innerRT and innerUV then
 			-- Draw inner's mask TEXTURE with black tint and normal alpha blend.
@@ -333,13 +349,14 @@ function FM.DrawHUDViz()
 	end
 	local rects = {}
 	for i, c in ipairs(cascades) do
-		-- Draw the SYMMETRIC ortho box, not the raw AABB. That's what the
-		-- shadowmap actually covers.
-		local h = c.half or math.max(c.maxX - c.minX, c.maxY - c.minY) * 0.5
-		local bxMin = c.cx - h
-		local bxMax = c.cx + h
-		local byMin = c.cy - h
-		local byMax = c.cy + h
+		-- Draw the actual ortho box — square when symmetric, rect when asymmetric.
+		local asym = cvAsymOrtho:GetBool()
+		local hx = asym and (c.hx or c.half) or (c.half or math.max(c.maxX - c.minX, c.maxY - c.minY) * 0.5)
+		local hy = asym and (c.hy or c.half) or (c.half or math.max(c.maxX - c.minX, c.maxY - c.minY) * 0.5)
+		local bxMin = c.cx - hx
+		local bxMax = c.cx + hx
+		local byMin = c.cy - hy
+		local byMax = c.cy + hy
 		local corners = {
 			-- Wound CCW so that after the Y-flip (screen Y points down) the
 			-- surface.DrawPoly winding is correct.
@@ -439,20 +456,80 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 	local sunRight = sunAngle:Right()
 	local sunUp    = sunAngle:Up()
 
+	-- Roll the light-space basis so sunRight aligns with camera forward
+	-- projected onto the sun-perpendicular plane. This keeps the ortho box's
+	-- long axis pointing where the frustum extends, making the axis-aligned
+	-- bounding box much tighter than if we used an arbitrary sunAngle roll.
+	do
+		local camFwd = camAng:Forward()
+		local dotF   = camFwd:Dot(sunFwd)
+		local proj   = Vector(
+			camFwd.x - sunFwd.x * dotF,
+			camFwd.y - sunFwd.y * dotF,
+			camFwd.z - sunFwd.z * dotF
+		)
+		local len = proj:Length()
+		if len > 0.01 then
+			local nRight = proj / len
+			local nUp    = sunFwd:Cross(nRight); nUp:Normalize()
+			-- Compute roll: signed angle from sunAngle:Right() to nRight around sunFwd.
+			local cosR = sunRight:Dot(nRight)
+			local sinR = sunUp:Dot(nRight)
+			local roll = math.deg(math.atan2(sinR, cosR))
+			-- Quantize roll to discrete steps so texel grid only jumps occasionally
+			-- rather than rotating continuously with camera yaw. Trades a bit of
+			-- coverage for stability — no shimmer except at the boundary crossings.
+			local step = GetConVar("csm_roll_step") and GetConVar("csm_roll_step"):GetFloat() or 30
+			if step > 0 then
+				roll = math.floor(roll / step + 0.5) * step
+			end
+			sunAngle   = Angle(sunAngle.p, sunAngle.y, sunAngle.r + roll)
+			sunFwd     = sunAngle:Forward()
+			sunRight   = sunAngle:Right()
+			sunUp      = sunAngle:Up()
+		end
+	end
+
 	-- Used to bail here when camera looked along sun direction; turns out
 	-- that's not actually degenerate (sun-perp plane is well-defined), and
 	-- bailing left PTs holding stale frustum-mask RTs from earlier frames.
 	-- Just proceed — projectAABB_abs handles any camera angle.
 
 	-- Compute each cascade's absolute light-space AABB.
+	-- Use PSSM slabs (cascade i covers view distances split[i-1] → split[i])
+	-- rather than cumulative frustums [nearZ, split[i]]. Then union with the
+	-- previous cascade's AABB so inner ⊂ outer (required for carve math).
+	-- Net effect: outer cascades are tighter than naive cumulative because
+	-- distant slabs don't include the wide near-camera region.
 	local perCascade = {}
+	local prevAABB   = nil
 	for i, casc in ipairs(cascades) do
 		if not IsValid(casc.pt) then break end
-		local farZ = splitDistances[i]
+		local farZ  = splitDistances[i]
 		if not farZ then break end
+		local slabNear = (i == 1) and nearZ or splitDistances[i-1]
 
-		local corners = getFrustumCorners(camPos, camAng, fovV, aspect, nearZ, farZ)
+		-- Outermost cascade can optionally use a narrower effective FOV to
+		-- trim peripheral far-shadow coverage in exchange for more forward
+		-- distance packed into the same shadowmap resolution.
+		local effFov, effAspect = fovV, aspect
+		if i == #cascades then
+			local scale = math.Clamp(cvFarFovScale:GetFloat(), 0.3, 1.0)
+			effFov = fovV * scale
+			-- keep aspect the same so we shrink symmetrically on both axes
+		end
+
+		local corners = getFrustumCorners(camPos, camAng, effFov, effAspect, slabNear, farZ)
 		local minX, minY, maxX, maxY = projectAABB_abs(corners, sunRight, sunUp)
+
+		-- Union with previous cascade's AABB so inner ⊂ outer (carve assumes it).
+		if prevAABB then
+			if prevAABB.minX < minX then minX = prevAABB.minX end
+			if prevAABB.minY < minY then minY = prevAABB.minY end
+			if prevAABB.maxX > maxX then maxX = prevAABB.maxX end
+			if prevAABB.maxY > maxY then maxY = prevAABB.maxY end
+		end
+		prevAABB = { minX = minX, minY = minY, maxX = maxX, maxY = maxY }
 
 		-- Lamp position: AABB center in light-space, lifted along -sunFwd.
 		-- We can't just add sunRight*cx + sunUp*cy because that ignores the
@@ -518,6 +595,67 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		info.half = h
 	end
 
+	-- Pass 1.5: shift the symmetric square box along camera-forward so that
+	-- the slack (h - hx on X, h - hy on Y) falls in front of the player rather
+	-- than behind. The AABB stays inside the box; we just reposition which
+	-- side of the box the waste lives on.
+	-- Each cascade shifts by its OWN slack so the largest cascade (usually
+	-- the far one) gets the biggest forward push — that's the whole point,
+	-- more forward reach from the same-size far cascade. We then clamp each
+	-- inner cascade's shift so it stays inside the enclosing outer cascade
+	-- (required by carve math), with room to spare.
+	local shiftFrac = math.Clamp(cvShiftFwd:GetFloat(), 0, 1)
+	if shiftFrac > 0 then
+		local camFwd = camAng:Forward()
+		local fwdX   = camFwd:Dot(sunRight)
+		local fwdY   = camFwd:Dot(sunUp)
+		local fmag   = math.sqrt(fwdX*fwdX + fwdY*fwdY)
+		if fmag > 1e-4 then
+			fwdX, fwdY = fwdX / fmag, fwdY / fmag
+
+			-- Outermost shifts by its full slack (no containment constraint above it).
+			local N = #perCascade
+			local outerShiftX = (perCascade[N].half - perCascade[N].hx) * shiftFrac
+			local outerShiftY = (perCascade[N].half - perCascade[N].hy) * shiftFrac
+			perCascade[N].cx = perCascade[N].cx + outerShiftX * fwdX
+			perCascade[N].cy = perCascade[N].cy + outerShiftY * fwdY
+
+			-- Inner cascades shift by their own slack, clamped so the shifted
+			-- inner box stays inside the shifted outer box (inner ⊂ outer
+			-- invariant needed by carve). The shifted outer occupies
+			-- [outerCx ± outerH] along each axis; we need the inner's shifted
+			-- box [innerCx + shift ± innerH] to stay inside that.
+			for i = N - 1, 1, -1 do
+				local info  = perCascade[i]
+				local outer = perCascade[i + 1]
+				local wantSx = (info.half - info.hx) * shiftFrac
+				local wantSy = (info.half - info.hy) * shiftFrac
+
+				-- Project shifts onto forward direction (fwdX, fwdY).
+				-- Actually each cascade shifts along its own axes, and axis shifts
+				-- need the same sign as fwdX/fwdY respectively. We want inner's
+				-- new edges to stay inside outer's new edges on BOTH axes.
+				local function clampShift(innerCx, innerH, outerCx, outerH, want, dir)
+					-- After shift by s along dir: inner box = [innerCx + s*dir - innerH, innerCx + s*dir + innerH]
+					-- Outer box = [outerCx - outerH, outerCx + outerH]
+					-- Need: innerCx + s*dir - innerH >= outerCx - outerH
+					--  and: innerCx + s*dir + innerH <= outerCx + outerH
+					if math.abs(dir) < 1e-4 then return 0 end
+					local sMin = ((outerCx - outerH) - (innerCx - innerH)) / dir
+					local sMax = ((outerCx + outerH) - (innerCx + innerH)) / dir
+					if sMin > sMax then sMin, sMax = sMax, sMin end
+					return math.Clamp(want, sMin, sMax)
+				end
+
+				local sX = clampShift(info.cx, info.half, outer.cx, outer.half, wantSx, fwdX)
+				local sY = clampShift(info.cy, info.half, outer.cy, outer.half, wantSy, fwdY)
+
+				info.cx = info.cx + sX * fwdX
+				info.cy = info.cy + sY * fwdY
+			end
+		end
+	end
+
 	-- Pass 2: snap positions to the COARSEST grid this cascade appears in.
 	-- Cascade i appears in its OWN shadow-depth RT (texel = 2*half_i/depthRes)
 	-- AND in the outer cascade's MASK RT (pixel = 2*half_{i+1}/MASK_SIZE).
@@ -542,7 +680,11 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		info.cx    = snappedCx
 		info.cy    = snappedCy
 		info.ptPos = snappedLampWorld
-		info.pt:SetOrthographic(true, h, h, h, h)
+		if cvAsymOrtho:GetBool() then
+			info.pt:SetOrthographic(true, info.hx, info.hy, info.hx, info.hy)
+		else
+			info.pt:SetOrthographic(true, h, h, h, h)
+		end
 		info.pt:SetPos(snappedLampWorld)
 		info.pt:SetAngles(sunAngle)
 	end
@@ -576,15 +718,19 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 			-- Stamp region = PREV cascade's full ortho box mapped into THIS
 			-- cascade's UV. Softness matches automatically because we're
 			-- sampling the prev cascade's mask texture itself.
-			local h = info.half
-			local ph = prev.half
-			local thisMinX = info.cx - h
-			local thisMinY = info.cy - h
-			local inv2h    = 1 / (2 * h)
-			local uMin = ((prev.cx - ph) - thisMinX) * inv2h
-			local uMax = ((prev.cx + ph) - thisMinX) * inv2h
-			local vMin = ((prev.cy - ph) - thisMinY) * inv2h
-			local vMax = ((prev.cy + ph) - thisMinY) * inv2h
+			local asym = cvAsymOrtho:GetBool()
+			local h_x  = asym and info.hx or info.half
+			local h_y  = asym and info.hy or info.half
+			local ph_x = asym and prev.hx or prev.half
+			local ph_y = asym and prev.hy or prev.half
+			local thisMinX = info.cx - h_x
+			local thisMinY = info.cy - h_y
+			local invW    = 1 / (2 * h_x)
+			local invH    = 1 / (2 * h_y)
+			local uMin = ((prev.cx - ph_x) - thisMinX) * invW
+			local uMax = ((prev.cx + ph_x) - thisMinX) * invW
+			local vMin = ((prev.cy - ph_y) - thisMinY) * invH
+			local vMax = ((prev.cy + ph_y) - thisMinY) * invH
 
 			-- Clamp to [0..1]
 			if uMin < 0 then uMin = 0 end
@@ -598,7 +744,8 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 			end
 		end
 
-		paintMask(rt, innerRT, innerUV)
+		local isOutermost = (i == #perCascade)
+		paintMask(rt, innerRT, innerUV, isOutermost)
 		info.pt:SetTexture(rt)
 	end
 
