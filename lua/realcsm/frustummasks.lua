@@ -83,9 +83,9 @@ end
 -- toward the center. Crude but cheap and matches the soft mask VTF vibe.
 
 -- Softness band controls. Exposed as convars so you can tune live.
-local cvEdgeUV    = CreateClientConVar("csm_edge_uv",    "0.50", true, false,
+local cvEdgeUV    = CreateClientConVar("csm_edge_uv",    "0.25", true, false,
 	"Fraction of each cascade mask's UV used for the soft-edge band")
-local cvEdgeRings = CreateClientConVar("csm_edge_rings", "32",  true, false,
+local cvEdgeRings = CreateClientConVar("csm_edge_rings", "64",  true, false,
 	"Number of discrete rings used to render the soft edge")
 
 local function getEdgeRings() return math.Clamp(cvEdgeRings:GetInt(), 1, 256) end
@@ -201,20 +201,6 @@ local function paintSoftBorderedWhite()
 	surface.DrawTexturedRect(0, 0, MASK_SIZE, MASK_SIZE)
 end
 
-local function drawSoftRect(u0, v0, u1, v1, r, g, b)
-	local N = getEdgeRings()
-	local uv = getEdgeUV()
-	local a = math.floor(255 * (1 - math.pow(0.01, 1 / N)))
-	local step = uv / N
-	for k = 0, N do
-		local inset = k * step
-		surface.SetDrawColor(r, g, b, a)
-		local x, y, w, h = rectUVtoPx(u0 + inset, v0 + inset, u1 - inset, v1 - inset)
-		if w > 0 and h > 0 then
-			surface.DrawRect(x, y, w, h)
-		end
-	end
-end
 
 -- Material cache for drawing an inner cascade's mask RT into an outer
 -- cascade's mask. Standard alpha blend: we draw inner's RT at innerUV
@@ -241,7 +227,7 @@ local function paintMask(rt, innerRT, innerUV)
 	render.PushRenderTarget(rt)
 	-- Transparent-black clear: we'll paint white where the mask should be
 	-- opaque. Alpha = coverage for the projected texture's soft falloff.
-	render.Clear(255, 255, 255, 0, false, false)
+	render.Clear(0, 0, 0, 0, false, false)
 	cam.Start2D()
 		paintSoftBorderedWhite()
 

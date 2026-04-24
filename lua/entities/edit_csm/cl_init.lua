@@ -890,8 +890,13 @@ function ENT:Think()
 		-- When frustum placement transitions from ACTIVE -> INACTIVE, restore
 		-- the original per-cascade textures so we don't keep stale mask RTs.
 		if needsRestore then
-			if i == 1 or i == 2 then
+			if i == 1 then
 				pt:SetTexture("csm/mask_center")
+			elseif i == 2 then
+				pt:SetTexture("csm/mask_ring")
+				if GetConVar("csm_cascade_count"):GetInt() <= 2 then
+					pt:SetTexture("csm/mask_center")
+				end
 			elseif i == 3 then
 				pt:SetTexture("csm/mask_ring")
 			elseif i == 4 then
