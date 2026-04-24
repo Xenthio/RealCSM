@@ -83,7 +83,7 @@ end
 -- toward the center. Crude but cheap and matches the soft mask VTF vibe.
 
 -- Softness band controls. Exposed as convars so you can tune live.
-local cvEdgeUV    = CreateClientConVar("csm_edge_uv",    "0.25", true, false,
+local cvEdgeUV    = CreateClientConVar("csm_edge_uv",    "0.10", true, false,
 	"Fraction of each cascade mask's UV used for the soft-edge band")
 local cvEdgeRings = CreateClientConVar("csm_edge_rings", "64",  true, false,
 	"Number of discrete rings used to render the soft edge")
