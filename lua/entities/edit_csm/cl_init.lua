@@ -6,6 +6,7 @@ include("realcsm/util.lua")
 include("realcsm/rtt.lua")
 include("realcsm/skyboxfix.lua")
 include("realcsm/spread.lua")
+include("realcsm/frustummasks.lua")
 
 local Util      = RealCSM.Util
 local RTT       = RealCSM.RTT
@@ -785,7 +786,10 @@ function ENT:Think()
 		for i = 1, extra do cascadeSize[4 + i] = sizeMid end
 	end
 
-	-- Set orthographic extents.
+	-- Set default orthographic extents first. If runtime frustum placement is
+	-- active later in this Think, it will override these values. Doing the base
+	-- setup unconditionally preserves correct fallback extents on frames where
+	-- frustum masks are enabled but UpdatePlacement bails/returns false.
 	local function setOrtho(pt, s)
 		if IsValid(pt) then
 			pt:SetOrthographic(true, s, s, s, s)
@@ -811,7 +815,6 @@ function ENT:Think()
 			end
 		end
 	end
-
 	local stormfoxEnabled  = GetConVar("csm_stormfoxsupport"):GetInt() == 1
 	local depthBias        = GetConVar("csm_depthbias"):GetFloat()
 	local slopeScaleBias   = GetConVar("csm_depthbias_slopescale"):GetFloat()
@@ -831,8 +834,79 @@ function ENT:Think()
 		stormfoxApp = Util.CalculateAppearance((pitch + -180) / 360)
 	end
 
+	-- ── Runtime frustum cutout masks + placement (experimental) ─────────────
+	-- When csm_frustum_masks is on, the FrustumMasks module OWNS per-cascade
+	-- SetPos / SetAngles / SetOrthographic, placing each PT at the center of
+	-- its view-frustum slice AABB in light space (proper CSM placement).
+	-- The base Think loop below skips those calls when this flag is set.
+	local frustumPlacementActive = false
+	if RealCSM.FrustumMasks
+		and GetConVar("csm_frustum_masks"):GetBool()
+		and GetConVar("csm_cascade_count"):GetInt() > 1
+		and not spreadEnabled then
+		local cascades, splits = {}, {}
+		for ci = 1, 4 do
+			local pt = self.ProjectedTextures[ci]
+			if IsValid(pt) and cascadeSize[ci] then
+				cascades[#cascades + 1] = { pt = pt }
+			end
+		end
+
+		-- Proper cascade splits (PSSM-style, pure log distribution for
+		-- tight near cascade). Covers nearZ..maxViewDist along view.
+		-- Use a fixed reasonable far distance; don't use sizeFar which is
+		-- an ortho half-size, not a view-depth.
+		local maxViewDist = math.min(sizeFar > 0 and sizeFar or 4000, 4000)
+		splits = RealCSM.FrustumMasks.ComputeSplits(7, maxViewDist, #cascades, 1.0)
+
+		if #cascades > 1 then
+			-- GetViewEntity():GetPos() is reliable in Think; EyePos() isn't.
+			local viewEnt = GetViewEntity()
+			local realEyePos = IsValid(viewEnt) and (viewEnt:EyePos() or viewEnt:GetPos()) or vector_origin
+			local realEyeAng = IsValid(viewEnt) and (viewEnt:EyeAngles() or viewEnt:GetAngles()) or angle_zero
+			local realFov    = (IsValid(LocalPlayer()) and LocalPlayer():GetFOV()) or 75
+			frustumPlacementActive = RealCSM.FrustumMasks.UpdatePlacement(
+				self, sunAngle, self:GetHeight(), splits, cascades,
+				realEyePos, realEyeAng, realFov
+			)
+		end
+	end
+
+	-- Track frustum-placement state transitions so we only restore default
+	-- textures once when turning OFF (not every frame).
+	local wasActive = self._frustumPlacementWas or false
+	local needsRestore = wasActive and not frustumPlacementActive
+	self._frustumPlacementWas = frustumPlacementActive
+
 	for i, pt in pairs(self.ProjectedTextures) do
 		if not IsValid(pt) then continue end
+
+		-- When frustum placement transitions from ACTIVE -> INACTIVE, restore
+		-- the original per-cascade textures so we don't keep stale mask RTs.
+		if needsRestore then
+			if i == 1 then
+				pt:SetTexture("csm/mask_center")
+			elseif i == 2 then
+				pt:SetTexture("csm/mask_ring")
+				if GetConVar("csm_cascade_count"):GetInt() <= 2 then
+					pt:SetTexture("csm/mask_center")
+				end
+			elseif i == 3 then
+				pt:SetTexture("csm/mask_ring")
+				-- if the further cascade isn't enabled, the far cascade uses the end mask when harsh cutoff is enabled, so check that too
+				if GetConVar("csm_harshcutoff"):GetBool() and not GetConVar("csm_further"):GetBool() then
+					pt:SetTexture("csm/mask_end")
+				end
+			elseif i == 4 then -- further is enabled here
+				pt:SetTexture("csm/mask_ring")
+				-- harsh cutoff also uses mask_end for the further cascade, so check that too
+				if GetConVar("csm_harshcutoff"):GetBool() then
+					pt:SetTexture("csm/mask_end")
+				end
+			else
+				pt:SetTexture("csm/mask_center")
+			end
+		end
 
 		-- Brightness.
 		local sunBright = sunBrightBase
@@ -932,8 +1006,10 @@ function ENT:Think()
 			end
 		end
 
-		pt:SetPos(ptPos)
-		pt:SetAngles(sunAngle)
+		if not frustumPlacementActive then
+			pt:SetPos(ptPos)
+			pt:SetAngles(sunAngle)
+		end
 
 		-- Spread: rotate each sample around the sun axis.
 		if spreadEnabled and self._lightPoints then

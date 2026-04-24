@@ -25,6 +25,7 @@ if SERVER then
 	util.AddNetworkString("RealCSMSunOff")              -- client→server: disable static sun
 
 	AddCSLuaFile("realcsm/spread.lua")
+	AddCSLuaFile("realcsm/frustummasks.lua")
 end
 
 -- ── PlayerInitialSpawn full-load trick ─────────────────────────────────────
