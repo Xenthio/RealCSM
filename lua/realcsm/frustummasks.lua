@@ -502,7 +502,6 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 	-- Net effect: outer cascades are tighter than naive cumulative because
 	-- distant slabs don't include the wide near-camera region.
 	local perCascade = {}
-	local prevAABB   = nil
 	for i, casc in ipairs(cascades) do
 		if not IsValid(casc.pt) then break end
 		local farZ  = splitDistances[i]
@@ -522,14 +521,9 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		local corners = getFrustumCorners(camPos, camAng, effFov, effAspect, slabNear, farZ)
 		local minX, minY, maxX, maxY = projectAABB_abs(corners, sunRight, sunUp)
 
-		-- Union with previous cascade's AABB so inner ⊂ outer (carve assumes it).
-		if prevAABB then
-			if prevAABB.minX < minX then minX = prevAABB.minX end
-			if prevAABB.minY < minY then minY = prevAABB.minY end
-			if prevAABB.maxX > maxX then maxX = prevAABB.maxX end
-			if prevAABB.maxY > maxY then maxY = prevAABB.maxY end
-		end
-		prevAABB = { minX = minX, minY = minY, maxX = maxX, maxY = maxY }
+		-- Option B: do NOT union with the previous cascade's AABB.
+		-- Let inner/mid cascades overhang naturally instead of forcing nesting
+		-- via recentering/enlargement at the geometry stage.
 
 		-- Lamp position: AABB center in light-space, lifted along -sunFwd.
 		-- We can't just add sunRight*cx + sunUp*cy because that ignores the
@@ -595,63 +589,23 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		info.half = h
 	end
 
-	-- Pass 1.5: shift the symmetric square box along camera-forward so that
-	-- the slack (h - hx on X, h - hy on Y) falls in front of the player rather
-	-- than behind. The AABB stays inside the box; we just reposition which
-	-- side of the box the waste lives on.
-	-- Each cascade shifts by its OWN slack so the largest cascade (usually
-	-- the far one) gets the biggest forward push — that's the whole point,
-	-- more forward reach from the same-size far cascade. We then clamp each
-	-- inner cascade's shift so it stays inside the enclosing outer cascade
-	-- (required by carve math), with room to spare.
+	-- Pass 1.5: forward-bias each cascade by its own slack, with fade padding.
+	-- No AABB union, no inner clamp chain: cascades are allowed to overhang.
 	local shiftFrac = math.Clamp(cvShiftFwd:GetFloat(), 0, 1)
-	if shiftFrac > 0 then
+	if shiftFrac > 0 and #perCascade > 0 then
 		local camFwd = camAng:Forward()
 		local fwdX   = camFwd:Dot(sunRight)
 		local fwdY   = camFwd:Dot(sunUp)
 		local fmag   = math.sqrt(fwdX*fwdX + fwdY*fwdY)
 		if fmag > 1e-4 then
 			fwdX, fwdY = fwdX / fmag, fwdY / fmag
-
-			-- Outermost shifts by its full slack (no containment constraint above it).
-			local N = #perCascade
-			local outerShiftX = (perCascade[N].half - perCascade[N].hx) * shiftFrac
-			local outerShiftY = (perCascade[N].half - perCascade[N].hy) * shiftFrac
-			perCascade[N].cx = perCascade[N].cx + outerShiftX * fwdX
-			perCascade[N].cy = perCascade[N].cy + outerShiftY * fwdY
-
-			-- Inner cascades shift by their own slack, clamped so the shifted
-			-- inner box stays inside the shifted outer box (inner ⊂ outer
-			-- invariant needed by carve). The shifted outer occupies
-			-- [outerCx ± outerH] along each axis; we need the inner's shifted
-			-- box [innerCx + shift ± innerH] to stay inside that.
-			for i = N - 1, 1, -1 do
-				local info  = perCascade[i]
-				local outer = perCascade[i + 1]
-				local wantSx = (info.half - info.hx) * shiftFrac
-				local wantSy = (info.half - info.hy) * shiftFrac
-
-				-- Project shifts onto forward direction (fwdX, fwdY).
-				-- Actually each cascade shifts along its own axes, and axis shifts
-				-- need the same sign as fwdX/fwdY respectively. We want inner's
-				-- new edges to stay inside outer's new edges on BOTH axes.
-				local function clampShift(innerCx, innerH, outerCx, outerH, want, dir)
-					-- After shift by s along dir: inner box = [innerCx + s*dir - innerH, innerCx + s*dir + innerH]
-					-- Outer box = [outerCx - outerH, outerCx + outerH]
-					-- Need: innerCx + s*dir - innerH >= outerCx - outerH
-					--  and: innerCx + s*dir + innerH <= outerCx + outerH
-					if math.abs(dir) < 1e-4 then return 0 end
-					local sMin = ((outerCx - outerH) - (innerCx - innerH)) / dir
-					local sMax = ((outerCx + outerH) - (innerCx + innerH)) / dir
-					if sMin > sMax then sMin, sMax = sMax, sMin end
-					return math.Clamp(want, sMin, sMax)
-				end
-
-				local sX = clampShift(info.cx, info.half, outer.cx, outer.half, wantSx, fwdX)
-				local sY = clampShift(info.cy, info.half, outer.cy, outer.half, wantSy, fwdY)
-
-				info.cx = info.cx + sX * fwdX
-				info.cy = info.cy + sY * fwdY
+			local edgeUV = getEdgeUV()
+			for _, info in ipairs(perCascade) do
+				local backFade = 2 * edgeUV * info.half
+				local shiftX = math.max(0, (info.half - info.hx) - backFade) * shiftFrac
+				local shiftY = math.max(0, (info.half - info.hy) - backFade) * shiftFrac
+				info.cx = info.cx + shiftX * fwdX
+				info.cy = info.cy + shiftY * fwdY
 			end
 		end
 	end
