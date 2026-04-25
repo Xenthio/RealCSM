@@ -772,7 +772,6 @@ function ENT:Think()
 
 	local viewPos = GetViewEntity():GetPos()
 	local position = viewPos + offset * self:GetHeight()
-	print(clampedHeight)
 	-- ── Texel snapping ───────────────────────────────────────────────────────────
 	-- Snaps position to the shadow-map texel grid in light space, eliminating
 	-- sub-texel shadow shimmer as the camera moves.
