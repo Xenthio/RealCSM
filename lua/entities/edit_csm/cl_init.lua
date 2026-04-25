@@ -1089,7 +1089,7 @@ function ENT:Think()
 		pt:SetFarZ(farZ * 1.025)		
 		pt:SetQuadraticAttenuation(0)
 		pt:SetLinearAttenuation(0)
-		pt:SetConstantAttenuation(1222)
+		pt:SetConstantAttenuation(1)
 
 		pt:Update()
 	end
