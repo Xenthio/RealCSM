@@ -1,194 +1,187 @@
 -- lua/realcsm/skyboxlamp.lua
--- A single dedicated projected texture that lights the 3D skybox.
+-- Dedicated projected texture that lights the 3D skybox.
 --
--- Problem: The normal CSM lamps are placed in world space (usually high above
--- the map). The 3D skybox is rendered from sky_camera at 1/16th scale at a
--- separate world origin, so a lamp positioned at e.g. (0, 0, 32768) in world
--- space may or may not happen to illuminate the skybox depending on whether
--- its frustum intersects the sky_camera zone.  This is the "only sometimes the
--- sky gets lit" behaviour.
+-- APPROACH:
+--   The sky lamp is updated every frame in Think() (same as normal lamps) so
+--   the engine sees it before the render pass begins.  PreDrawSkyBox /
+--   PostDrawSkyBox only toggle brightness so the sky lamp is bright during
+--   the skybox render and dark during the main world render.
 --
--- Solution:
---   • On PreDrawSkyBox, disable the normal CSM lamps, enable a dedicated
---     sky-only lamp positioned correctly in sky_camera space.
---   • On PostDrawSkyBox, restore the normal lamps and kill the sky lamp.
---   • The sky lamp uses a full-center mask, no ring, with shadows OFF (skybox
---     geometry is usually simple enough and shadow maps in skybox cause artifacts).
+--   The lamp is positioned in sky_camera-space (1/16th world scale), so its
+--   orthographic frustum doesn't significantly overlap main world geometry.
 --
--- Note on sky_camera scale:
---   The skybox world is 1/16th scale.  The sky_camera entity is at the world
---   position that maps to the skybox "centre".  We position our lamp at the
---   sky_camera position plus 1/16th of the normal lamp height offset, so it
---   matches the apparent sun position the player sees.
+-- WHY NOT UPDATE IN PreDrawSkyBox:
+--   By the time PreDrawSkyBox fires the engine has already gathered all active
+--   PTs for the current render pass.  Calling Update() there only takes effect
+--   on the NEXT frame — too late to light the skybox in the current frame.
+--   r_flashlightdrawfrustum confirmed: lamps updated in the hook never appear.
 
 RealCSM = RealCSM or {}
 local M = {}
 RealCSM.SkyboxLamp = M
 
+local SKYBOX_SCALE = 1 / 16
+
 -- ── State ─────────────────────────────────────────────────────────────────────
 
-local _skyLamp       = nil   -- the dedicated skybox ProjectedTexture
-local _ownerEnt      = nil   -- the edit_csm entity that owns this system
-local _hooksActive   = false
-local _normalLamps   = nil   -- reference to the owner's ProjectedTextures table
+local _skyLamp   = nil
+local _ownerEnt  = nil
+local _lampTable = nil
+local _hooks     = false
+local _cachedOrthoSize = nil  -- cached skybox extent (recomputed when sky_camera pos changes)
+local _cachedSkyCamPos = nil
 
--- ── Helper: find sky_camera ────────────────────────────────────────────────────
+-- ── Lamp lifecycle ────────────────────────────────────────────────────────────
 
-local function getSkyCamera()
-	return ents.FindByClass("sky_camera")[1]
-end
-
--- ── Lamp setup ─────────────────────────────────────────────────────────────────
-
-local function createSkyLamp()
-	if _skyLamp and _skyLamp:IsValid() then return end
+local function ensureSkyLamp()
+	if IsValid(_skyLamp) then return end
 	_skyLamp = ProjectedTexture()
 	_skyLamp:SetTexture("csm/mask_center")
 	_skyLamp:SetEnableShadows(false)
+	_skyLamp:SetBrightness(0)
 	_skyLamp:SetOrthographic(true, 512, 512, 512, 512)
 	_skyLamp:SetQuadraticAttenuation(0)
 	_skyLamp:SetLinearAttenuation(0)
 	_skyLamp:SetConstantAttenuation(1)
-end
-
-local function removeSkyLamp()
-	if _skyLamp and _skyLamp:IsValid() then
-		_skyLamp:Remove()
-	end
-	_skyLamp = nil
-end
-
--- ── Hook callbacks ────────────────────────────────────────────────────────────
-
-local function onPreDrawSkyBox()
-	if not IsValid(_ownerEnt) then return end
-	if not _normalLamps then return end
-
-	-- Disable normal lamps so they don't bleed into the skybox.
-	for _, pt in pairs(_normalLamps) do
-		if IsValid(pt) then
-			pt:SetBrightness(0)
-			pt:Update()
-		end
-	end
-
-	-- Position the sky lamp.
-	local skyCamera = getSkyCamera()
-	if not IsValid(skyCamera) then return end
-
-	createSkyLamp()
-	if not IsValid(_skyLamp) then return end
-
-	-- Sky space scale factor.
-	local SKYBOX_SCALE = 1 / 16
-
-	-- Sun direction from the owner entity (already computed in Think).
-	-- We read the current angle from the first valid normal lamp rather than
-	-- re-computing, since Think runs before the draw hooks.
-	local sunAngle = angle_zero
-	for _, pt in pairs(_normalLamps) do
-		if IsValid(pt) then
-			sunAngle = pt:GetAngles()
-			break
-		end
-	end
-
-	-- Offset from sky_camera in sky-scaled coordinates.
-	local skyHeight  = _ownerEnt:GetHeight() * SKYBOX_SCALE
-	local sunOffset  = Vector(0, 0, 1)
-	sunOffset:Rotate(Angle(sunAngle.p - 90, sunAngle.y, sunAngle.r))
-
-	local skyLampPos = skyCamera:GetPos() - sunOffset * skyHeight
-
-	-- Ortho size: use the far cascade size, scaled down.
-	local orthoSize = _ownerEnt:GetSizeFar() * SKYBOX_SCALE
-	orthoSize = math.Clamp(orthoSize, 64, 4096)
-
-	-- Brightness: match normal lamps.
-	local sunBright = _ownerEnt:GetSunBrightness() / 400
-
-	_skyLamp:SetPos(skyLampPos)
-	_skyLamp:SetAngles(sunAngle)
-	_skyLamp:SetOrthographic(true, orthoSize, orthoSize, orthoSize, orthoSize)
-	_skyLamp:SetBrightness(sunBright)
-	_skyLamp:SetColor(_ownerEnt:GetSunColour():ToColor())
-	_skyLamp:SetNearZ(1.0)
-	_skyLamp:SetFarZ(skyHeight * 2 + 256)
 	_skyLamp:Update()
 end
 
-local function onPostDrawSkyBox()
-	if not IsValid(_ownerEnt) then return end
-	if not _normalLamps then return end
+local function destroySkyLamp()
+	if IsValid(_skyLamp) then _skyLamp:Remove() end
+	_skyLamp = nil
+end
 
-	-- Kill the sky lamp now that the skybox render is done.
-	-- We do NOT remove it permanently — we'll recreate or update it next frame.
+-- ── Brightness helpers ────────────────────────────────────────────────────────
+
+local function calcNormalBrightness(i)
+	if not IsValid(_ownerEnt) then return 1 end
+	local hdr    = GetConVar("csm_hashdr"):GetInt() == 1
+	local spread = GetConVar("csm_spread"):GetBool()
+	local samples = GetConVar("csm_spread_samples"):GetInt()
+	local base   = _ownerEnt:GetSunBrightness() / 400
+	if not hdr then base = base * 0.2 end
+	if spread and (i == 1 or i == 2 or i > 4) then
+		base = base / samples
+	end
+	return base
+end
+
+local function setNormalLampsEnabled(on)
+	if not _lampTable then return end
+	for i, pt in pairs(_lampTable) do
+		if IsValid(pt) then
+			pt:SetBrightness(on and calcNormalBrightness(i) or 0)
+			pt:Update()
+		end
+	end
+end
+
+-- ── Think integration (call every frame from entity Think) ────────────────────
+
+-- Think integration (call every frame from entity Think, AFTER normal lamps updated)
+-- sunAngle: the already-computed sun angle from the entity Think
+function M.Think(sunAngle)
+	if not IsValid(_ownerEnt) or not _lampTable then return end
+	ensureSkyLamp()
+	if not IsValid(_skyLamp) then return end
+
+	local skyCamPos = RealCSM.SkyCameraPos or Vector(0, 0, 0)
+
+	local height = _ownerEnt:GetHeight() * SKYBOX_SCALE
+	local skyPos = skyCamPos - sunAngle:Forward() * height
+
+	-- Calculate ortho size to cover the full skybox room.
+	-- Cache this per sky_camera position (it never changes at runtime).
+	if _cachedOrthoSize == nil or _cachedSkyCamPos ~= skyCamPos then
+		local function traceExtent(dir)
+			local tr = util.TraceLine({
+				start  = skyCamPos,
+				endpos = skyCamPos + dir * 65536,
+				mask   = MASK_SOLID_BRUSHONLY,
+			})
+			if tr.Hit then return tr.Fraction * 65536 end
+			return 4096
+		end
+		local right = sunAngle:Right()
+		local up    = sunAngle:Up()
+		local extentR = math.max(traceExtent(right), traceExtent(-right))
+		local extentU = math.max(traceExtent(up),    traceExtent(-up))
+		_cachedOrthoSize = math.Clamp(math.max(extentR, extentU) * 1.2, 512, 16384)
+		_cachedSkyCamPos = skyCamPos
+	end
+	local orthoSize = _cachedOrthoSize
+
+	_skyLamp:SetPos(skyPos)
+	_skyLamp:SetAngles(sunAngle)
+	_skyLamp:SetOrthographic(true, orthoSize, orthoSize, orthoSize, orthoSize)
+	_skyLamp:SetColor(_ownerEnt:GetSunColour():ToColor())
+	_skyLamp:SetNearZ(1)
+	_skyLamp:SetFarZ(height * 2 + 512)
+	_skyLamp:SetQuadraticAttenuation(0)
+	_skyLamp:SetLinearAttenuation(0)
+	_skyLamp:SetConstantAttenuation(1)
+	-- Brightness is managed by the Pre/PostDrawSkyBox hooks; don't override here.
+	_skyLamp:Update()
+end
+
+-- ── Hook callbacks (brightness toggle only) ───────────────────────────────────
+
+local function onPreDrawSkyBox()
+	if not IsValid(_ownerEnt) or not _lampTable then return end
+
+	-- Dim normal lamps for the skybox render pass.
+	setNormalLampsEnabled(false)
+
+	-- Brighten the sky lamp for the skybox render pass.
+	if IsValid(_skyLamp) then
+		local hdr  = GetConVar("csm_hashdr"):GetInt() == 1
+		local base = _ownerEnt:GetSunBrightness() / 400
+		if not hdr then base = base * 0.2 end
+		_skyLamp:SetBrightness(base)
+		_skyLamp:Update()
+	end
+end
+
+local function onPostDrawSkyBox()
+	-- Restore normal lamps.
+	setNormalLampsEnabled(true)
+
+	-- Kill sky lamp brightness for main world render.
 	if IsValid(_skyLamp) then
 		_skyLamp:SetBrightness(0)
 		_skyLamp:Update()
-	end
-
-	-- Restore normal lamp brightness.  The actual brightness value will be
-	-- re-set correctly on the next Think(), but we need a non-zero value NOW
-	-- so the main world render sees light again.  Use a sentinel; Think corrects it.
-	local sunBright = IsValid(_ownerEnt) and (_ownerEnt:GetSunBrightness() / 400) or 1
-	local spreadEnabled = GetConVar("csm_spread"):GetBool()
-	local spreadSamples = GetConVar("csm_spread_samples"):GetInt()
-
-	for i, pt in pairs(_normalLamps) do
-		if IsValid(pt) then
-			local br = sunBright
-			if spreadEnabled then
-				if i == 1 or i == 2 or i > 4 then
-					br = br / spreadSamples
-				end
-			end
-			pt:SetBrightness(br)
-			pt:Update()
-		end
 	end
 end
 
 -- ── Public API ────────────────────────────────────────────────────────────────
 
--- Call once when CSM entity spawns (or when the skybox-lamp setting changes to ON).
--- ent       : the edit_csm entity
--- lampTable : reference to ent.ProjectedTextures
 function M.On(ent, lampTable)
-	_ownerEnt    = ent
-	_normalLamps = lampTable
+	_ownerEnt  = ent
+	_lampTable = lampTable
 
-	if not _hooksActive then
+	ensureSkyLamp()
+
+	if not _hooks then
 		hook.Add("PreDrawSkyBox",  "RealCSM_SkyboxLamp", onPreDrawSkyBox)
 		hook.Add("PostDrawSkyBox", "RealCSM_SkyboxLamp", onPostDrawSkyBox)
-		_hooksActive = true
+		_hooks = true
 	end
 end
 
--- Call when CSM entity is removed or the skybox-lamp setting is turned OFF.
 function M.Off()
 	hook.Remove("PreDrawSkyBox",  "RealCSM_SkyboxLamp")
 	hook.Remove("PostDrawSkyBox", "RealCSM_SkyboxLamp")
-	_hooksActive = false
+	_hooks = false
 
-	removeSkyLamp()
+	destroySkyLamp()
+	setNormalLampsEnabled(true)
 
-	-- Restore normal lamp brightness (they may have been set to 0 mid-frame).
-	if _normalLamps then
-		local sunBright = IsValid(_ownerEnt) and (_ownerEnt:GetSunBrightness() / 400) or 1
-		for _, pt in pairs(_normalLamps) do
-			if IsValid(pt) then
-				pt:SetBrightness(sunBright)
-				pt:Update()
-			end
-		end
-	end
-
-	_ownerEnt    = nil
-	_normalLamps = nil
+	_ownerEnt  = nil
+	_lampTable = nil
+	_cachedOrthoSize = nil
+	_cachedSkyCamPos = nil
 end
 
--- Call when the lamp table is rebuilt (e.g. after cascade count change).
 function M.UpdateLamps(lampTable)
-	_normalLamps = lampTable
+	_lampTable = lampTable
 end

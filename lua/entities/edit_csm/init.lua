@@ -87,6 +87,14 @@ function ENT:Initialize()
 	local hasLightEnv = #ents.FindByClass("light_environment") > 0
 	RunConsoleCommand("csm_haslightenv", hasLightEnv and "1" or "0")
 
+	-- Broadcast sky_camera position to clients (not networked by default).
+	local skyCam = ents.FindByClass("sky_camera")[1]
+	if IsValid(skyCam) then
+		net.Start("RealCSMSkyCameraPos")
+		net.WriteVector(skyCam:GetPos())
+		net.Broadcast()
+	end
+
 	if hasLightEnv then
 		self:SetRemoveStaticSun(true)
 		-- Broadcast to all clients so their csm_haslightenv updates.

@@ -926,6 +926,12 @@ function ENT:Think()
 		self._prevSkyboxLamp = skyboxLampWanted
 	end
 
+	-- Tick the sky lamp every frame so it's positioned before the render pass.
+	-- Pass sunAngle directly so it doesn't have to read it back from the PT.
+	if skyboxLampWanted then
+		SkyboxLamp.Think(sunAngle)
+	end
+
 	for i, pt in pairs(self.ProjectedTextures) do
 		if not IsValid(pt) then continue end
 

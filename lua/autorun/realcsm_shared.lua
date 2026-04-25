@@ -23,6 +23,7 @@ if SERVER then
 	util.AddNetworkString("RealCSMEnforceDepthRes")     -- server→client: cap shadow quality
 	util.AddNetworkString("RealCSMSunOn")               -- client→server: re-enable static sun
 	util.AddNetworkString("RealCSMSunOff")              -- client→server: disable static sun
+	util.AddNetworkString("RealCSMSkyCameraPos")        -- server→client: sky_camera world position
 
 	AddCSLuaFile("realcsm/spread.lua")
 	AddCSLuaFile("realcsm/frustummasks.lua")

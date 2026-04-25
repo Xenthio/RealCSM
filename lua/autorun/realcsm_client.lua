@@ -42,6 +42,11 @@ net.Receive("RealCSMReloadLightmaps", function()
 		render.RedownloadAllLightmaps(false, true)
 	end
 end)
+-- ── Net: sky_camera world position (not networked by default in GMod) ──────────
+RealCSM.SkyCameraPos = nil
+net.Receive("RealCSMSkyCameraPos", function()
+	RealCSM.SkyCameraPos = net.ReadVector()
+end)
 
 -- ── Net: remove the clientside fp-shadow entity when server says so ─────────
 net.Receive("RealCSMKillClientShadows", function()
