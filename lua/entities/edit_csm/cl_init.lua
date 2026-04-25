@@ -945,7 +945,10 @@ function ENT:Think()
 	-- Tick the sky lamp every frame so it's positioned before the render pass.
 	-- Pass sunAngle directly so it doesn't have to read it back from the PT.
 	if skyboxLampWanted then
-		SkyboxLamp.Think(sunAngle)
+		local harshCutoff = GetConVar("csm_harshcutoff"):GetBool()
+		local further     = GetConVar("csm_further"):GetBool()
+		local tex3 = (harshCutoff and not further) and "csm/mask_end" or "csm/mask_ring"
+		SkyboxLamp.Think(sunAngle, tex3)
 	end
 
 	for i, pt in pairs(self.ProjectedTextures) do

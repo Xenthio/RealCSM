@@ -1,19 +1,23 @@
 -- lua/realcsm/skyboxlamp.lua
--- Dedicated projected texture that lights the 3D skybox.
+-- Lights the 3D skybox by temporarily repositioning the main cascade lamps
+-- into sky_camera space during the skybox render pass, then restoring them.
 --
--- PERFORMANCE DESIGN:
---   • One persistent PT, created in M.On(), removed in M.Off().
---   • Parked (orthoSize=0.001) during main render — covers no geometry,
---     engine skips it in RenderFlashlights. Zero render cost.
---   • PreDrawSkyBox: expand sky lamp (1 Update). Normal lamp muting is
---     opt-in via csm_skyboxlamp_mutenormal (default OFF) because on most
---     maps the normal lamp world-space frustums don't reach skybox geometry.
---   • PostDrawSkyBox: re-park sky lamp (1 Update). No normal-lamp Updates
---     unless muting was enabled.
---   • Think(): pure cache-write, no Update calls.
+-- WHY REUSE INSTEAD OF A DEDICATED PT:
+--   A dedicated PT costs 2 extra Update() calls per frame (park/expand) plus
+--   one extra PT in the engine's flashlight enumeration list even when parked.
+--   Reusing the main lamps costs the same 2N Updates but zero extra PTs.
 --
---   Minimum cost per frame: 2 Update() calls (Pre + Post expand/park).
---   With mutenormal ON: 2 + N*2 Updates (N = cascade count).
+-- SHADOW SAFETY:
+--   Main lamp shadow maps are baked during the main world render (before
+--   PreDrawSkyBox). Moving lamps to sky-space mid-frame would corrupt those
+--   maps for subsequent frames. Fix: disable shadows in Pre, restore in Post.
+--   The skybox doesn't need cascaded shadows anyway — geometry is simple.
+--
+-- UPDATE COUNT (N cascades, mutenormal irrelevant since we reuse):
+--   PreDrawSkyBox:  N * (SetPos + SetAngles + SetOrthographic + SetEnableShadows
+--                       + SetBrightness + SetNearZ + SetFarZ + Update) = N Updates
+--   PostDrawSkyBox: N * (restore all fields + Update) = N Updates
+--   Total: 2N Updates/frame. Zero extra PTs in flashlight list.
 
 RealCSM = RealCSM or {}
 local M = {}
@@ -21,17 +25,23 @@ RealCSM.SkyboxLamp = M
 
 local SKYBOX_SCALE = 1 / 16
 local PARKED_SIZE  = 0.001
+local SKY_LAMP_IDX = 3   -- reuse far cascade; biggest ortho, fewest cascades active
 
 -- ── State ─────────────────────────────────────────────────────────────────────
 
 local _ownerEnt        = nil
 local _lampTable       = nil
 local _hooks           = false
-local _skyLamp         = nil
 local _cachedOrthoSize = nil
 local _cachedSunAngle  = nil
 local _cachedSkyPos    = nil
 local _cachedFarZ      = nil
+
+-- Saved lamp state for restore after skybox pass.
+-- {[i] = {pos, angles, orthoSize, nearZ, farZ, brightness, shadows}}
+local _savedState        = {}
+local _savedOrthos       = {}
+local _tex3              = "csm/mask_ring"
 
 -- ── Skybox extent calculation (done once) ─────────────────────────────────────
 
@@ -57,102 +67,106 @@ local function calcOrthoSize(skyCamPos, sunAngle)
 	return math.Clamp(maxExtent * 1.25, 512, 32768)
 end
 
--- ── Sky lamp lifecycle ────────────────────────────────────────────────────────
-
-local function createSkyLamp()
-	if IsValid(_skyLamp) then return end
-	_skyLamp = ProjectedTexture()
-	_skyLamp:SetTexture("csm/mask_center")
-	_skyLamp:SetEnableShadows(false)
-	_skyLamp:SetBrightness(0)
-	_skyLamp:SetOrthographic(true, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE)
-	_skyLamp:SetNearZ(1)
-	_skyLamp:SetFarZ(2)
-	_skyLamp:SetQuadraticAttenuation(0)
-	_skyLamp:SetLinearAttenuation(0)
-	_skyLamp:SetConstantAttenuation(1)
-	_skyLamp:Update()
-end
-
--- ── Normal lamp park/restore (opt-in) ─────────────────────────────────────────
-
-local _savedSizes = {}
-
-local function parkNormalLamps()
-	if not _lampTable then return end
-	_savedSizes = {}
-	for i, pt in pairs(_lampTable) do
-		if IsValid(pt) then
-			local _, l, r, t, b = pt:GetOrthographic()
-			_savedSizes[i] = (l + r + t + b) / 4
-			pt:SetOrthographic(true, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE)
-			pt:SetLightWorld(false)
-			pt:Update()
-		end
-	end
-end
-
-local function restoreNormalLamps()
-	if not _lampTable then return end
-	for i, pt in pairs(_lampTable) do
-		if IsValid(pt) then
-			local s = _savedSizes[i] or PARKED_SIZE
-			pt:SetOrthographic(true, s, s, s, s)
-			pt:SetLightWorld(true)
-			pt:Update()
-		end
-	end
-	_savedSizes = {}
-end
-
 -- ── Hook callbacks ────────────────────────────────────────────────────────────
 
+local _hasSkipAPI = FindMetaTable("ProjectedTexture") and FindMetaTable("ProjectedTexture").SetSkipShadowUpdates ~= nil
+
 local function onPreDrawSkyBox()
-	if not IsValid(_skyLamp) or not IsValid(_ownerEnt) then return end
+	if not IsValid(_ownerEnt) or not _lampTable then return end
 	if not _cachedSunAngle or not _cachedSkyPos then return end
 
-	if GetConVar("csm_skyboxlamp_mutenormal"):GetBool() then
-		parkNormalLamps()
+	local pt = _lampTable[SKY_LAMP_IDX]
+	if not IsValid(pt) then
+		for _, v in pairs(_lampTable) do
+			if IsValid(v) then pt = v break end
+		end
 	end
+	if not IsValid(pt) then return end
 
 	local hdr  = GetConVar("csm_hashdr"):GetInt() == 1
 	local base = _ownerEnt:GetSunBrightness() / 400
 	if not hdr then base = base * 0.2 end
 
-	_skyLamp:SetLightWorld(true)
-	_skyLamp:SetPos(_cachedSkyPos)
-	_skyLamp:SetAngles(_cachedSunAngle)
-	_skyLamp:SetOrthographic(true, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize)
-	_skyLamp:SetNearZ(1)
-	_skyLamp:SetFarZ(_cachedFarZ)
-	_skyLamp:SetBrightness(base)
-	_skyLamp:SetColor(_ownerEnt:GetSunColour():ToColor())
-	_skyLamp:SetQuadraticAttenuation(0)
-	_skyLamp:SetLinearAttenuation(0)
-	_skyLamp:SetConstantAttenuation(1)
-	_skyLamp:Update()
+	-- Optionally park other lamps (csm_skyboxlamp_mutenormal).
+	-- OFF by default: Update() calls cost more than the extra render passes.
+	-- ON: use when normal lamps visibly bleed into the skybox on specific maps.
+	local muteNormal = GetConVar("csm_skyboxlamp_mutenormal"):GetBool()
+	_savedOrthos = {}
+	if muteNormal then
+		for i, lpt in pairs(_lampTable) do
+			if IsValid(lpt) and i ~= SKY_LAMP_IDX then
+				local _, l, r, t, b = lpt:GetOrthographic()
+				_savedOrthos[i] = (l + r + t + b) / 4
+				lpt:SetOrthographic(true, 0.001, 0.001, 0.001, 0.001)
+				lpt:Update()
+			end
+		end
+	end
+
+	-- Save lamp 3 state only.
+	local _, l, r, t, b = pt:GetOrthographic()
+	_savedState = {
+		pt      = pt,
+		pos     = pt:GetPos(),
+		angles  = pt:GetAngles(),
+		ortho   = (l + r + t + b) / 4,
+		nearZ   = pt:GetNearZ(),
+		farZ    = pt:GetFarZ(),
+		bright  = pt:GetBrightness(),
+		shadows = pt:GetEnableShadows(),
+		col     = pt:GetColor(),
+		tex     = _tex3,
+	}
+
+	pt:SetPos(_cachedSkyPos)
+	pt:SetAngles(_cachedSunAngle)
+	pt:SetOrthographic(true, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize)
+	pt:SetNearZ(1)
+	pt:SetFarZ(_cachedFarZ)
+	pt:SetBrightness(base)
+	pt:SetColor(_ownerEnt:GetSunColour():ToColor())
+	pt:SetEnableShadows(false)
+	pt:SetTexture("effects/flashlight/soft")
+	if _hasSkipAPI then pt:SetSkipShadowUpdates(true) end
+	pt:Update()
 end
 
 local function onPostDrawSkyBox()
-	-- Re-park the sky lamp.
-	if IsValid(_skyLamp) then
-		_skyLamp:SetOrthographic(true, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE)
-		_skyLamp:SetBrightness(0)
-		_skyLamp:SetNearZ(1)
-		_skyLamp:SetFarZ(2)
-		_skyLamp:SetLightWorld(false)
-		_skyLamp:Update()
-	end
+	local s = _savedState
+	if not s or not IsValid(s.pt) then return end
 
-	if GetConVar("csm_skyboxlamp_mutenormal"):GetBool() then
-		restoreNormalLamps()
+	s.pt:SetPos(s.pos)
+	s.pt:SetAngles(s.angles)
+	s.pt:SetOrthographic(true, s.ortho, s.ortho, s.ortho, s.ortho)
+	s.pt:SetNearZ(s.nearZ)
+	s.pt:SetFarZ(s.farZ)
+	s.pt:SetBrightness(s.bright)
+	s.pt:SetColor(s.col)
+	s.pt:SetTexture(s.tex)
+	s.pt:SetEnableShadows(s.shadows)
+	if _hasSkipAPI then s.pt:SetSkipShadowUpdates(false) end
+	s.pt:Update()
+
+	_savedState = {}
+
+	-- Restore parked lamps.
+	if _savedOrthos then
+		for i, s in pairs(_savedOrthos) do
+			local lpt = _lampTable and _lampTable[i]
+			if IsValid(lpt) then
+				lpt:SetOrthographic(true, s, s, s, s)
+				lpt:Update()
+			end
+		end
+		_savedOrthos = {}
 	end
 end
 
 -- ── Think integration ─────────────────────────────────────────────────────────
 
-function M.Think(sunAngle)
+function M.Think(sunAngle, tex3)
 	_cachedSunAngle = sunAngle
+	if tex3 then _tex3 = tex3 end
 
 	local skyCamPos = RealCSM.SkyCameraPos or Vector(0, 0, 0)
 
@@ -171,7 +185,6 @@ end
 function M.On(ent, lampTable)
 	_ownerEnt  = ent
 	_lampTable = lampTable
-	createSkyLamp()
 	if not _hooks then
 		hook.Add("PreDrawSkyBox",  "RealCSM_SkyboxLamp", onPreDrawSkyBox)
 		hook.Add("PostDrawSkyBox", "RealCSM_SkyboxLamp", onPostDrawSkyBox)
@@ -183,18 +196,16 @@ function M.Off()
 	hook.Remove("PreDrawSkyBox",  "RealCSM_SkyboxLamp")
 	hook.Remove("PostDrawSkyBox", "RealCSM_SkyboxLamp")
 	_hooks = false
-	if IsValid(_skyLamp) then _skyLamp:Remove() end
-	_skyLamp = nil
-	if GetConVar("csm_skyboxlamp_mutenormal") and GetConVar("csm_skyboxlamp_mutenormal"):GetBool() then
-		restoreNormalLamps()
-	end
+
+	-- Restore if we were mid-pass when disabled.
+	onPostDrawSkyBox()
+
 	_ownerEnt        = nil
 	_lampTable       = nil
 	_cachedOrthoSize = nil
 	_cachedSunAngle  = nil
 	_cachedSkyPos    = nil
 	_cachedFarZ      = nil
-	_savedSizes      = {}
 end
 
 function M.UpdateLamps(lampTable)
