@@ -283,6 +283,9 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
 		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
 		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
+
+		panel:CheckBox("Sun Occlusion Culling (EXPERIMENTAL)", "csm_sunocclude")
+		panel:ControlHelp("Parks all cascade lamps when player is fully indoors (5-ray hemisphere test, cached per 64u grid). Eliminates indoor light leaking and saves render passes. May have false positives near doorways.")
 		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
 
 		local resetBtn = panel:Button("Open First-Time Setup")

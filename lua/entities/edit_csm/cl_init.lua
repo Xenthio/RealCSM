@@ -9,12 +9,14 @@ include("realcsm/spread.lua")
 include("realcsm/frustummasks.lua")
 include("realcsm/depthrange.lua")
 include("realcsm/skyboxlamp.lua")
+include("realcsm/sunocclude.lua")
 
-local Util       = RealCSM.Util
-local RTT        = RealCSM.RTT
-local SkyboxFix  = RealCSM.SkyboxFix
-local DepthRange = RealCSM.DepthRange
-local SkyboxLamp = RealCSM.SkyboxLamp
+local Util        = RealCSM.Util
+local RTT         = RealCSM.RTT
+local SkyboxFix   = RealCSM.SkyboxFix
+local DepthRange  = RealCSM.DepthRange
+local SkyboxLamp  = RealCSM.SkyboxLamp
+local SunOcclude  = RealCSM.SunOcclude
 
 -- ── Per-entity state (reset in Initialize, updated in Think) ─────────────────
 -- We keep these as entity fields (self.*Prev) rather than file-level locals so
@@ -940,6 +942,12 @@ function ENT:Think()
 			SkyboxLamp.Off()
 		end
 		self._prevSkyboxLamp = skyboxLampWanted
+	end
+
+	-- Sun occlusion culling: park all lamps if player is fully indoors.
+	-- Returns true if occluded (lamps already parked, skip PT loop).
+	if SunOcclude.Think(viewPos, sunAngle, self.ProjectedTextures) then
+		return
 	end
 
 	-- Tick the sky lamp every frame so it's positioned before the render pass.

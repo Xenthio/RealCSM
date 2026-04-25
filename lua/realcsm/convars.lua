@@ -71,6 +71,8 @@ local clientDefs = {
 	{ "csm_skyboxlamp_mutenormal",             1,        true,  false },
 	-- Debug overlay: show current NearZ/FarZ values on screen.
 	{ "csm_debug_nearfarz",                   0,        false, false },
+	-- Sun occlusion culling: park all lamps when player is fully indoors.
+	{ "csm_sunocclude",                       0,        true,  false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },
