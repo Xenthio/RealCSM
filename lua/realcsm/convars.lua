@@ -68,7 +68,7 @@ local clientDefs = {
 	{ "csm_skyboxlamp",                       1,        true,  false },
 	-- Mute normal cascade lamps during skybox render to prevent bleed.
 	-- Costs N*2 extra Update() calls per frame. Disable if no bleed is visible.
-	{ "csm_skyboxlamp_mutenormal",             0,        true,  false },
+	{ "csm_skyboxlamp_mutenormal",             1,        true,  false },
 	-- Debug overlay: show current NearZ/FarZ values on screen.
 	{ "csm_debug_nearfarz",                   0,        false, false },
 	{ "csm_legacydisablesun",                 0,        true,  false },

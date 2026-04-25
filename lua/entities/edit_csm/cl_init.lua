@@ -758,7 +758,28 @@ function ENT:Think()
 	if not self.ProjectedTextures then self:createLamps() end
 
 	local viewPos = GetViewEntity():GetPos()
-	local position = viewPos + offset * self:GetHeight()
+
+	-- Clamp lamp height so it doesn't enter the 3D skybox brush volume.
+	-- Trace upward once every 2s (ceiling doesn't move).
+	self._ceilCache = self._ceilCache or {}
+	local now = RealTime()
+	if not self._ceilCache.z or (now - (self._ceilCache.t or 0)) > 2 then
+		local tr = util.TraceLine({
+			start  = viewPos,
+			endpos = viewPos + Vector(0, 0, 65536),
+			mask   = MASK_SOLID_BRUSHONLY,
+		})
+		self._ceilCache.z = (tr.Hit and not tr.HitSky) and (tr.HitPos.z - 64) or nil
+		self._ceilCache.t = now
+	end
+
+	local rawPos  = viewPos + offset * self:GetHeight()
+	local position
+	if self._ceilCache.z and rawPos.z > self._ceilCache.z then
+		position = Vector(rawPos.x, rawPos.y, self._ceilCache.z)
+	else
+		position = rawPos
+	end
 
 	-- ── Texel snapping ───────────────────────────────────────────────────────────
 	-- Snaps position to the shadow-map texel grid in light space, eliminating
