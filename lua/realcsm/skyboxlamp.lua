@@ -56,20 +56,26 @@ end
 -- ── Skybox extent cache ───────────────────────────────────────────────────────
 
 local function calcOrthoSize(skyCamPos, sunAngle)
-	local function traceExtent(dir)
+	-- Sample in 8 lateral directions to cover irregularly-shaped skybox rooms.
+	local right = sunAngle:Right()
+	local up    = sunAngle:Up()
+	local maxExtent = 0
+	for _, dir in ipairs({
+		 right,  -right,  up,  -up,
+		(right + up):GetNormalized(),
+		(right - up):GetNormalized(),
+		(-right + up):GetNormalized(),
+		(-right - up):GetNormalized(),
+	}) do
 		local tr = util.TraceLine({
 			start  = skyCamPos,
 			endpos = skyCamPos + dir * 65536,
 			mask   = MASK_SOLID_BRUSHONLY,
 		})
-		if tr.Hit then return tr.Fraction * 65536 end
-		return 4096
+		local d = tr.Hit and (tr.Fraction * 65536) or 4096
+		if d > maxExtent then maxExtent = d end
 	end
-	local right   = sunAngle:Right()
-	local up      = sunAngle:Up()
-	local extentR = math.max(traceExtent(right), traceExtent(-right))
-	local extentU = math.max(traceExtent(up),    traceExtent(-up))
-	return math.Clamp(math.max(extentR, extentU) * 1.2, 512, 16384)
+	return math.Clamp(maxExtent * 1.25, 512, 32768)
 end
 
 -- ── Hook callbacks ────────────────────────────────────────────────────────────
@@ -84,13 +90,21 @@ local function onPreDrawSkyBox()
 	if not sunAngle then return end
 
 	local skyCamPos = RealCSM.SkyCameraPos or Vector(0, 0, 0)
-	local height    = _ownerEnt:GetHeight() * SKYBOX_SCALE
-	local skyPos    = skyCamPos - sunAngle:Forward() * height
+	local fwdZ      = math.max(math.abs(sunAngle:Forward().z), 0.08)
 
-	-- Compute ortho size once per sky_camera position.
+	-- Compute ortho size once (cached per sky_camera pos).
 	if not _cachedOrthoSize then
 		_cachedOrthoSize = calcOrthoSize(skyCamPos, sunAngle)
 	end
+	local orthoSize = _cachedOrthoSize
+
+	-- Position: place the lamp orthogonally above sky_camera along the sun's
+	-- vertical component so the frustum covers the full room on all sides.
+	-- farZ = 2 * room_height / sin(pitch) ensures the frustum reaches the floor.
+	local roomHeight = orthoSize  -- conservative estimate; sun pitch adjusts coverage
+	local lampOffset = roomHeight / fwdZ
+	local skyPos     = skyCamPos - sunAngle:Forward() * lampOffset
+	local farZ       = lampOffset * 2 + 512
 
 	-- Create the sky lamp fresh each frame — it won't cost anything during
 	-- the main world render because it doesn't exist yet at that point.
@@ -100,9 +114,9 @@ local function onPreDrawSkyBox()
 	_skyLamp:SetEnableShadows(false)
 	_skyLamp:SetPos(skyPos)
 	_skyLamp:SetAngles(sunAngle)
-	_skyLamp:SetOrthographic(true, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize)
+	_skyLamp:SetOrthographic(true, orthoSize, orthoSize, orthoSize, orthoSize)
 	_skyLamp:SetNearZ(1)
-	_skyLamp:SetFarZ(height * 2 + 512)
+	_skyLamp:SetFarZ(farZ)
 
 	local hdr  = GetConVar("csm_hashdr"):GetInt() == 1
 	local base = _ownerEnt:GetSunBrightness() / 400
