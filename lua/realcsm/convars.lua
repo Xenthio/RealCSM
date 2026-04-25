@@ -65,7 +65,7 @@ local clientDefs = {
 	-- Auto depth-range: trace-based NearZ/FarZ calculation instead of hardcoded values.
 	{ "csm_auto_nearfarz",                    0,        true,  false },
 	-- Dedicated skybox sun lamp (positioned in sky_camera space, enabled only during skybox draw).
-	{ "csm_skyboxlamp",                       1,        true,  false },
+	{ "csm_skyboxlamp",                       0,        true,  false },
 	-- Mute normal cascade lamps during skybox render to prevent bleed.
 	-- Costs N*2 extra Update() calls per frame. Disable if no bleed is visible.
 	{ "csm_skyboxlamp_mutenormal",             1,        true,  false },

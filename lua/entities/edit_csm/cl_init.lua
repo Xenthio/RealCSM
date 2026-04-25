@@ -250,7 +250,7 @@ function ENT:_showFirstTimeSpawnUI()
 	RunConsoleCommand("r_flashlightdepthres", "1024")
 
 	local Frame = vgui.Create("DFrame")
-	Frame:SetSize(330, 290)
+	Frame:SetSize(330, 330)
 	Frame:Center()
 	Frame:SetTitle("CSM First Time Spawn!")
 	Frame:SetVisible(true)
@@ -303,9 +303,22 @@ function ENT:_showFirstTimeSpawnUI()
 	perfLbl:SetTextColor(Color(180,180,180))
 	perfLbl:SetText("Use fewer shadow cascades for better performance.")
 
+	local skyboxCheck = vgui.Create("DCheckBoxLabel", Frame)
+	skyboxCheck:SetText("Skybox Sun Fixes")
+	skyboxCheck:SetPos(15, 233)
+	skyboxCheck:SetSize(300, 20)
+	skyboxCheck:SetTextColor(Color(255,255,255))
+	skyboxCheck:SetConVar("csm_skyboxlamp")
+
+	local skyboxLbl = vgui.Create("DLabel", Frame)
+	skyboxLbl:SetPos(39, 251)
+	skyboxLbl:SetSize(300, 20)
+	skyboxLbl:SetTextColor(Color(180,180,180))
+	skyboxLbl:SetText("Lights the 3D skybox correctly. ~160fps cost, opt-in.")
+
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
-	continueBtn:SetPos(175, 250)
+	continueBtn:SetPos(175, 290)
 	continueBtn.DoClick = function()
 		file.Write("realcsm.txt", "two")
 		Frame:Close()
@@ -313,7 +326,7 @@ function ENT:_showFirstTimeSpawnUI()
 
 	local cancelBtn = vgui.Create("DButton", Frame)
 	cancelBtn:SetText("Cancel")
-	cancelBtn:SetPos(95, 250)
+	cancelBtn:SetPos(95, 290)
 	cancelBtn.DoClick = function()
 		RunConsoleCommand("csm_enabled", "0")
 		Frame:Close()
@@ -758,29 +771,8 @@ function ENT:Think()
 	if not self.ProjectedTextures then self:createLamps() end
 
 	local viewPos = GetViewEntity():GetPos()
-
-	-- Clamp lamp height so it doesn't enter the 3D skybox brush volume.
-	-- Trace upward once every 2s (ceiling doesn't move).
-	self._ceilCache = self._ceilCache or {}
-	local now = RealTime()
-	if not self._ceilCache.z or (now - (self._ceilCache.t or 0)) > 2 then
-		local tr = util.TraceLine({
-			start  = viewPos,
-			endpos = viewPos + Vector(0, 0, 65536),
-			mask   = MASK_SOLID_BRUSHONLY,
-		})
-		self._ceilCache.z = (tr.Hit and not tr.HitSky) and (tr.HitPos.z - 64) or nil
-		self._ceilCache.t = now
-	end
-
-	local rawPos  = viewPos + offset * self:GetHeight()
-	local position
-	if self._ceilCache.z and rawPos.z > self._ceilCache.z then
-		position = Vector(rawPos.x, rawPos.y, self._ceilCache.z)
-	else
-		position = rawPos
-	end
-
+	local position = viewPos + offset * self:GetHeight()
+	print(clampedHeight)
 	-- ── Texel snapping ───────────────────────────────────────────────────────────
 	-- Snaps position to the shadow-map texel grid in light space, eliminating
 	-- sub-texel shadow shimmer as the camera moves.

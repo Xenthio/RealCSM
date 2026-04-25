@@ -86,6 +86,7 @@ local function parkNormalLamps()
 			local _, l, r, t, b = pt:GetOrthographic()
 			_savedSizes[i] = (l + r + t + b) / 4
 			pt:SetOrthographic(true, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE, PARKED_SIZE)
+			pt:SetLightWorld(false)
 			pt:Update()
 		end
 	end
@@ -97,6 +98,7 @@ local function restoreNormalLamps()
 		if IsValid(pt) then
 			local s = _savedSizes[i] or PARKED_SIZE
 			pt:SetOrthographic(true, s, s, s, s)
+			pt:SetLightWorld(true)
 			pt:Update()
 		end
 	end
@@ -117,6 +119,7 @@ local function onPreDrawSkyBox()
 	local base = _ownerEnt:GetSunBrightness() / 400
 	if not hdr then base = base * 0.2 end
 
+	_skyLamp:SetLightWorld(true)
 	_skyLamp:SetPos(_cachedSkyPos)
 	_skyLamp:SetAngles(_cachedSunAngle)
 	_skyLamp:SetOrthographic(true, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize, _cachedOrthoSize)
@@ -137,6 +140,7 @@ local function onPostDrawSkyBox()
 		_skyLamp:SetBrightness(0)
 		_skyLamp:SetNearZ(1)
 		_skyLamp:SetFarZ(2)
+		_skyLamp:SetLightWorld(false)
 		_skyLamp:Update()
 	end
 
