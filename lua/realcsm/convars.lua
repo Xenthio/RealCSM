@@ -63,7 +63,7 @@ local clientDefs = {
 	{ "csm_frustum_debug",                    0,        true,  false },
 	{ "csm_frustum_viz",                      0,        true,  false },
 	-- Auto depth-range: trace-based NearZ/FarZ calculation instead of hardcoded values.
-	{ "csm_auto_nearfarz",                    1,        true,  false },
+	{ "csm_auto_nearfarz",                    0,        true,  false },
 	-- Dedicated skybox sun lamp (positioned in sky_camera space, enabled only during skybox draw).
 	{ "csm_skyboxlamp",                       1,        true,  false },
 	-- Debug overlay: show current NearZ/FarZ values on screen.
