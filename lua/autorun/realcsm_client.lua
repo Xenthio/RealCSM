@@ -175,6 +175,11 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:CheckBox("Super performance mode", "csm_farshadows")
 		panel:ControlHelp("Disable shadows on the far cascade, for more performance.")
 
+		panel:CheckBox("Skybox Fixes", "csm_skyboxlamp")
+		panel:ControlHelp("Fixes dark lightless skyboxes. 2 extra PT Updates/frame minimum.")
+		panel:CheckBox("Skybox lamp: mute normal cascades (reduces bleed, costs N*2 Updates/frame)", "csm_skyboxlamp_mutenormal")
+		panel:ControlHelp("Off by default. Enable if normal cascade lamps bleed into the skybox.")
+
 		-- Shadow quality sliders with linked update logic.
 		local qualitySlider = panel:NumSlider("Shadow Quality", "r_flashlightdepthres", 0, 16384, 0)
 		panel:ControlHelp("Shadow map resolution.")
@@ -279,9 +284,6 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
 		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
 		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
-
-		panel:CheckBox("Skybox sun lamp", "csm_skyboxlamp")
-		panel:ControlHelp("Enables a dedicated projected texture for the 3D skybox, swapped in during the skybox draw pass. Prevents normal cascade lamps from leaking into or being absent from the skybox.")
 
 		local resetBtn = panel:Button("Open First-Time Setup")
 		resetBtn.DoClick = FirstTimeSetup

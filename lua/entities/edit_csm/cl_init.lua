@@ -451,6 +451,10 @@ function ENT:Think()
 			end
 			table.Empty(self.ProjectedTextures)
 		end
+
+		-- Kill skybox lamp when CSM is disabled.
+		SkyboxLamp.Off()
+		self._prevSkyboxLamp = false
 	end
 
 	-- ── Prop radiosity ─────────────────────────────────────────────────────────
