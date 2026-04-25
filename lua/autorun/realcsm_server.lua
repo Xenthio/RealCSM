@@ -5,6 +5,10 @@ if not SERVER then return end
 
 include("realcsm/convars.lua")
 
+-- Ensure new client-only modules are sent to clients on dedicated servers.
+AddCSLuaFile("realcsm/depthrange.lua")
+AddCSLuaFile("realcsm/skyboxlamp.lua")
+
 -- ── Helpers ─────────────────────────────────────────────────────────────────
 
 local function wakeProps()

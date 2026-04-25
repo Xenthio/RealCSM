@@ -270,6 +270,14 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:CheckBox("Debug: log cascade placement", "csm_frustum_debug")
 		panel:CheckBox("Debug: draw cascade AABBs on HUD", "csm_frustum_viz")
 
+		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
+		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
+		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
+		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
+
+		panel:CheckBox("Skybox sun lamp", "csm_skyboxlamp")
+		panel:ControlHelp("Enables a dedicated projected texture for the 3D skybox, swapped in during the skybox draw pass. Prevents normal cascade lamps from leaking into or being absent from the skybox.")
+
 		local resetBtn = panel:Button("Open First-Time Setup")
 		resetBtn.DoClick = FirstTimeSetup
 	end)

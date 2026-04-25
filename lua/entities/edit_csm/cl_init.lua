@@ -7,10 +7,14 @@ include("realcsm/rtt.lua")
 include("realcsm/skyboxfix.lua")
 include("realcsm/spread.lua")
 include("realcsm/frustummasks.lua")
+include("realcsm/depthrange.lua")
+include("realcsm/skyboxlamp.lua")
 
-local Util      = RealCSM.Util
-local RTT       = RealCSM.RTT
-local SkyboxFix = RealCSM.SkyboxFix
+local Util       = RealCSM.Util
+local RTT        = RealCSM.RTT
+local SkyboxFix  = RealCSM.SkyboxFix
+local DepthRange = RealCSM.DepthRange
+local SkyboxLamp = RealCSM.SkyboxLamp
 
 -- ── Per-entity state (reset in Initialize, updated in Think) ─────────────────
 -- We keep these as entity fields (self.*Prev) rather than file-level locals so
@@ -93,6 +97,11 @@ function ENT:createLamps()
 	-- Expose lamps globally so other addons can read them.
 	-- RealCSM.Lamps is a read-only view; don't modify it externally.
 	RealCSM.Lamps = self.ProjectedTextures
+
+	-- Update skybox lamp reference when lamp table is rebuilt.
+	if GetConVar("csm_skyboxlamp"):GetBool() then
+		SkyboxLamp.UpdateLamps(self.ProjectedTextures)
+	end
 end
 
 -- ── Shadow depth buffer upgrade ────────────────────────────────────────────────────
@@ -180,7 +189,9 @@ function ENT:Initialize()
 	end
 
 	RunConsoleCommand("csm_enabled", "1")
-	self._prevCSMEnabled = true -- already setting up, don't double-create lamps in Think
+	self._prevCSMEnabled  = true -- already setting up, don't double-create lamps in Think
+	self._prevSkyboxLamp  = false -- will be enabled after createLamps()
+	self._prevSunAngle    = nil   -- used by DepthRange cache invalidation
 
 	-- Warn if no light_environment.
 	timer.Simple(0.1, function()
@@ -213,6 +224,12 @@ function ENT:Initialize()
 	UpgradeDepthFormat(GetConVar("csm_depthformat"):GetInt() == 24)
 
 	self:createLamps()
+
+	-- Enable skybox lamp if configured.
+	if GetConVar("csm_skyboxlamp"):GetBool() then
+		SkyboxLamp.On(self, self.ProjectedTextures)
+		self._prevSkyboxLamp = true
+	end
 end
 
 -- ── Warning helpers ────────────────────────────────────────────────────────────
@@ -307,6 +324,7 @@ end
 
 function ENT:OnRemove()
 	SkyboxFix.Off()
+	SkyboxLamp.Off()
 
 	if RealCSM.FPShadowController and RealCSM.FPShadowController:IsValid() then
 		RealCSM.FPShadowController:Remove()
@@ -878,6 +896,36 @@ function ENT:Think()
 	local needsRestore = wasActive and not frustumPlacementActive
 	self._frustumPlacementWas = frustumPlacementActive
 
+	-- ── Auto NearZ / FarZ ────────────────────────────────────────────────────
+	-- Override the entity's hardcoded SunNearZ/FarZ with trace-calculated values
+	-- so the shadow volume is as tight as possible for the current map geometry.
+	local nearZ, farZ
+	if GetConVar("csm_auto_nearfarz"):GetBool() then
+		nearZ, farZ = DepthRange.Get(position, viewPos, sunAngle, sizeFar)
+		-- Invalidate cache when the sun angle changes significantly.
+		if self._prevSunAngle then
+			if math.abs(self._prevSunAngle.p - sunAngle.p) > 1 or
+			   math.abs(self._prevSunAngle.y - sunAngle.y) > 1 then
+				DepthRange.Invalidate()
+			end
+		end
+		self._prevSunAngle = Angle(sunAngle.p, sunAngle.y, sunAngle.r)
+	else
+		nearZ = self:GetSunNearZ()
+		farZ  = self:GetSunFarZ()
+	end
+
+	-- ── Skybox lamp toggle ────────────────────────────────────────────────────
+	local skyboxLampWanted = GetConVar("csm_skyboxlamp"):GetBool()
+	if skyboxLampWanted ~= self._prevSkyboxLamp then
+		if skyboxLampWanted then
+			SkyboxLamp.On(self, self.ProjectedTextures)
+		else
+			SkyboxLamp.Off()
+		end
+		self._prevSkyboxLamp = skyboxLampWanted
+	end
+
 	for i, pt in pairs(self.ProjectedTextures) do
 		if not IsValid(pt) then continue end
 
@@ -1037,13 +1085,33 @@ function ENT:Think()
 		end
 		pt:SetShadowFilter(filterBase / filtScale)
 
-		pt:SetNearZ(self:GetSunNearZ())
-		pt:SetFarZ(self:GetSunFarZ() * 1.025)
+		pt:SetNearZ(nearZ)
+		pt:SetFarZ(farZ * 1.025)		
 		pt:SetQuadraticAttenuation(0)
 		pt:SetLinearAttenuation(0)
-		pt:SetConstantAttenuation(1)
+		pt:SetConstantAttenuation(1222)
 
 		pt:Update()
+	end
+
+	-- ── NearZ/FarZ debug overlay ──────────────────────────────────────────────────────
+	if GetConVar("csm_debug_nearfarz"):GetBool() then
+		local n, f, t = DepthRange.GetLast()
+		local auto    = GetConVar("csm_auto_nearfarz"):GetBool()
+		local age     = math.floor((RealTime() - t) * 10) / 10
+		local lines   = {
+			"[CSM NearZ/FarZ Debug]",
+			string.format("  Auto:  %s",            auto and "ON" or "OFF (hardcoded)"),
+			string.format("  NearZ: %.0f",          n),
+			string.format("  FarZ:  %.0f",          f),
+			string.format("  Ratio: 1:%.1f",        f / math.max(n, 1)),
+			string.format("  Cache age: %.1f s",    age),
+		}
+		local x, y = 10, ScrH() - 20 - #lines * 18
+		for _, line in ipairs(lines) do
+			draw.SimpleTextOutlined(line, "DermaDefault", x, y, Color(255,220,80), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP, 1, Color(0,0,0,200))
+			y = y + 18
+		end
 	end
 
 	-- ── Sky/fog effects (via UseSkyFogEffects network var) ────────────────────
