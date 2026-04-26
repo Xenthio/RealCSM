@@ -69,7 +69,7 @@ end)
 
 local function FirstTimeSetup()
 	local Frame = vgui.Create("DFrame")
-	Frame:SetSize(330, 340)
+	Frame:SetSize(330, 310)
 	Frame:Center()
 	Frame:SetTitle("CSM First Time Load!")
 	Frame:SetVisible(true)
@@ -88,38 +88,25 @@ local function FirstTimeSetup()
 
 	label("Thanks for using Real CSM!",                                          15, 40,  300, Color(255,255,255))
 	label("In order to allow me to support this addon and keep it free,",        15, 55)
-	label("it would be nice if you could consider donating to my Patreon!",      15, 70)
-	label("https://www.patreon.com/xenthio",                                     15, 85,  300, Color(255,255,255))
+	label("it would be nice if you could consider supporting me on Ko-fi!",      15, 70)
+	label("https://ko-fi.com/xenthio",                                     15, 85,  300, Color(255,255,255))
 	label("Refer to the F.A.Q for troubleshooting and help!",                    15, 110)
 	label("Optional: install NikNaks (workshop: 1835812634) for",               15, 128, 300, Color(200, 220, 255))
 	label("accurate sun colours, brightness + sun occlusion culling.",          15, 143, 300, Color(200, 220, 255))
 	label("More quality settings appear when CSM is next activated,",           15, 162)
 	label("then can be found in the spawnmenu \"Utilities\" tab.",               15, 177)
 
-	label("Cascade Mode:",                                                       15, 195, 300, Color(255,255,255))
-	local cascadeCombo = vgui.Create("DComboBox", Frame)
-	cascadeCombo:SetPos(15, 211)
-	cascadeCombo:SetSize(300, 22)
-	cascadeCombo:AddChoice("3 Cascades (Normal - best quality)", 3)
-	cascadeCombo:AddChoice("2 Cascades (Performance)", 2)
-	cascadeCombo:AddChoice("1 Cascade (Shadow Mapping - cheapest)", 1)
-	cascadeCombo:SetValue("3 Cascades (Normal - best quality)")
-	cascadeCombo.OnSelect = function(_, _, _, data)
-		RunConsoleCommand("csm_cascade_count", tostring(data))
-	end
-	label("Fewer cascades = more performance, less shadow coverage.",             15, 235, 300, Color(180,180,180))
-
 	local spawnCheck = vgui.Create("DCheckBoxLabel", Frame)
 	spawnCheck:SetText("Spawn on load")
-	spawnCheck:SetPos(15, 251)
+	spawnCheck:SetPos(15, 195)
 	spawnCheck:SetSize(300, 30)
 	spawnCheck:SetTextColor(Color(255,255,255))
 	spawnCheck:SetConVar("csm_spawnalways")
-	label("Spawn Real CSM on map load, serverside only.",                         39, 271, 300, Color(180,180,180))
+	label("Spawn Real CSM on map load, serverside only.",                         39, 215, 300, Color(180,180,180))
 
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
-	continueBtn:SetPos(133, 305)
+	continueBtn:SetPos(120, 270)
 	continueBtn.DoClick = function()
 		file.Write("realcsm.txt", "one")
 		if GetConVar("csm_spawnalways"):GetInt() == 1 then
@@ -139,6 +126,59 @@ local function firstTimeCheck()
 end
 
 hook.Add("InitPostEntity", "RealCSMFirstTimeCheck", firstTimeCheck)
+
+-- ── NikNaks first-seen popup ─────────────────────────────────────────────────
+-- Shown once when NikNaks is detected for the first time, prompting the user
+-- to enable the features it unlocks (currently: sun occlusion culling).
+local function NikNaksWelcomePopup()
+	local Frame = vgui.Create("DFrame")
+	Frame:SetSize(340, 220)
+	Frame:Center()
+	Frame:SetTitle("Real CSM: NikNaks detected!")
+	Frame:SetVisible(true)
+	Frame:SetDraggable(false)
+	Frame:ShowCloseButton(true)
+	Frame:MakePopup()
+
+	local function label(text, x, y, w, col)
+		local lbl = vgui.Create("DLabel", Frame)
+		lbl:SetPos(x, y)
+		lbl:SetSize(w or 310, 20)
+		lbl:SetText(text)
+		if col then lbl:SetTextColor(col) end
+		return lbl
+	end
+
+	label("NikNaks is installed — Real CSM can now use it for:",        15, 35, 310, Color(200, 220, 255))
+	label("  • Accurate per-map sun colour and brightness",             15, 53, 310, Color(200, 220, 255))
+	label("    (automatic, always active when NikNaks is present)",      15, 68, 310, Color(160, 180, 210))
+	label("  • Sun occlusion culling (skip shadow updates indoors)",    15, 86, 310, Color(200, 220, 255))
+	label("    Enable below — it\'s off by default.",                    15, 101, 310, Color(160, 180, 210))
+
+	local occludeCheck = vgui.Create("DCheckBoxLabel", Frame)
+	occludeCheck:SetText("Enable sun occlusion culling")
+	occludeCheck:SetPos(15, 128)
+	occludeCheck:SetSize(310, 24)
+	occludeCheck:SetTextColor(Color(255, 255, 255))
+	occludeCheck:SetConVar("csm_sunocclude")
+
+	local closeBtn = vgui.Create("DButton", Frame)
+	closeBtn:SetText("Got it!")
+	closeBtn:SetPos(125, 180)
+	closeBtn:SetSize(90, 28)
+	closeBtn.DoClick = function()
+		file.Write("realcsm_niknaks_seen.txt", "1")
+		Frame:Close()
+	end
+end
+
+local function nikNaksCheck()
+	if not file.Exists("includes/modules/niknaks.lua", "LUA") then return end
+	if file.Read("realcsm_niknaks_seen.txt", "DATA") == "1" then return end
+	NikNaksWelcomePopup()
+end
+
+hook.Add("InitPostEntity", "RealCSMNikNaksCheck", nikNaksCheck)
 
 -- ── Client toolmenu ──────────────────────────────────────────────────────────
 
@@ -165,8 +205,12 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_General", "General", "", "", function(panel)
 		panel:ClearControls()
 
-		panel:ControlHelp("Thanks for using Real CSM! Please consider donating to support development:")
-		panel:ControlHelp("https://www.patreon.com/xenthio")
+		panel:ControlHelp("Thanks for using Real CSM! Consider supporting development:")
+		panel:ControlHelp("https://ko-fi.com/xenthio")
+		local nikNaksInstalled = file.Exists("includes/modules/niknaks.lua", "LUA")
+		if not nikNaksInstalled then
+			panel:ControlHelp("Tip: Install NikNaks (workshop) for automatic per-map sun colour and brightness.")
+		end
 
 		panel:AddControl("ComboBox", {
 			MenuButton = 1,
@@ -212,6 +256,7 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Quality", "Quality", "", "", function(panel)
 		panel:ClearControls()
 
+		panel:ControlHelp("Support development: https://ko-fi.com/xenthio")
 		local qualitySlider = panel:NumSlider("Shadow Quality", "r_flashlightdepthres", 0, 16384, 0)
 		panel:ControlHelp("Shadow map resolution.")
 		qualitySlider.OnValueChanged = function(self, value)
@@ -274,12 +319,23 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Texel Snapping", "csm_texelsnap")
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves.")
+
+		panel:Help("Runtime Frustum Cascade Placement (EXPERIMENTAL)")
+		panel:CheckBox("Enable runtime frustum cutout masks", "csm_frustum_masks")
+		panel:ControlHelp("Fits each cascade tightly to the camera view frustum slice. Better shadow texel utilisation, no wasted corners. Incompatible with shadow spread.")
+		panel:NumSlider("Edge softness (UV fraction)", "csm_edge_uv", 0, 0.499, 3)
+		panel:ControlHelp("Soft-edge band width on the cascade mask borders (0 = hard edge, 0.1 = 10% soft).")
+		panel:NumSlider("Far cascade FOV scale", "csm_far_fov_scale", 0.3, 1.0, 2)
+		panel:ControlHelp("Tighten the outermost cascade for more shadow distance at the cost of peripheral coverage.")
+		panel:CheckBox("Asymmetric ortho (tighter, anisotropic)", "csm_asymmetric_ortho")
+		panel:ControlHelp("Non-square cascade boxes. Tighter fit for non-square view frustums but shadow texels become anisotropic.")
 	end)
 
 	-- ── Culling ────────────────────────────────────────────────────────────────
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Culling", "Culling", "", "", function(panel)
 		panel:ClearControls()
 
+		panel:ControlHelp("Support development: https://ko-fi.com/xenthio")
 		local ptMeta = FindMetaTable("ProjectedTexture")
 		local hasSkipAPI = ptMeta and ptMeta.SetSkipShadowUpdates ~= nil
 		if hasSkipAPI then
@@ -295,9 +351,6 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
 		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
-
-		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
-		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners.")
 
 		panel:Help("Sun Occlusion Culling (EXPERIMENTAL)")
 		panel:ControlHelp("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
@@ -321,6 +374,7 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Debug", "Debug", "", "", function(panel)
 		panel:ClearControls()
 
+		panel:ControlHelp("Support development: https://ko-fi.com/xenthio")
 		panel:CheckBox("Cascade Debug Colors", "csm_debug_cascade")
 		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
@@ -344,8 +398,12 @@ hook.Add("PopulateToolMenu", "RealCSMServer", function()
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Server", "Server (Admin)", "", "", function(panel)
 		panel:ClearControls()
 
-		panel:ControlHelp("Thanks for using Real CSM! Please consider donating to support development:")
-		panel:ControlHelp("https://www.patreon.com/xenthio")
+		panel:ControlHelp("Thanks for using Real CSM! Consider supporting development:")
+		panel:ControlHelp("https://ko-fi.com/xenthio")
+		local nikNaksInstalled = file.Exists("includes/modules/niknaks.lua", "LUA")
+		if not nikNaksInstalled then
+			panel:ControlHelp("Tip: Install NikNaks (workshop) for automatic per-map sun colour and brightness.")
+		end
 
 		panel:CheckBox("Auto-spawn CSM on map load (Experimental)",                "csm_spawnalways")
 		panel:CheckBox("Only spawn if map has a light_environment (Experimental)", "csm_spawnwithlightenv")

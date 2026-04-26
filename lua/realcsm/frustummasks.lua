@@ -701,6 +701,10 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		local isOutermost = (i == #perCascade)
 		paintMask(rt, innerRT, innerUV, isOutermost)
 		info.pt:SetTexture(rt)
+		-- Track active RTs by cascade index so SkyboxLamp can restore them
+		-- after its pre/post skybox save-restore cycle.
+		FM._activeRTs = FM._activeRTs or {}
+		FM._activeRTs[i] = rt
 	end
 
 	return true

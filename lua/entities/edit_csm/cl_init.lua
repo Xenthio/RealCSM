@@ -265,7 +265,7 @@ function ENT:_showFirstTimeSpawnUI()
 	RunConsoleCommand("r_flashlightdepthres", "1024")
 
 	local Frame = vgui.Create("DFrame")
-	Frame:SetSize(330, 330)
+	Frame:SetSize(330, 410)
 	Frame:Center()
 	Frame:SetTitle("CSM First Time Spawn!")
 	Frame:SetVisible(true)
@@ -305,35 +305,53 @@ function ENT:_showFirstTimeSpawnUI()
 	makeQualityButton("Medium", 135, "4096")
 	makeQualityButton("High",   255, "8192")
 
-	local perfCheck = vgui.Create("DCheckBoxLabel", Frame)
-	perfCheck:SetText("Performance Mode")
-	perfCheck:SetPos(15, 195)
-	perfCheck:SetSize(300, 30)
-	perfCheck:SetTextColor(Color(255,255,255))
-	perfCheck:SetConVar("csm_perfmode")
-
-	local perfLbl = vgui.Create("DLabel", Frame)
-	perfLbl:SetPos(39, 215)
-	perfLbl:SetSize(300, 20)
-	perfLbl:SetTextColor(Color(180,180,180))
-	perfLbl:SetText("Use fewer shadow cascades for better performance.")
+	lbl("Cascade Mode:",                                                       15, 195)
+	local cascadeCombo = vgui.Create("DComboBox", Frame)
+	cascadeCombo:SetPos(15, 210)
+	cascadeCombo:SetSize(300, 22)
+	cascadeCombo:AddChoice("3 Cascades (Normal - best quality)", 3)
+	cascadeCombo:AddChoice("2 Cascades (Performance)", 2)
+	cascadeCombo:AddChoice("1 Cascade (Shadow Mapping - cheapest)", 1)
+	cascadeCombo:SetValue("3 Cascades (Normal - best quality)")
+	cascadeCombo.OnSelect = function(_, _, _, data)
+		RunConsoleCommand("csm_cascade_count", tostring(data))
+	end
 
 	local skyboxCheck = vgui.Create("DCheckBoxLabel", Frame)
 	skyboxCheck:SetText("Skybox Sun Fixes")
-	skyboxCheck:SetPos(15, 233)
+	skyboxCheck:SetPos(15, 243)
 	skyboxCheck:SetSize(300, 20)
 	skyboxCheck:SetTextColor(Color(255,255,255))
 	skyboxCheck:SetConVar("csm_skyboxlamp")
 
 	local skyboxLbl = vgui.Create("DLabel", Frame)
-	skyboxLbl:SetPos(39, 251)
+	skyboxLbl:SetPos(39, 261)
 	skyboxLbl:SetSize(300, 20)
 	skyboxLbl:SetTextColor(Color(180,180,180))
-	skyboxLbl:SetText("Lights the 3D skybox correctly. ~160fps cost, opt-in.")
+	skyboxLbl:SetText("Lights the 3D skybox correctly. Performance cost, opt-in.")
+
+	local frustumCheck = vgui.Create("DCheckBoxLabel", Frame)
+	frustumCheck:SetText("Runtime frustum cascade placement (EXPERIMENTAL)")
+	frustumCheck:SetPos(15, 281)
+	frustumCheck:SetSize(300, 24)
+	frustumCheck:SetTextColor(Color(255,255,255))
+	frustumCheck:SetConVar("csm_frustum_masks")
+
+	local frustumLbl = vgui.Create("DLabel", Frame)
+	frustumLbl:SetPos(39, 301)
+	frustumLbl:SetSize(300, 20)
+	frustumLbl:SetTextColor(Color(180,180,180))
+	frustumLbl:SetText("Better cascade fit and utilisation within the view frustum.")
+
+	local frustumLbl2 = vgui.Create("DLabel", Frame)
+	frustumLbl2:SetPos(39, 316)
+	frustumLbl2:SetSize(300, 20)
+	frustumLbl2:SetTextColor(Color(180,180,180))
+	frustumLbl2:SetText("Considerable quality improvement with little cost")
 
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
-	continueBtn:SetPos(175, 290)
+	continueBtn:SetPos(175, 368)
 	continueBtn.DoClick = function()
 		file.Write("realcsm.txt", "two")
 		Frame:Close()
@@ -341,7 +359,7 @@ function ENT:_showFirstTimeSpawnUI()
 
 	local cancelBtn = vgui.Create("DButton", Frame)
 	cancelBtn:SetText("Cancel")
-	cancelBtn:SetPos(95, 290)
+	cancelBtn:SetPos(95, 368)
 	cancelBtn.DoClick = function()
 		RunConsoleCommand("csm_enabled", "0")
 		Frame:Close()
@@ -601,6 +619,12 @@ function ENT:Think()
 					self.ProjectedTextures[4 + i] = ProjectedTexture()
 					self.ProjectedTextures[4 + i]:SetEnableShadows(true)
 					self.ProjectedTextures[4 + i]:SetTexture("csm/mask_center")
+				end
+				-- Recompute light offset table for the new lamp set, and restore
+				-- static textures if FM was active (FM skips when spread is on).
+				self:allocLights()
+				if RealCSM.FrustumMasks then
+					RealCSM.FrustumMasks._activeRTs = {}
 				end
 			end
 		else
@@ -942,6 +966,11 @@ function ENT:Think()
 	local wasActive = self._frustumPlacementWas or false
 	local needsRestore = wasActive and not frustumPlacementActive
 	self._frustumPlacementWas = frustumPlacementActive
+	-- Clear the active RT table when frustum masks go inactive so SkyboxLamp
+	-- falls back to static texture strings on restore.
+	if needsRestore and RealCSM.FrustumMasks then
+		RealCSM.FrustumMasks._activeRTs = {}
+	end
 
 	-- ── Auto NearZ / FarZ ────────────────────────────────────────────────────
 	-- Override the entity's hardcoded SunNearZ/FarZ with trace-calculated values
