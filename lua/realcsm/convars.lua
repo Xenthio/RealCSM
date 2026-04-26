@@ -72,7 +72,13 @@ local clientDefs = {
 	-- Debug overlay: show current NearZ/FarZ values on screen.
 	{ "csm_debug_nearfarz",                   0,        false, false },
 	-- Sun occlusion culling: park all lamps when player is fully indoors.
+	-- Uses NikNaks BSP PVS for instant, bake-free leaf visibility checks.
+	-- Requires NikNaks addon (workshop ID 1835812634).
 	{ "csm_sunocclude",                       0,        true,  false },
+	-- 0 = direction-independent (PVS-of-PVS sky check; fast, never bakes per-sun)
+	-- 1 = direction-dependent (per-sun-angle bake; more aggressive culling)
+	{ "csm_sunocclude_mode",                  0,        true,  false },
+	{ "csm_occlude_debug",                    0,        false, false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },
 	{ "csm_hashdr",                           0,        false, false },

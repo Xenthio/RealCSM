@@ -9,6 +9,8 @@ include("realcsm/spread.lua")
 include("realcsm/frustummasks.lua")
 include("realcsm/depthrange.lua")
 include("realcsm/skyboxlamp.lua")
+include("realcsm/skyvis.lua")
+include("realcsm/sunbake.lua")
 include("realcsm/sunocclude.lua")
 
 local Util        = RealCSM.Util

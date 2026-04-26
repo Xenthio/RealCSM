@@ -36,6 +36,7 @@ local _cachedOrthoSize = nil
 local _cachedSunAngle  = nil
 local _cachedSkyPos    = nil
 local _cachedFarZ      = nil
+local _occluded        = false   -- set by SunOcclude to suppress skybox lamp during bake/occlusion
 
 -- Saved lamp state for restore after skybox pass.
 -- {[i] = {pos, angles, orthoSize, nearZ, farZ, brightness, shadows}}
@@ -72,8 +73,17 @@ end
 local _hasSkipAPI = FindMetaTable("ProjectedTexture") and FindMetaTable("ProjectedTexture").SetSkipShadowUpdates ~= nil
 
 local function onPreDrawSkyBox()
+	if _occluded then return end
 	if not IsValid(_ownerEnt) or not _lampTable then return end
 	if not _cachedSunAngle or not _cachedSkyPos then return end
+
+	-- PVS-gated optimisation: if the player's current BSP leaf can't see the
+	-- 3D skybox at all, skip the entire skybox-lamp pass. Decoupled from
+	-- csm_sunocclude so it works whenever NikNaks is installed.
+	if NikNaks and NikNaks.CurrentMap and RealCSM.SunOcclude then
+		local leaf = RealCSM.SunOcclude.GetEyeLeaf and RealCSM.SunOcclude.GetEyeLeaf()
+		if leaf and not leaf:HasSkyboxInPVS() then return end
+	end
 
 	local pt = _lampTable[SKY_LAMP_IDX]
 	if not IsValid(pt) then
@@ -210,4 +220,9 @@ end
 
 function M.UpdateLamps(lampTable)
 	_lampTable = lampTable
+end
+
+-- Called by SunOcclude to suppress skybox lamp while player is indoors.
+function M.SetOccluded(state)
+	_occluded = state
 end

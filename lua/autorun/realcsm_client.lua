@@ -5,6 +5,10 @@ if not CLIENT then return end
 
 include("realcsm/convars.lua")
 
+-- NikNaks (optional): used by csm_sunocclude for BSP PVS leaf checks.
+-- Attempt to load it here so it's available when sunocclude.lua runs.
+pcall(require, "niknaks")
+
 -- ── HDR detection ────────────────────────────────────────────────────────────
 -- Done once at load; the entity also checks this on spawn.
 RunConsoleCommand("csm_hashdr", render.GetHDREnabled() and "1" or "0")
