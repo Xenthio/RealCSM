@@ -279,19 +279,11 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves. More accurate than the legacy position rounding option.")
 		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
-		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
-		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners. MVP uses axis-aligned rectangles.")
-		panel:CheckBox("Debug: log cascade placement", "csm_frustum_debug")
-		panel:CheckBox("Debug: draw cascade AABBs on HUD", "csm_frustum_viz")
-
-		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
-		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
-		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
-
-		panel:Help("Sun Occlusion Culling (EXPERIMENTAL)")
-		panel:ControlHelp("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
-		panel:CheckBox("Enable", "csm_sunocclude")
+		-- Occlusion culling settings. --
+		panel:CheckBox("Sun Occlusion Culling (EXPERIMENTAL)", "csm_sunocclude")
 		panel:ControlHelp("Parks all cascade lamps when the player can't see any sunlit area.")
+
+		panel:Help("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
 
 		local occCombo = panel:ComboBox("Mode", "csm_sunocclude_mode")
 		occCombo:AddChoice("Direction-independent (PVS-only)",     "0")
@@ -304,6 +296,16 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("View frustum cull", "csm_sunocclude_frustum")
 		panel:ControlHelp("Also park lamps when sunlit areas are off-screen. More aggressive but cheap; padded by 30% FOV to hide edges. Works with both modes.")
+		--------------------------------
+
+		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
+		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners. MVP uses axis-aligned rectangles.")
+		panel:CheckBox("Debug: log cascade placement", "csm_frustum_debug")
+		panel:CheckBox("Debug: draw cascade AABBs on HUD", "csm_frustum_viz")
+
+		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
+		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
+		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
 		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
 
 		local resetBtn = panel:Button("Open First-Time Setup")
