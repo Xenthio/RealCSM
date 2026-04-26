@@ -371,6 +371,25 @@ function M.Reset()
 	-- Don't reset _noNikNaks.
 end
 
+-- ── Public query API for external addons ─────────────────────────────────────
+-- RealCSM.SunOcclude.IsOccluded()   → true if lamps are currently parked
+-- RealCSM.SunOcclude.IsReady()      → true if the backing bake/vis is usable
+-- RealCSM.SunOcclude.GetMode()      → 0 = PVS-only, 1 = directional bake
+-- On RealCSM global: RealCSM.IsPlayerOutdoors() convenience wrapper.
+
+function M.IsOccluded() return _occluded end
+function M.IsReady()    return _ready end
+function M.GetMode()    return GetConVar("csm_sunocclude_mode") and GetConVar("csm_sunocclude_mode"):GetInt() or 0 end
+
+-- Convenience: true when the player is considered outdoors (sun visible).
+-- Returns nil when occlusion culling is disabled (no opinion either way).
+function RealCSM.IsPlayerOutdoors()
+	if not (GetConVar("csm_sunocclude") and GetConVar("csm_sunocclude"):GetBool()) then
+		return nil  -- culling off, unknown
+	end
+	return not _occluded
+end
+
 -- ── HUD ───────────────────────────────────────────────────────────────────────
 local _warnTimer = 0
 
