@@ -288,8 +288,22 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
 		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
 
-		panel:CheckBox("Sun Occlusion Culling (EXPERIMENTAL)", "csm_sunocclude")
-		panel:ControlHelp("Parks all cascade lamps when player is fully indoors (5-ray hemisphere test, cached per 64u grid). Eliminates indoor light leaking and saves render passes. May have false positives near doorways.")
+		panel:Help("Sun Occlusion Culling (EXPERIMENTAL)")
+		panel:ControlHelp("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
+		panel:CheckBox("Enable", "csm_sunocclude")
+		panel:ControlHelp("Parks all cascade lamps when the player can't see any sunlit area.")
+
+		local occCombo = panel:ComboBox("Mode", "csm_sunocclude_mode")
+		occCombo:AddChoice("Direction-independent (PVS-only)",     "0")
+		occCombo:AddChoice("Directional (PVS + sun raycast bake)", "1")
+		local curMode = GetConVar("csm_sunocclude_mode"):GetInt()
+		occCombo:SetValue(curMode == 1
+			and "Directional (PVS + sun raycast bake)"
+			or  "Direction-independent (PVS-only)")
+		panel:ControlHelp("PVS-only: cheap, less accurate. Directional: ~1-2s bake when the sun moves more than 10°, more accurate.")
+
+		panel:CheckBox("View frustum cull", "csm_sunocclude_frustum")
+		panel:ControlHelp("Also park lamps when sunlit areas are off-screen. More aggressive but cheap; padded by 30% FOV to hide edges. Works with both modes.")
 		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
 
 		local resetBtn = panel:Button("Open First-Time Setup")

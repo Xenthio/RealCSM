@@ -78,6 +78,7 @@ local clientDefs = {
 	-- 0 = direction-independent (PVS-of-PVS sky check; fast, never bakes per-sun)
 	-- 1 = direction-dependent (per-sun-angle bake; more aggressive culling)
 	{ "csm_sunocclude_mode",                  0,        true,  false },
+	{ "csm_sunocclude_frustum",               1,        true,  false },
 	{ "csm_occlude_debug",                    0,        false, false },
 	{ "csm_legacydisablesun",                 0,        true,  false },
 	{ "csm_haslightenv",                      0,        false, false },

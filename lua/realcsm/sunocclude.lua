@@ -109,6 +109,148 @@ function M.GetEyeLeaf()
 	return pointInLeaf(eyePos)
 end
 
+-- Mode 2: PVS-filtered sunlit candidates + view-frustum AABB test.
+-- No per-frame raycasts — just bake-driven PVS ∩ _isSunlit, and a quick
+-- AABB-vs-frustum test against the padded camera frustum. Cheap.
+local _mode2_lastLeafIdx = nil
+local _mode2_candidates  = nil
+
+-- Build six frustum planes from view origin/angles/fov.
+-- Plane format: { normal, dist } with point-inside test n·p ≥ dist.
+local function buildFrustum(eyePos, eyeAng, fovDeg, aspect, nearD, farD)
+	local fwd   = eyeAng:Forward()
+	local right = eyeAng:Right()
+	local up    = eyeAng:Up()
+
+	local fovRad = math.rad(fovDeg)
+	local tanH = math.tan(fovRad * 0.5)
+	local tanV = tanH / aspect
+
+	local planes = {}
+	planes[1] = { fwd, fwd:Dot(eyePos + fwd * nearD) }
+	local nF = -fwd
+	planes[2] = { nF, nF:Dot(eyePos + fwd * farD) }
+
+	local eR = (fwd + right * tanH); eR:Normalize()
+	local eL = (fwd - right * tanH); eL:Normalize()
+	local eT = (fwd + up    * tanV); eT:Normalize()
+	local eB = (fwd - up    * tanV); eB:Normalize()
+
+	local pR = up:Cross(eR);    pR:Normalize()
+	local pL = eL:Cross(up);    pL:Normalize()
+	local pT = eT:Cross(right); pT:Normalize()
+	local pB = right:Cross(eB); pB:Normalize()
+
+	planes[3] = { pR, pR:Dot(eyePos) }
+	planes[4] = { pL, pL:Dot(eyePos) }
+	planes[5] = { pT, pT:Dot(eyePos) }
+	planes[6] = { pB, pB:Dot(eyePos) }
+	return planes
+end
+
+local function aabbInFrustum(mins, maxs, planes)
+	for i = 1, #planes do
+		local n, d = planes[i][1], planes[i][2]
+		local vx = (n.x >= 0) and maxs.x or mins.x
+		local vy = (n.y >= 0) and maxs.y or mins.y
+		local vz = (n.z >= 0) and maxs.z or mins.z
+		if (n.x*vx + n.y*vy + n.z*vz) < d then
+			return false
+		end
+	end
+	return true
+end
+
+-- Cache for frustum candidate lists, keyed by (leaf idx, source kind, bake key).
+local _frustum_lastLeafIdx = nil
+local _frustum_lastKind    = nil
+local _frustum_lastBakeKey = nil
+local _frustum_candidates  = nil
+
+-- Apply view-frustum cull to a candidate set of leafs.
+-- isInteresting(leaf, idx) decides which leafs in PVS qualify (sunlit, has-sky, etc).
+-- Returns true if any qualifying leaf's AABB intersects the padded camera frustum.
+local function frustumCullCheck(playerLeaf, eyePos, kind, isInteresting)
+	local idx = playerLeaf and playerLeaf.__id or nil
+	if not idx then return true end
+
+	local bakeKey = (RealCSM.SunBake and RealCSM.SunBake.GetCacheKey)
+		and RealCSM.SunBake.GetCacheKey() or nil
+
+	-- (Re)build candidate list when leaf, kind, or bake key changes.
+	if idx ~= _frustum_lastLeafIdx
+		or kind ~= _frustum_lastKind
+		or bakeKey ~= _frustum_lastBakeKey then
+		_frustum_lastLeafIdx = idx
+		_frustum_lastKind    = kind
+		_frustum_lastBakeKey = bakeKey
+		_frustum_candidates  = {}
+		local pvs = playerLeaf:CreatePVS()
+		if pvs and _leafs then
+			for i = 1, #_leafs do
+				local lf = _leafs[i]
+				if lf and lf.cluster and lf.cluster >= 0
+					and pvs[lf.cluster]
+					and isInteresting(lf, i) then
+					_frustum_candidates[#_frustum_candidates + 1] = lf
+				end
+			end
+		end
+	end
+
+	if #_frustum_candidates == 0 then return false end
+
+	-- Build padded frustum from current view.
+	local viewEnt = GetViewEntity and GetViewEntity() or LocalPlayer()
+	local eyeAng  = (IsValid(viewEnt) and viewEnt.EyeAngles) and viewEnt:EyeAngles() or EyeAngles()
+	local fov     = (IsValid(LocalPlayer()) and LocalPlayer():GetFOV()) or 75
+	local sw, sh  = ScrW(), ScrH()
+	local aspect  = (sh > 0) and (sw / sh) or (16/9)
+	local paddedFov = math.min(170, fov * 1.30)
+	local planes  = buildFrustum(eyePos, eyeAng, paddedFov, aspect, 1, 65536)
+
+	for i = 1, #_frustum_candidates do
+		local lf = _frustum_candidates[i]
+		if lf and lf.mins and lf.maxs and aabbInFrustum(lf.mins, lf.maxs, planes) then
+			return true
+		end
+	end
+	return false
+end
+
+-- Frustum check using SunBake _isSunlit set (mode 1 + frustum).
+local function isSunlitPredicate(lf, i)
+	return RealCSM.SunBake and RealCSM.SunBake.IsLeafSunlit(i)
+end
+
+-- Frustum check using sky-in-PVS (mode 0 + frustum). Direction-independent.
+local function hasSkyboxPredicate(lf, _i)
+	return lf.HasSkyboxInPVS and lf:HasSkyboxInPVS()
+end
+
+function M.SeesSunFrustum_Mode1(leaf, eyePos, sunAngle)
+	if not RealCSM.SunBake then return true end
+	-- Always call EnsureBake — it cheap-returns if cache key matches, else
+	-- triggers a rebake when the sun angle has changed by >10°.
+	RealCSM.SunBake.EnsureBake(sunAngle, 1)
+	if not RealCSM.SunBake.IsReady() then
+		return true   -- safe default while baking
+	end
+	local idx = leaf and leaf.__id
+	if idx and RealCSM.SunBake.IsLeafSunlit(idx) then return true end
+	return frustumCullCheck(leaf, eyePos, "sunlit", isSunlitPredicate)
+end
+
+function M.SeesSunFrustum_Mode0(leaf, eyePos)
+	if leaf and leaf.HasSkyboxInPVS and leaf:HasSkyboxInPVS() then return true end
+	return frustumCullCheck(leaf, eyePos, "sky", hasSkyboxPredicate)
+end
+
+-- Back-compat alias for old callers.
+function M.EyeSeesSunFrustum(leaf, eyePos, sunAngle)
+	return M.SeesSunFrustum_Mode1(leaf, eyePos, sunAngle)
+end
+
 function M.Think(_ignoredViewPos, sunAngle, lampTable)
 	-- Always sample the real eye/camera position, not the entity origin (feet).
 	local viewEnt = GetViewEntity and GetViewEntity() or LocalPlayer()
@@ -137,15 +279,24 @@ function M.Think(_ignoredViewPos, sunAngle, lampTable)
 	-- BSP leaf lookup using the camera/eye position (NOT player feet).
 	local leaf = pointInLeaf(eyePos)
 
-	local mode = GetConVar("csm_sunocclude_mode"):GetInt()
+	local mode    = GetConVar("csm_sunocclude_mode"):GetInt()
+	local frustum = GetConVar("csm_sunocclude_frustum"):GetBool()
 	local canSeeSky
 	if leaf == nil then
 		canSeeSky = true   -- outside map / lookup failed → safe default
 	elseif mode == 1 and RealCSM.SunBake then
-		canSeeSky = RealCSM.SunBake.LeafSeesSun(leaf, sunAngle)
+		if frustum then
+			canSeeSky = M.SeesSunFrustum_Mode1(leaf, eyePos, sunAngle)
+		else
+			canSeeSky = RealCSM.SunBake.LeafSeesSun(leaf, sunAngle, 1)
+		end
 	else
-		-- Direction-independent: "can any leaf in my PVS see the skybox?"
-		canSeeSky = RealCSM.SkyVis and RealCSM.SkyVis.LeafSeesSky(leaf) or leaf:HasSkyboxInPVS()
+		-- Mode 0: direction-independent "can any leaf in my PVS see the skybox?"
+		if frustum then
+			canSeeSky = M.SeesSunFrustum_Mode0(leaf, eyePos)
+		else
+			canSeeSky = RealCSM.SkyVis and RealCSM.SkyVis.LeafSeesSky(leaf) or leaf:HasSkyboxInPVS()
+		end
 	end
 	_lastCanSeeSky = canSeeSky
 	local wantOcclude = not canSeeSky
@@ -305,9 +456,11 @@ hook.Add("HUDPaint", "SunOcclude_HUD", function()
 	end
 
 	local mode = GetConVar("csm_sunocclude_mode"):GetInt()
-	ln(string.format("  Mode: %d (%s)  decision: canSeeSky=%s",
+	local frustum = GetConVar("csm_sunocclude_frustum"):GetBool()
+	ln(string.format("  Mode: %d (%s)%s  decision: canSeeSky=%s",
 		mode,
 		mode == 1 and "directional" or "omni",
+		frustum and " +frustum" or "",
 		tostring(_lastCanSeeSky)),
 		_lastCanSeeSky and color_white or Color(160, 160, 160))
 
