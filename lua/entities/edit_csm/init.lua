@@ -46,7 +46,9 @@ function ENT:Initialize()
 	self:SetModel("models/maxofs2d/cube_tool.mdl")
 	self:SetMaterial("csm/edit_csm")
 
-	-- Set network var defaults.
+	-- Set network var defaults from BSP light_environment.
+	-- NikNaks is client-only so this just sets fallback defaults;
+	-- the client's Initialize will override with accurate BSP values if NikNaks is present.
 	local getENVSunColour = GetConVar("csm_getENVSUNcolour"):GetBool()
 	local mapName         = game.GetMap()
 	local envSun          = findEntity("env_sun")
@@ -56,10 +58,7 @@ function ENT:Initialize()
 	else
 		self:SetSunColour(Vector(1.0, 0.90, 0.80))
 	end
-
-	-- Brightness: clients will tell us via csm_hashdr, but we default based on
-	-- the server's knowledge (listen server has render access; dedicated servers default high).
-	self:SetSunBrightness(1000) -- clients will correct via csm_hashdr if needed
+	self:SetSunBrightness(1000)
 
 	self:SetSizeNear(128.0)
 	self:SetSizeMid(1024.0)

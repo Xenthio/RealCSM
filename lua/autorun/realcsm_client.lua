@@ -65,7 +65,7 @@ end)
 
 local function FirstTimeSetup()
 	local Frame = vgui.Create("DFrame")
-	Frame:SetSize(330, 310)
+	Frame:SetSize(330, 340)
 	Frame:Center()
 	Frame:SetTitle("CSM First Time Load!")
 	Frame:SetVisible(true)
@@ -87,12 +87,14 @@ local function FirstTimeSetup()
 	label("it would be nice if you could consider donating to my Patreon!",      15, 70)
 	label("https://www.patreon.com/xenthio",                                     15, 85,  300, Color(255,255,255))
 	label("Refer to the F.A.Q for troubleshooting and help!",                    15, 110)
-	label("More quality settings appear when CSM is next activated,",            15, 125)
-	label("then can be found in the spawnmenu \"Utilities\" tab.",               15, 140)
+	label("Optional: install NikNaks (workshop: 1835812634) for",               15, 128, 300, Color(200, 220, 255))
+	label("accurate sun colours, brightness + sun occlusion culling.",          15, 143, 300, Color(200, 220, 255))
+	label("More quality settings appear when CSM is next activated,",           15, 162)
+	label("then can be found in the spawnmenu \"Utilities\" tab.",               15, 177)
 
-	label("Cascade Mode:",                                                       15, 162, 300, Color(255,255,255))
+	label("Cascade Mode:",                                                       15, 195, 300, Color(255,255,255))
 	local cascadeCombo = vgui.Create("DComboBox", Frame)
-	cascadeCombo:SetPos(15, 178)
+	cascadeCombo:SetPos(15, 211)
 	cascadeCombo:SetSize(300, 22)
 	cascadeCombo:AddChoice("3 Cascades (Normal - best quality)", 3)
 	cascadeCombo:AddChoice("2 Cascades (Performance)", 2)
@@ -101,19 +103,19 @@ local function FirstTimeSetup()
 	cascadeCombo.OnSelect = function(_, _, _, data)
 		RunConsoleCommand("csm_cascade_count", tostring(data))
 	end
-	label("Fewer cascades = more performance, less shadow coverage.",             15, 202, 300, Color(180,180,180))
+	label("Fewer cascades = more performance, less shadow coverage.",             15, 235, 300, Color(180,180,180))
 
 	local spawnCheck = vgui.Create("DCheckBoxLabel", Frame)
 	spawnCheck:SetText("Spawn on load")
-	spawnCheck:SetPos(15, 218)
+	spawnCheck:SetPos(15, 251)
 	spawnCheck:SetSize(300, 30)
 	spawnCheck:SetTextColor(Color(255,255,255))
 	spawnCheck:SetConVar("csm_spawnalways")
-	label("Spawn Real CSM on map load, serverside only.",                         39, 238, 300, Color(180,180,180))
+	label("Spawn Real CSM on map load, serverside only.",                         39, 271, 300, Color(180,180,180))
 
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
-	continueBtn:SetPos(133, 275)
+	continueBtn:SetPos(133, 305)
 	continueBtn.DoClick = function()
 		file.Write("realcsm.txt", "one")
 		if GetConVar("csm_spawnalways"):GetInt() == 1 then
@@ -155,7 +157,8 @@ local ConVarsDefault = {
 }
 
 hook.Add("PopulateToolMenu", "RealCSMClient", function()
-	spawnmenu.AddToolMenuOption("Utilities", "User", "CSM_Client", "#CSM", "", "", function(panel)
+	-- ── General ────────────────────────────────────────────────────────────────
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_General", "General", "", "", function(panel)
 		panel:ClearControls()
 
 		panel:ControlHelp("Thanks for using Real CSM! Please consider donating to support development:")
@@ -184,7 +187,27 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:CheckBox("Skybox lamp: mute normal cascades (reduces bleed, costs N*2 Updates/frame)", "csm_skyboxlamp_mutenormal")
 		panel:ControlHelp("Off by default. Enable if normal cascade lamps bleed into the skybox.")
 
-		-- Shadow quality sliders with linked update logic.
+		panel:NumSlider("Size / Distance Scale", "csm_sizescale", 0, 5)
+		panel:ControlHelp("Cascade size multiplier – affects both reach and perceived quality.")
+
+		panel:CheckBox("Hard distance cutoff", "csm_harshcutoff")
+		panel:ControlHelp("Hard edge on the final cascade instead of a gradient fade.")
+
+		panel:CheckBox("Enable further cascade (large maps)", "csm_further")
+		panel:ControlHelp("Adds a fourth cascade for greater shadow draw distance.")
+		panel:CheckBox("Enable shadows on further cascade", "csm_furthershadows")
+
+		panel:CheckBox("Draw Firstperson Shadows (Experimental)", "csm_localplayershadow")
+		panel:ControlHelp("See your own shadow in firstperson.")
+
+		local resetBtn = panel:Button("Open First-Time Setup")
+		resetBtn.DoClick = FirstTimeSetup
+	end)
+
+	-- ── Quality ────────────────────────────────────────────────────────────────
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Quality", "Quality", "", "", function(panel)
+		panel:ClearControls()
+
 		local qualitySlider = panel:NumSlider("Shadow Quality", "r_flashlightdepthres", 0, 16384, 0)
 		panel:ControlHelp("Shadow map resolution.")
 		qualitySlider.OnValueChanged = function(self, value)
@@ -206,9 +229,16 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:NumSlider("Shadow Filter", "csm_filter", 0, 20)
 		panel:ControlHelp("Source engine shadow filter. 0.08 is a good default; use 1.00 for lower resolutions.")
-
 		panel:CheckBox("Filter distance correction", "csm_filter_distancescale")
 		panel:ControlHelp("Scale filter per cascade to prevent blurring on far rings.")
+
+		local depthFmtCombo = panel:ComboBox("Shadow Depth Buffer Format", "csm_depthformat")
+		depthFmtCombo:AddChoice("D16 (default, 16-bit, no code needed)", 16)
+		depthFmtCombo:AddChoice("D24 (higher precision, less acne — requires spawn)", 24)
+		panel:ControlHelp("D24 reduces shadow acne on large cascades. Applied once at CSM spawn; requires map reload to revert. Experimental.")
+
+		panel:NumSlider("Shadowmap Depth Bias", "csm_depthbias", -1, 1, 6)
+		panel:NumSlider("Shadowmap Slope Scale Depth Bias", "csm_depthbias_slopescale", 0, 6, 1)
 
 		local radiosity = panel:ComboBox("Prop Radiosity", "csm_propradiosity")
 		radiosity:AddChoice("0: no radiosity",                                             0)
@@ -217,7 +247,6 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		radiosity:AddChoice("3: 162 samples statics, 6 samples rest (GMod default)",       3)
 		radiosity:AddChoice("4: 162 samples statics, leaf node rest (Real CSM default)",   4)
 		panel:ControlHelp("Prop indirect lighting quality (r_radiosity).")
-
 		panel:CheckBox("Update and Wake Props", "csm_wakeprops")
 		panel:ControlHelp("Wake props after radiosity changes.")
 
@@ -236,34 +265,17 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		spreadMethodCombo:AddChoice("1: Vogel / Golden-angle spiral (good for any count)", 1)
 		spreadMethodCombo:AddChoice("2: Legacy layer-based (original algorithm)", 2)
 		panel:ControlHelp("Optimal uses pre-computed Vogel spiral packings for N=1-32, exact analytical for small N. Falls back to Vogel above 32. Legacy exposes the layer controls below.")
-
 		panel:NumSlider("Spread Circle Layers (Legacy only)", "csm_spread_layers", 1, 6, 0)
 		panel:ControlHelp("Only used by the Legacy pattern method.")
 
-		panel:CheckBox("Draw Firstperson Shadows (Experimental)", "csm_localplayershadow")
-		panel:ControlHelp("See your own shadow in firstperson.")
-
-		panel:NumSlider("Size / Distance Scale", "csm_sizescale", 0, 5)
-		panel:ControlHelp("Cascade size multiplier – affects both reach and perceived quality.")
-
-		panel:CheckBox("Hard distance cutoff", "csm_harshcutoff")
-		panel:ControlHelp("Hard edge on the final cascade instead of a gradient fade.")
-
-		panel:CheckBox("Enable further cascade (large maps)", "csm_further")
-		panel:ControlHelp("Adds a fourth cascade for greater shadow draw distance.")
-		panel:CheckBox("Enable shadows on further cascade", "csm_furthershadows")
-
-		local depthFmtCombo = panel:ComboBox("Shadow Depth Buffer Format", "csm_depthformat")
-		depthFmtCombo:AddChoice("D16 (default, 16-bit, no code needed)", 16)
-		depthFmtCombo:AddChoice("D24 (higher precision, less acne — requires spawn)", 24)
-		panel:ControlHelp("D24 reduces shadow acne on large cascades. Applied once at CSM spawn; requires map reload to revert. Experimental.")
-
-		panel:NumSlider("Shadowmap Depth Bias", "csm_depthbias", -1, 1, 6)
-		panel:NumSlider("Shadowmap Slope Scale Depth Bias", "csm_depthbias_slopescale", 0, 6, 1)
-
-		panel:CheckBox("Cascade Debug Colors", "csm_debug_cascade")
-
 		panel:CheckBox("Texel Snapping", "csm_texelsnap")
+		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves.")
+	end)
+
+	-- ── Culling ────────────────────────────────────────────────────────────────
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Culling", "Culling", "", "", function(panel)
+		panel:ClearControls()
+
 		local ptMeta = FindMetaTable("ProjectedTexture")
 		local hasSkipAPI = ptMeta and ptMeta.SetSkipShadowUpdates ~= nil
 		if hasSkipAPI then
@@ -272,18 +284,21 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 			panel:NumSlider("Near Cascade Skip (s)", "csm_nearskip", 0, 5, 2)
 			panel:ControlHelp("Max seconds between shadow updates per cascade. 0 = update every frame. Updates still trigger on texel snap or sun angle change. Requires x86-64 or dev branch.")
 			panel:NumSlider("Snap Multiplier", "csm_skip_snapmult", 1, 32, 1)
-			panel:ControlHelp("Coarsens the snap grid for all cascades (they stay in lockstep). Higher = shadows stay locked across more camera movement. Pair with skip sliders to prevent shadow drag during skipped frames.")
+			panel:ControlHelp("Coarsens the snap grid for all cascades. Higher = shadows stay locked across more camera movement. Pair with skip sliders to prevent shadow drag during skipped frames.")
 		else
-			local lbl = panel:Help("Far Cascade Skip: unavailable on this GMod branch (requires x86-64 or dev).")
+			panel:Help("Cascade Skip: unavailable on this GMod branch (requires x86-64 or dev).")
 		end
-		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves. More accurate than the legacy position rounding option.")
-		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
 
-		-- Occlusion culling settings. --
-		panel:CheckBox("Sun Occlusion Culling (EXPERIMENTAL)", "csm_sunocclude")
+		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
+		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
+
+		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
+		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners.")
+
+		panel:Help("Sun Occlusion Culling (EXPERIMENTAL)")
+		panel:ControlHelp("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
+		panel:CheckBox("Enable", "csm_sunocclude")
 		panel:ControlHelp("Parks all cascade lamps when the player can't see any sunlit area.")
-
-		panel:Help("Requires the NikNaks workshop addon (1835812634). Falls back to no culling if missing.")
 
 		local occCombo = panel:ComboBox("Mode", "csm_sunocclude_mode")
 		occCombo:AddChoice("Direction-independent (PVS-only)",     "0")
@@ -295,21 +310,24 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ControlHelp("PVS-only: cheap, less accurate. Directional: ~1-2s bake when the sun moves more than 10°, more accurate.")
 
 		panel:CheckBox("View frustum cull", "csm_sunocclude_frustum")
-		panel:ControlHelp("Also park lamps when sunlit areas are off-screen. More aggressive but cheap; padded by 30% FOV to hide edges. Works with both modes.")
-		--------------------------------
+		panel:ControlHelp("Also park lamps when sunlit areas are off-screen. Padded by 30% FOV to reduce edge pop. Works with both modes.")
+	end)
 
-		panel:CheckBox("Runtime frustum cutout masks (EXPERIMENTAL)", "csm_frustum_masks")
-		panel:ControlHelp("Replaces the static circular masks with render-target masks painted every frame to match the camera view frustum. Cascades tile without overlap and waste no texels on empty corners. MVP uses axis-aligned rectangles.")
+	-- ── Debug ──────────────────────────────────────────────────────────────────
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Debug", "Debug", "", "", function(panel)
+		panel:ClearControls()
+
+		panel:CheckBox("Cascade Debug Colors", "csm_debug_cascade")
+		panel:ControlHelp("Each cascade rendered in a distinct colour for debugging.")
+
 		panel:CheckBox("Debug: log cascade placement", "csm_frustum_debug")
 		panel:CheckBox("Debug: draw cascade AABBs on HUD", "csm_frustum_viz")
 
-		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
-		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
 		panel:CheckBox("Debug: show NearZ/FarZ on screen", "csm_debug_nearfarz")
 		panel:ControlHelp("Displays current NearZ, FarZ and precision ratio in the bottom-left corner. Useful for diagnosing dark spots or over-wide shadow volumes.")
 
-		local resetBtn = panel:Button("Open First-Time Setup")
-		resetBtn.DoClick = FirstTimeSetup
+		panel:CheckBox("Debug: Sun Occlusion overlay", "csm_occlude_debug")
+		panel:ControlHelp("Shows current leaf, mode, frustum state and culling decision on screen.")
 	end)
 end)
 
@@ -319,7 +337,7 @@ end)
 -- ── Server toolmenu ──────────────────────────────────────────────────────────
 
 hook.Add("PopulateToolMenu", "RealCSMServer", function()
-	spawnmenu.AddToolMenuOption("Utilities", "Admin", "CSM_Server", "#CSM", "", "", function(panel)
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Server", "Server (Admin)", "", "", function(panel)
 		panel:ClearControls()
 
 		panel:ControlHelp("Thanks for using Real CSM! Please consider donating to support development:")

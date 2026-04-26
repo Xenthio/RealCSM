@@ -20,7 +20,6 @@ local _nodes        = nil   -- cached BSP nodes array
 local _leafs        = nil   -- cached BSP leafs array
 local _ready        = false
 local _noNikNaks    = false
-local _noSkybox     = false -- map has no 3D skybox → auto-disable
 
 local _lastLeaf     = nil   -- last BSP leaf we were in (cached)
 local _occluded     = false
@@ -73,12 +72,6 @@ local function tryInit()
 
 	local bsp = NikNaks.CurrentMap
 	if not bsp then return end  -- not ready yet, retry next tick
-
-	-- Disable on maps without a 3D skybox (HasSkyboxInPVS would be false everywhere).
-	if not bsp:HasSkyBox() then
-		_noSkybox = true
-		return
-	end
 
 	-- Pre-fetch and cache node/leaf tables (NikNaks caches them internally too).
 	_nodes = bsp:GetNodes()
@@ -417,7 +410,6 @@ hook.Add("HUDPaint", "SunOcclude_HUD", function()
 	if not _ready then
 		ln("[SunOcclude] " .. (
 			_noNikNaks and "NO NIKNAKS" or
-			_noSkybox   and "No 3D skybox (disabled)" or
 			"Initialising…"), Color(255, 120, 0))
 	else
 		ln("[SunOcclude] BSP PVS ready", Color(0, 255, 0))

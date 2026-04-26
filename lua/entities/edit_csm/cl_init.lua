@@ -12,7 +12,7 @@ include("realcsm/skyboxlamp.lua")
 include("realcsm/skyvis.lua")
 include("realcsm/sunbake.lua")
 include("realcsm/sunocclude.lua")
-
+include("realcsm/niknaks_suninfo.lua")
 local Util        = RealCSM.Util
 local RTT         = RealCSM.RTT
 local SkyboxFix   = RealCSM.SkyboxFix
@@ -183,6 +183,18 @@ function ENT:Initialize()
 
 	-- HDR detection (update the cvar for the entity's brightness logic).
 	RunConsoleCommand("csm_hashdr", render.GetHDREnabled() and "1" or "0")
+
+	-- If NikNaks is available, read light_environment from BSP for accurate
+	-- initial colour and brightness (overrides server defaults).
+	timer.Simple(0, function()
+		if not IsValid(self) then return end
+		local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
+		if nikInfo then
+			self:SetSunColour(nikInfo.color)
+			-- Don't override brightness: PT scale ≠ VRAD _light intensity.
+			-- The entity default (1000) is empirically correct; user can adjust.
+		end
+	end)
 
 	-- Skybox far-plane fix.
 	SkyboxFix.On()
@@ -718,16 +730,26 @@ function ENT:Think()
 					yaw   = ang.yaw
 					roll  = ang.roll
 				else
-					if not self._warnedNoSun and not GetConVar("csm_disable_warnings"):GetBool() then
-						Derma_Message(
-							"This map has no env_sun. CSM cannot find the sun position!",
-							"CSM Alert!", "OK!"
-						)
-						self._warnedNoSun = true
-					end
-					pitch = -180.0 + (self:GetTime() * 360.0)
-					yaw   = self:GetOrientation()
-					roll  = 90.0 - self:GetMaxAltitude()
+					-- Try NikNaks BSP entity lump. Works on maps where
+					-- light_environment is absent from engine edict list.
+					local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
+					if nikInfo then
+						local ang = nikInfo.angle
+						pitch = ang.p
+						yaw   = ang.y
+						roll  = ang.r
+					else
+						if not self._warnedNoSun and not GetConVar("csm_disable_warnings"):GetBool() then
+							Derma_Message(
+								"This map has no env_sun. CSM cannot find the sun position!",
+								"CSM Alert!", "OK!"
+							)
+							self._warnedNoSun = true
+						end
+						pitch = -180.0 + (self:GetTime() * 360.0)
+						yaw   = self:GetOrientation()
+						roll  = 90.0 - self:GetMaxAltitude()
+					end  -- nikInfo
 				end
 			end
 		end
@@ -991,12 +1013,14 @@ function ENT:Think()
 			end
 		end
 
-		-- Brightness.
+		-- Brightness. Apply non-HDR scale always (not just StormFox paths)
+		-- since projected textures read in linear light and non-HDR maps
+		-- don't have tonemapping to compensate.
 		local sunBright = sunBrightBase
 		if stormfoxEnabled and stormfoxApp then
 			sunBright = sunBright * stormfoxApp.SunBrightness * stormfoxBrMul
-			sunBright = sunBright * (hdr and 1 or 0.2)
 		end
+		if not hdr then sunBright = sunBright * 0.2 end
 		if spreadEnabled then
 			if i == 1 or i == 2 or i > 4 then
 				sunBright = sunBright / spreadSamples
