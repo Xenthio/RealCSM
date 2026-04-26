@@ -94,8 +94,13 @@ local function onPreDrawSkyBox()
 	if not IsValid(pt) then return end
 
 	local hdr  = GetConVar("csm_hashdr"):GetInt() == 1
+	-- Brightness: GetSunBrightness() stores raw _light intensity (e.g. 560 for gm_construct).
+	-- Divisor 128 = 255 / OVERBRIGHT(2.0): matches VRAD's VectorScale(intensity, 1/255) export
+	-- combined with the lightmap shader's 2.0 overbright multiplier (vrad/lightmap.cpp:1107).
+	-- LDR multiplier 0.125 = flFlashlightScale_LDR(2.0) / flFlashlightScale_HDR(0.25) inverse
+	-- (BaseVSShader.h:354 - shader hardcodes these to compensate for missing HDR tonemapper).
 	local base = _ownerEnt:GetSunBrightness() / 128
-	if not hdr then base = base * 0.2 end
+	if not hdr then base = base * 0.125 end
 
 	-- Optionally park other lamps (csm_skyboxlamp_mutenormal).
 	-- OFF by default: Update() calls cost more than the extra render passes.

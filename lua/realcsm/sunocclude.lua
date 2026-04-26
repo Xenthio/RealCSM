@@ -63,7 +63,9 @@ local function tryInit()
 	if _ready or _noNikNaks then return end
 
 	if not NikNaks then
-		pcall(require, "niknaks")
+		if file.Exists("includes/modules/niknaks.lua", "LUA") then
+			require("niknaks")
+		end
 	end
 	if not NikNaks then
 		_noNikNaks = true

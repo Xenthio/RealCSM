@@ -721,22 +721,23 @@ function ENT:Think()
 				yaw   = ang.yaw
 				roll  = ang.roll
 			else
-				local shadowCtrl = ents.FindByClass("shadow_control")[1]
-				if shadowCtrl then
-					print("[Real CSM] - No env_sun; using shadow_control angles.")
-					local ang = shadowCtrl:GetAngles()
-					pitch = ang.pitch + 90
-					yaw   = ang.yaw
-					roll  = ang.roll
+				-- Try NikNaks BSP entity lump. Works on maps where
+				-- light_environment is absent from engine edict list.
+				local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
+				if nikInfo then
+					print("[Real CSM] - No env_sun; using NikNaks angles.")
+					local ang = nikInfo.angle
+					pitch = ang.p
+					yaw   = ang.y
+					roll  = ang.r
 				else
-					-- Try NikNaks BSP entity lump. Works on maps where
-					-- light_environment is absent from engine edict list.
-					local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
-					if nikInfo then
-						local ang = nikInfo.angle
-						pitch = ang.p
-						yaw   = ang.y
-						roll  = ang.r
+					local shadowCtrl = ents.FindByClass("shadow_control")[1]
+					if shadowCtrl then
+						print("[Real CSM] - No env_sun and NikNaks not installed; using shadow_control angles.")
+						local ang = shadowCtrl:GetAngles()
+						pitch = ang.pitch + 90
+						yaw   = ang.yaw
+						roll  = ang.roll
 					else
 						if not self._warnedNoSun and not GetConVar("csm_disable_warnings"):GetBool() then
 							Derma_Message(
@@ -886,6 +887,12 @@ function ENT:Think()
 	local hdr              = GetConVar("csm_hashdr"):GetInt() == 1
 	local spreadSamples    = GetConVar("csm_spread_samples"):GetInt()
 
+	-- Brightness derivation (source-grounded):
+	-- VRAD exports: wl->intensity = pow(r/255, 2.2) * scaler / 255  (vrad/lightmap.cpp:1107)
+	-- So raw _light intensity stored in GetSunBrightness() needs / 255 to reach the same unit.
+	-- But the lightmap shader applies OVERBRIGHT=2.0, so we divide by 255/2 = 127.5 ≈ 128.
+	-- In HDR mode the flashlight shader scales m_Color by 0.25 (BaseVSShader.h:354).
+	-- In LDR mode it scales by 2.0 → ratio = 0.25/2.0 = 0.125 applied to LDR path.
 	local sunBrightBase = self:GetSunBrightness() / 128
 	local stormfoxApp
 	if stormfoxEnabled then
@@ -1018,7 +1025,9 @@ function ENT:Think()
 		if stormfoxEnabled and stormfoxApp then
 			sunBright = sunBright * stormfoxApp.SunBrightness * stormfoxBrMul
 		end
-		if not hdr then sunBright = sunBright * 0.13 end
+		-- LDR: shader uses flFlashlightScale=2.0, HDR uses 0.25 (BaseVSShader.h:354)
+		-- Ratio = 0.25/2.0 = 0.125; apply inverse to keep LDR matching HDR brightness.
+		if not hdr then sunBright = sunBright * 0.125 end
 		if spreadEnabled then
 			if i == 1 or i == 2 or i > 4 then
 				sunBright = sunBright / spreadSamples

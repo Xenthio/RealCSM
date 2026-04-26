@@ -7,7 +7,11 @@ include("realcsm/convars.lua")
 
 -- NikNaks (optional): used by csm_sunocclude for BSP PVS leaf checks.
 -- Attempt to load it here so it's available when sunocclude.lua runs.
-pcall(require, "niknaks")
+-- NikNaks is optional. Use file.Exists to silently skip when not installed;
+-- pcall alone doesn't suppress the engine-level "Couldn't include file" print.
+if file.Exists("includes/modules/niknaks.lua", "LUA") then
+	require("niknaks")
+end
 
 -- ── HDR detection ────────────────────────────────────────────────────────────
 -- Done once at load; the entity also checks this on spawn.
