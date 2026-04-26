@@ -94,7 +94,7 @@ local function onPreDrawSkyBox()
 	if not IsValid(pt) then return end
 
 	local hdr  = GetConVar("csm_hashdr"):GetInt() == 1
-	local base = _ownerEnt:GetSunBrightness() / 400
+	local base = _ownerEnt:GetSunBrightness() / 128
 	if not hdr then base = base * 0.2 end
 
 	-- Optionally park other lamps (csm_skyboxlamp_mutenormal).

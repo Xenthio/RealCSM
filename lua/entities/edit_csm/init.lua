@@ -58,7 +58,7 @@ function ENT:Initialize()
 	else
 		self:SetSunColour(Vector(1.0, 0.90, 0.80))
 	end
-	self:SetSunBrightness(1000)
+	self:SetSunBrightness(320)
 
 	self:SetSizeNear(128.0)
 	self:SetSizeMid(1024.0)

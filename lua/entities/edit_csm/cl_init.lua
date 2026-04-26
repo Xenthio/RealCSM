@@ -191,8 +191,7 @@ function ENT:Initialize()
 		local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
 		if nikInfo then
 			self:SetSunColour(nikInfo.color)
-			-- Don't override brightness: PT scale ≠ VRAD _light intensity.
-			-- The entity default (1000) is empirically correct; user can adjust.
+			self:SetSunBrightness(nikInfo.brightness)
 		end
 	end)
 
@@ -887,8 +886,7 @@ function ENT:Think()
 	local hdr              = GetConVar("csm_hashdr"):GetInt() == 1
 	local spreadSamples    = GetConVar("csm_spread_samples"):GetInt()
 
-	local sunBrightBase = self:GetSunBrightness() / 400
-
+	local sunBrightBase = self:GetSunBrightness() / 128
 	local stormfoxApp
 	if stormfoxEnabled then
 		stormfoxApp = Util.CalculateAppearance((pitch + -180) / 360)
@@ -1020,7 +1018,7 @@ function ENT:Think()
 		if stormfoxEnabled and stormfoxApp then
 			sunBright = sunBright * stormfoxApp.SunBrightness * stormfoxBrMul
 		end
-		if not hdr then sunBright = sunBright * 0.2 end
+		if not hdr then sunBright = sunBright * 0.13 end
 		if spreadEnabled then
 			if i == 1 or i == 2 or i > 4 then
 				sunBright = sunBright / spreadSamples
