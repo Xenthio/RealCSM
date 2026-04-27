@@ -64,7 +64,9 @@ local function tryInit()
 	if _ready or _noNikNaks then return end
 
 	if not NikNaks then
-		if file.Exists("includes/modules/niknaks.lua", "LUA") then
+		local canLoad = file.Exists("includes/modules/niknaks.lua", "LUA")
+			or file.Exists("lua/includes/modules/niknaks.lua", "GAME")
+		if canLoad then
 			require("niknaks")
 		end
 	end

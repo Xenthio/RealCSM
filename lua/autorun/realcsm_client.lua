@@ -7,9 +7,16 @@ include("realcsm/convars.lua")
 
 -- NikNaks (optional): used by csm_sunocclude for BSP PVS leaf checks.
 -- Attempt to load it here so it's available when sunocclude.lua runs.
--- NikNaks is optional. Use file.Exists to silently skip when not installed;
--- pcall alone doesn't suppress the engine-level "Couldn't include file" print.
-if file.Exists("includes/modules/niknaks.lua", "LUA") then
+-- We must not call require() when the module is absent: GMod prints a
+-- C-level "Couldn't include file" message before the Lua error is thrown,
+-- which pcall can't suppress. Use file.Exists with both known VFS paths
+-- ("LUA" for the standard mounted path, "GAME" for x86-64 builds where
+-- the workshop mounts modules under lua/ in the GAME search path).
+local function _canLoadNikNaks()
+	return file.Exists("includes/modules/niknaks.lua", "LUA")
+		or file.Exists("lua/includes/modules/niknaks.lua", "GAME")
+end
+if not NikNaks and _canLoadNikNaks() then
 	require("niknaks")
 end
 
