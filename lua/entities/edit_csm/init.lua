@@ -154,6 +154,56 @@ end
 
 
 
+-- ── Duplication ─────────────────────────────────────────────────────────────
+-- GMod's default duplicator doesn't reliably round-trip Vector-type NetworkVars
+-- (like SunColour), so we save/restore them explicitly.
+-- BuildDupeInfo is called before removal of the original; ApplyDupeInfo is called
+-- on the new entity after Initialize(), letting us override the fresh defaults.
+
+local _dupeKeys = {
+	-- Vector
+	{ get = "GetSunColour",    set = "SetSunColour"    },
+	-- Float
+	{ get = "GetSunBrightness",set = "SetSunBrightness"},
+	{ get = "GetSizeNear",     set = "SetSizeNear"     },
+	{ get = "GetSizeMid",      set = "SetSizeMid"      },
+	{ get = "GetSizeFar",      set = "SetSizeFar"      },
+	{ get = "GetSizeFurther",  set = "SetSizeFurther"  },
+	{ get = "GetOrientation",  set = "SetOrientation"  },
+	{ get = "GetMaxAltitude",  set = "SetMaxAltitude"  },
+	{ get = "GetTime",         set = "SetTime"         },
+	{ get = "GetHeight",       set = "SetHeight"       },
+	{ get = "GetSunNearZ",     set = "SetSunNearZ"     },
+	{ get = "GetSunFarZ",      set = "SetSunFarZ"      },
+	-- Bool
+	{ get = "GetUseMapSunAngles",  set = "SetUseMapSunAngles"  },
+	{ get = "GetUseSkyFogEffects", set = "SetUseSkyFogEffects" },
+	{ get = "GetRemoveStaticSun",  set = "SetRemoveStaticSun"  },
+	{ get = "GetEnableOffsets",    set = "SetEnableOffsets"    },
+	-- Offset floats
+	{ get = "GetOffsetPitch",  set = "SetOffsetPitch"  },
+	{ get = "GetOffsetYaw",    set = "SetOffsetYaw"    },
+	{ get = "GetOffsetRoll",   set = "SetOffsetRoll"   },
+}
+
+function ENT:BuildDupeInfo()
+	local info = BaseClass.BuildDupeInfo(self) or {}
+	for _, kv in ipairs(_dupeKeys) do
+		info[kv.get] = self[kv.get](self)
+	end
+	return info
+end
+
+function ENT:ApplyDupeInfo(ply, ent, info, getEntity)
+	BaseClass.ApplyDupeInfo(self, ply, ent, info, getEntity)
+	for _, kv in ipairs(_dupeKeys) do
+		local val = info[kv.get]
+		if val ~= nil then
+			self[kv.set](self, val)
+		end
+	end
+end
+
 -- Sun on/off driven by clients via net messages. More reliable than watching
 -- csm_enabled serverside (client convar, async, not usable on dedicated).
 -- Each CSM entity listens and acts on its own Fire(turnon/turnoff) state.
