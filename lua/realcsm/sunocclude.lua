@@ -21,10 +21,11 @@ local _leafs        = nil   -- cached BSP leafs array
 local _ready        = false
 local _noNikNaks    = false
 
-local _lastLeaf     = nil   -- last BSP leaf we were in (cached)
-local _occluded     = false
+local _lastLeaf      = nil   -- last BSP leaf we were in (cached)
+local _occluded      = false
 local _lastCanSeeSky = true
-local _savedPTs     = {}   -- { [lampIdx] = { ortho, shadows, texture, nearZ, farZ, pos, angles } }
+local _savedOrthos   = {}   -- saved ortho half-size per lamp index
+local _savedShadows  = {}   -- saved shadow-enable state per lamp index
 
 -- Hysteresis: require this many consecutive "occluded" frames before parking.
 -- Eliminates single-frame flickers when crossing leaf boundaries mid-jump.
@@ -319,34 +320,18 @@ function M.Think(_ignoredViewPos, sunAngle, lampTable)
 
 	if shouldOcclude then
 		if not _occluded then
-			-- Transition: visible → occluded. Remove lamps from engine flashlight list.
+			-- Transition: visible → occluded.
+			-- Disable shadows (skips depth render) and park ortho to near-zero.
 			for i, pt in pairs(lampTable) do
 				if IsValid(pt) then
-					local _, l, r, t, b = pt:GetOrthographic()
-					local orthoSize = (l and (l + r + t + b) / 4) or 512
-					-- Save texture: if FrustumMasks has an active RT on this index,
-					-- store a static fallback string so we don't try to hold an RT
-					-- that may be reassigned. FM will re-bind on next UpdatePlacement.
-					local fmRT = RealCSM.FrustumMasks
-						and RealCSM.FrustumMasks._activeRTs
-						and RealCSM.FrustumMasks._activeRTs[i]
-					local savedTex
-					if fmRT then
-						savedTex = (i == 1 or i >= 5) and "csm/mask_center" or "csm/mask_ring"
-					else
-						savedTex = pt:GetTexture()
+					if not _savedOrthos[i] then
+						local _, l, r, t, b = pt:GetOrthographic()
+						_savedOrthos[i] = (l + r + t + b) / 4
 					end
-					_savedPTs[i] = {
-						ortho   = orthoSize,
-						shadows = pt:GetEnableShadows(),
-						texture = savedTex,
-						nearZ   = pt:GetNearZ(),
-						farZ    = pt:GetFarZ(),
-						pos     = pt:GetPos(),
-						angles  = pt:GetAngles(),
-					}
-					pt:Remove()
-					lampTable[i] = nil
+					_savedShadows[i] = pt:GetEnableShadows()
+					pt:SetEnableShadows(false)
+					pt:SetOrthographic(true, 0.001, 0.001, 0.001, 0.001)
+					pt:Update()
 				end
 			end
 			if RealCSM.SkyboxLamp then RealCSM.SkyboxLamp.SetOccluded(true) end
@@ -355,10 +340,7 @@ function M.Think(_ignoredViewPos, sunAngle, lampTable)
 		return true
 	else
 		if _occluded then
-			-- Transition: occluded → visible. Recreate lamps.
-			-- Note: the calling Think loop will set pos/angles/ortho/brightness/color
-			-- immediately after this returns, so we only need the PT to exist with
-			-- correct shadows + texture. No Update() here — the Think loop does it.
+			-- Transition: occluded → visible. Restore shadows + ortho.
 			M.Restore(lampTable)
 			if RealCSM.SkyboxLamp then RealCSM.SkyboxLamp.SetOccluded(false) end
 			_occluded = false
@@ -368,40 +350,37 @@ function M.Think(_ignoredViewPos, sunAngle, lampTable)
 end
 
 function M.Restore(lampTable)
-	if not lampTable then _savedPTs = {}; return end
-	for i, saved in pairs(_savedPTs) do
-		-- Only recreate if the slot is currently empty (PT was removed).
-		if not IsValid(lampTable[i]) then
-			local pt = ProjectedTexture()
-			pt:SetEnableShadows(saved.shadows)
-			if saved.texture then
-				pt:SetTexture(saved.texture)
+	if not lampTable then
+		_savedOrthos  = {}
+		_savedShadows = {}
+		return
+	end
+	for i, pt in pairs(lampTable) do
+		if IsValid(pt) then
+			if _savedOrthos[i] then
+				local s = _savedOrthos[i]
+				pt:SetOrthographic(true, s, s, s, s)
+				_savedOrthos[i] = nil
 			end
-			pt:SetNearZ(saved.nearZ or 0)
-			pt:SetFarZ(saved.farZ or 65536)
-			local s = saved.ortho or 512
-			pt:SetOrthographic(true, s, s, s, s)
-			-- Restore last known position so it doesn't flash at origin.
-			if saved.pos then pt:SetPos(saved.pos) end
-			if saved.angles then pt:SetAngles(saved.angles) end
-			-- Don't call Update() here; the calling Think loop updates all PTs
-			-- after this returns (avoids an extra shadow-depth-render on restore frame).
-			lampTable[i] = pt
+			-- Restore shadows; default true if we somehow lost the saved value.
+			pt:SetEnableShadows(_savedShadows[i] ~= false)
+			_savedShadows[i] = nil
+			pt:Update()
 		end
 	end
-	_savedPTs = {}
 end
 
 function M.Reset()
-	_ready      = false
-	_noSkybox   = false
-	_nodes      = nil
-	_leafs      = nil
-	_lastLeaf   = nil
-	_occluded   = false
-	_savedPTs   = {}
-	_occCounter = 0
-	_visCounter = 0
+	_ready        = false
+	_noSkybox     = false
+	_nodes        = nil
+	_leafs        = nil
+	_lastLeaf     = nil
+	_occluded     = false
+	_savedOrthos  = {}
+	_savedShadows = {}
+	_occCounter   = 0
+	_visCounter   = 0
 	if RealCSM.SkyboxLamp then RealCSM.SkyboxLamp.SetOccluded(false) end
 	-- Don't reset _noNikNaks.
 end
