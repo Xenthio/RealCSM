@@ -957,8 +957,11 @@ function ENT:Think()
 	-- of its view-frustum slice AABB in light space (proper CSM placement).
 	-- The base Think loop below skips those calls when this flag is set.
 	local frustumPlacementActive = false
+	-- Frustum placement requires cascade masks — masks are responsible for
+	-- blending cascade overlaps created by the tight frustum-fitted boxes.
 	if RealCSM.FrustumPlacement
 		and GetConVar("csm_frustum_placement"):GetBool()
+		and GetConVar("csm_cascade_masks"):GetBool()
 		and GetConVar("csm_cascade_count"):GetInt() > 1
 		and not spreadEnabled then
 		local cascades, splits = {}, {}

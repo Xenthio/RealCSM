@@ -205,6 +205,23 @@ local ConVarsDefault = {
 	csm_perfmode       = "0",
 	csm_depthbias      = "0.000002",
 	csm_depthbias_slopescale = "2",
+	-- cascade tab convars included so the General preset resets everything
+	csm_cascade_masks   = "0",
+	csm_frustum_placement = "0",
+	csm_size_near       = "128",
+	csm_size_mid        = "1024",
+	csm_size_far        = "8192",
+	csm_size_further    = "65536",
+	csm_edge_uv         = "0.10",
+	csm_edge_rings      = "64",
+	csm_far_fov_scale   = "1.0",
+	csm_shift_forward   = "1",
+	csm_roll_step       = "360",
+	csm_asymmetric_ortho = "0",
+	csm_farskip         = "0",
+	csm_midskip         = "0",
+	csm_nearskip        = "0",
+	csm_skip_snapmult   = "1",
 }
 
 hook.Add("PopulateToolMenu", "RealCSMClient", function()
@@ -342,11 +359,15 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		csm_shift_forward   = "1",
 		csm_roll_step       = "360",
 		csm_asymmetric_ortho = "0",
+		csm_farskip         = "0",
+		csm_midskip         = "0",
+		csm_nearskip        = "0",
+		csm_skip_snapmult   = "1",
 	}
 	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Cascades", "Cascades", "", "", function(panel)
 		panel:ClearControls()
 
-		panel:ControlHelp("Per-cascade tuning. Runtime masks are required for the placement options below them.")
+		panel:ControlHelp("Support development: https://ko-fi.com/xenthio")
 
 		panel:AddControl("ComboBox", {
 			MenuButton = 1,
@@ -354,6 +375,20 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 			Options    = { ["#preset.default"] = CascadeDefaults },
 			CVars      = table.GetKeys(CascadeDefaults),
 		})
+
+		-- ── Cascade skip (update throttling) ────────────────────────────
+		panel:Help("Cascade Shadow Update Throttle")
+		local ptMeta = FindMetaTable("ProjectedTexture")
+		local hasSkipAPI = ptMeta and ptMeta.SetSkipShadowUpdates ~= nil
+		if hasSkipAPI then
+			panel:NumSlider("Far Cascade Skip (s)",    "csm_farskip",  0, 5, 2)
+			panel:NumSlider("Mid Cascade Skip (s)",    "csm_midskip",  0, 5, 2)
+			panel:NumSlider("Near Cascade Skip (s)",   "csm_nearskip", 0, 5, 2)
+			panel:NumSlider("Snap Multiplier",         "csm_skip_snapmult", 1, 32, 1)
+			panel:ControlHelp("Coarsens the texel-snap grid so shadows stay locked during skipped frames. Pair with skip sliders above.")
+		else
+			panel:Help("Cascade Skip: unavailable for your version of Garry's Mod")
+		end
 
 		-- ── Runtime masks (top of the chain) ────────────────────────────
 		panel:Help("Runtime cascade cutout masks")
@@ -428,18 +463,6 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 		panel:ClearControls()
 
 		panel:ControlHelp("Support development: https://ko-fi.com/xenthio")
-		local ptMeta = FindMetaTable("ProjectedTexture")
-		local hasSkipAPI = ptMeta and ptMeta.SetSkipShadowUpdates ~= nil
-		if hasSkipAPI then
-			panel:NumSlider("Far Cascade Skip (s)", "csm_farskip", 0, 5, 2)
-			panel:NumSlider("Mid Cascade Skip (s)", "csm_midskip", 0, 5, 2)
-			panel:NumSlider("Near Cascade Skip (s)", "csm_nearskip", 0, 5, 2)
-			panel:ControlHelp("Max seconds between shadow updates per cascade. 0 = update every frame. Updates still trigger on texel snap or sun angle change. Requires x86-64 or dev branch.")
-			panel:NumSlider("Snap Multiplier", "csm_skip_snapmult", 1, 32, 1)
-			panel:ControlHelp("Coarsens the snap grid for all cascades. Higher = shadows stay locked across more camera movement. Pair with skip sliders to prevent shadow drag during skipped frames.")
-		else
-			panel:Help("Cascade Skip: unavailable on this GMod branch (requires x86-64 or dev).")
-		end
 
 		panel:CheckBox("Auto NearZ/FarZ (recommended)", "csm_auto_nearfarz")
 		panel:ControlHelp("Trace-calculates the optimal shadow depth range from the sun's position. Reduces light-leak through thin surfaces by tightening the shadow volume.")
