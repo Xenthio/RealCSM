@@ -610,19 +610,31 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 		end
 	end
 
-	-- Pass 2: snap positions to the COARSEST grid this cascade appears in.
-	-- Cascade i appears in its OWN shadow-depth RT (texel = 2*half_i/depthRes)
-	-- AND in the outer cascade's MASK RT (pixel = 2*half_{i+1}/MASK_SIZE).
-	-- Snap to whichever is larger so alignment is pixel-perfect in both.
+	-- Pass 2: snap positions to a GLOBAL grid shared by all cascades.
+	-- Each cascade i appears in:
+	--   - its OWN shadow-depth RT  (texel = 2*half_i / depthRes)
+	--   - every outer cascade's MASK RT (pixel = 2*half_j / MASK_SIZE for j > i)
+	-- For carve alignment to be pixel-perfect across the WHOLE chain (not just
+	-- adjacent pair), every cascade's cx/cy must fall on every outer's mask
+	-- pixel grid. With pow2 halves, the COARSEST grid is the outermost mask
+	-- pixel, so snapping every cascade to that grid (or its own depth texel,
+	-- whichever is larger) guarantees alignment in every outer cascade's mask.
 	local depthRes = GetConVar("r_flashlightdepthres") and GetConVar("r_flashlightdepthres"):GetInt() or 512
+	local outerMostHalf = perCascade[#perCascade] and perCascade[#perCascade].half or 0
+	local globalMaskPixel = (2 * outerMostHalf) / MASK_SIZE
 	for i, info in ipairs(perCascade) do
 		local h = info.half
 		local depthTexel = (2 * h) / depthRes
-		local maskPixel = 0
-		if perCascade[i + 1] then
-			maskPixel = (2 * perCascade[i + 1].half) / MASK_SIZE
+		-- For the outermost cascade itself there's no enclosing mask, so its
+		-- only constraint is its own depth texel. For all inner cascades, use
+		-- the outermost mask-pixel grid (coarsest in the chain) so the box
+		-- edges land on exact pixels in EVERY outer mask, not just immediate.
+		local grid
+		if i == #perCascade then
+			grid = depthTexel
+		else
+			grid = math.max(depthTexel, globalMaskPixel)
 		end
-		local grid = math.max(depthTexel, maskPixel)
 		local snappedCx = math.floor(info.cx / grid + 0.5) * grid
 		local snappedCy = math.floor(info.cy / grid + 0.5) * grid
 		local camCxLS = camPos:Dot(sunRight)
