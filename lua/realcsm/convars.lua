@@ -48,7 +48,7 @@ local clientDefs = {
 	-- Value = max seconds between that cascade's shadow updates. Updates also
 	-- trigger on texel snap (cascade moved) or sun angle change. 0 = disabled
 	-- (update every frame). 0.03s on far cascade is a cheap perf win.
-	{ "csm_farskip",                          0.03,     true,  false },
+	{ "csm_farskip",                          0,       true,  false },
 	{ "csm_midskip",                          0,        true,  false },
 	{ "csm_nearskip",                         0,        true,  false },
 	-- Multiplier for the cascade snap grid size. Applied to ALL cascades so
