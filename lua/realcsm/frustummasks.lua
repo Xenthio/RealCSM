@@ -625,16 +625,19 @@ function FM.UpdatePlacement(ent, sunAngle, sunHeight, splitDistances, cascades, 
 	for i, info in ipairs(perCascade) do
 		local h = info.half
 		local depthTexel = (2 * h) / depthRes
-		-- For the outermost cascade itself there's no enclosing mask, so its
-		-- only constraint is its own depth texel. For all inner cascades, use
-		-- the outermost mask-pixel grid (coarsest in the chain) so the box
-		-- edges land on exact pixels in EVERY outer mask, not just immediate.
-		local grid
-		if i == #perCascade then
-			grid = depthTexel
-		else
-			grid = math.max(depthTexel, globalMaskPixel)
-		end
+		-- The cascade's cx/cy must land on a grid that is simultaneously
+		-- compatible with:
+		--   (a) its own shadow-depth texel grid (= depthTexel) for stable
+		--       texel snapping in the depth RT.
+		--   (b) the OUTERMOST mask pixel grid (= globalMaskPixel) so its
+		--       AABB edges align with exact mask pixels in every outer mask.
+		-- The outermost cascade itself has NO enclosing mask, BUT its own
+		-- mask-pixel grid still matters: inner cascades reference
+		-- thisMinX = outermost.cx - half during carve, so outermost.cx must
+		-- land on its own mask pixel too. So always use both constraints.
+		-- (At depthRes > 1024, depthTexel < maskPixel, which is exactly when
+		--  the old code that only used depthTexel for outermost broke.)
+		local grid = math.max(depthTexel, globalMaskPixel)
 		local snappedCx = math.floor(info.cx / grid + 0.5) * grid
 		local snappedCy = math.floor(info.cy / grid + 0.5) * grid
 		local camCxLS = camPos:Dot(sunRight)
