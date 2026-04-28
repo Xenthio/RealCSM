@@ -331,37 +331,48 @@ function ENT:_showFirstTimeSpawnUI()
 	skyboxLbl:SetTextColor(Color(180,180,180))
 	skyboxLbl:SetText("Lights the 3D skybox correctly. Performance cost, opt-in.")
 
-	local frustumCheck = vgui.Create("DCheckBoxLabel", Frame)
-	frustumCheck:SetText("Runtime frustum cascade placement (EXPERIMENTAL)")
-	frustumCheck:SetPos(15, 281)
-	frustumCheck:SetSize(300, 24)
-	frustumCheck:SetTextColor(Color(255,255,255))
-	frustumCheck:SetConVar("csm_frustum_placement")
-
-	local frustumLbl = vgui.Create("DLabel", Frame)
-	frustumLbl:SetPos(39, 301)
-	frustumLbl:SetSize(300, 20)
-	frustumLbl:SetTextColor(Color(180,180,180))
-	frustumLbl:SetText("Better cascade fit and utilisation within the view frustum.")
-
-	local frustumLbl2 = vgui.Create("DLabel", Frame)
-	frustumLbl2:SetPos(39, 316)
-	frustumLbl2:SetSize(300, 20)
-	frustumLbl2:SetTextColor(Color(180,180,180))
-	frustumLbl2:SetText("Considerable quality improvement with little cost")
-
 	local masksCheck = vgui.Create("DCheckBoxLabel", Frame)
-	masksCheck:SetText("Soft cutout masks between cascades (EXPERIMENTAL)")
-	masksCheck:SetPos(15, 336)
+	masksCheck:SetText("Runtime cascade cutout masks (EXPERIMENTAL)")
+	masksCheck:SetPos(15, 281)
 	masksCheck:SetSize(300, 24)
 	masksCheck:SetTextColor(Color(255,255,255))
 	masksCheck:SetConVar("csm_cascade_masks")
 
 	local masksLbl = vgui.Create("DLabel", Frame)
-	masksLbl:SetPos(39, 356)
+	masksLbl:SetPos(39, 301)
 	masksLbl:SetSize(300, 20)
 	masksLbl:SetTextColor(Color(180,180,180))
-	masksLbl:SetText("Hides cascade overlap. Works with or without frustum placement.")
+	masksLbl:SetText("Runtime cutouts between cascades.")
+
+	local frustumCheck = vgui.Create("DCheckBoxLabel", Frame)
+	frustumCheck:SetText("Runtime frustum cascade placement (EXPERIMENTAL)")
+	frustumCheck:SetPos(15, 326)
+	frustumCheck:SetSize(300, 24)
+	frustumCheck:SetTextColor(Color(255,255,255))
+	frustumCheck:SetConVar("csm_frustum_placement")
+
+	local frustumLbl = vgui.Create("DLabel", Frame)
+	frustumLbl:SetPos(39, 346)
+	frustumLbl:SetSize(300, 20)
+	frustumLbl:SetTextColor(Color(180,180,180))
+	frustumLbl:SetText("Better cascade fit and utilisation within the view frustum.")
+
+	
+	local frustumLbl2 = vgui.Create("DLabel", Frame)
+	frustumLbl2:SetPos(39, 359)
+	frustumLbl2:SetSize(300, 20)
+	frustumLbl2:SetTextColor(Color(180,180,180))
+	frustumLbl2:SetText("Considerable quality improvement with little cost")
+
+	-- Greyout placement when masks aren't enabled.
+	local function refreshFrustumGate()
+		local on = GetConVar("csm_cascade_masks"):GetBool()
+		frustumCheck:SetEnabled(on)
+		frustumCheck:SetAlpha(on and 255 or 110)
+		frustumLbl:SetAlpha(on and 255 or 110)
+	end
+	refreshFrustumGate()
+	Frame.Think = function() refreshFrustumGate() end
 
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
@@ -866,10 +877,13 @@ function ENT:Think()
 	end
 
 	local sizeScale    = GetConVar("csm_sizescale"):GetFloat()
-	local sizeNear     = self:GetSizeNear()  * sizeScale
-	local sizeMid      = self:GetSizeMid()   * sizeScale
-	local sizeFar      = self:GetSizeFar()   * sizeScale
-	local sizeFurther  = self:GetSizeFurther() * sizeScale
+	-- Cascade sizes are convar-driven (csm_size_near/mid/far/further). They
+	-- replaced the entity's SizeNear/Mid/Far/Further NetworkVars now that
+	-- runtime cascade masks make non-default sizes safe to use.
+	local sizeNear     = GetConVar("csm_size_near"):GetFloat()    * sizeScale
+	local sizeMid      = GetConVar("csm_size_mid"):GetFloat()     * sizeScale
+	local sizeFar      = GetConVar("csm_size_far"):GetFloat()     * sizeScale
+	local sizeFurther  = GetConVar("csm_size_further"):GetFloat() * sizeScale
 
 	-- Per-cascade ortho size lookup (used for texel snapping below).
 	local cascadeSize = {

@@ -66,6 +66,13 @@ local clientDefs = {
 	-- Soft cutout masks for cascade overlap. Independent of placement: works
 	-- whether cascades are placed by frustum_placement or by the static path.
 	{ "csm_cascade_masks",                    0,        true,  false },
+	-- Per-cascade ortho size (light-space half-extents). Replaces the
+	-- entity's SizeNear/Mid/Far/Further NetworkVars in normal use; runtime
+	-- masks blend cascade overlap so these are now safely user-tunable.
+	{ "csm_size_near",                        128,      true,  false },
+	{ "csm_size_mid",                         1024,     true,  false },
+	{ "csm_size_far",                         8192,     true,  false },
+	{ "csm_size_further",                     65536,    true,  false },
 	{ "csm_frustum_debug",                    0,        true,  false },
 	{ "csm_frustum_viz",                      0,        true,  false },
 	-- Auto depth-range: trace-based NearZ/FarZ calculation instead of hardcoded values.

@@ -326,18 +326,101 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Texel Snapping", "csm_texelsnap")
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves.")
+	end)
 
-		panel:Help("Runtime Frustum Cascade Placement (EXPERIMENTAL)")
-		panel:CheckBox("Enable runtime frustum placement", "csm_frustum_placement")
-		panel:ControlHelp("Fits each cascade tightly to the camera view frustum slice. Better shadow texel utilisation, no wasted corners. Incompatible with shadow spread.")
+	-- ── Cascades ───────────────────────────────────────────────────────
+	local CascadeDefaults = {
+		csm_size_near       = "128",
+		csm_size_mid        = "1024",
+		csm_size_far        = "8192",
+		csm_size_further    = "65536",
+		csm_cascade_masks   = "0",
+		csm_frustum_placement = "0",
+		csm_edge_uv         = "0.10",
+		csm_edge_rings      = "64",
+		csm_far_fov_scale   = "1.0",
+		csm_shift_forward   = "1",
+		csm_roll_step       = "360",
+		csm_asymmetric_ortho = "0",
+	}
+	spawnmenu.AddToolMenuOption("Utilities", "Real CSM", "CSM_Cascades", "Cascades", "", "", function(panel)
+		panel:ClearControls()
+
+		panel:ControlHelp("Per-cascade tuning. Runtime masks are required for the placement options below them.")
+
+		panel:AddControl("ComboBox", {
+			MenuButton = 1,
+			Folder     = "presetCSMCascades",
+			Options    = { ["#preset.default"] = CascadeDefaults },
+			CVars      = table.GetKeys(CascadeDefaults),
+		})
+
+		-- ── Runtime masks (top of the chain) ────────────────────────────
+		panel:Help("Runtime cascade cutout masks")
 		panel:CheckBox("Enable cascade cutout masks", "csm_cascade_masks")
-		panel:ControlHelp("Soft cutout masks blend overlap between cascades. Works with or without runtime placement; uses each cascade's current ortho box.")
-		panel:NumSlider("Edge softness (UV fraction)", "csm_edge_uv", 0, 0.499, 3)
+		panel:ControlHelp("Soft cutout masks blend overlap between cascades at runtime. Replaces the static circular VTF masks. Required by frustum placement and the cascade size sliders below.")
+
+		-- Track all controls that should grey out when masks are off.
+		local gated = {}
+		local function gate(ctrl)
+			if ctrl then gated[#gated + 1] = ctrl end
+			return ctrl
+		end
+
+		gate(panel:NumSlider("Edge softness (UV fraction)", "csm_edge_uv", 0, 0.499, 3))
 		panel:ControlHelp("Soft-edge band width on the cascade mask borders (0 = hard edge, 0.1 = 10% soft).")
-		panel:NumSlider("Far cascade FOV scale", "csm_far_fov_scale", 0.3, 1.0, 2)
+		gate(panel:NumSlider("Edge softness rings", "csm_edge_rings", 1, 256, 0))
+		panel:ControlHelp("Number of discrete rings used to render the soft edge. Higher = smoother gradient, marginally more cost.")
+
+		-- ── Cascade sizes (used to live in CSM Editor Properties) ───────
+		panel:Help("Cascade Sizes")
+		panel:ControlHelp("Light-space half-extent (units) for each cascade. Previously 'Size 1-4' in the entity properties dialog. Masks must be on so cascade overlap doesn't double-darken.")
+		gate(panel:NumSlider("Near cascade size",    "csm_size_near",    0, 32768, 0))
+		gate(panel:NumSlider("Middle cascade size",  "csm_size_mid",     0, 32768, 0))
+		gate(panel:NumSlider("Far cascade size",     "csm_size_far",     0, 32768, 0))
+		gate(panel:NumSlider("Further cascade size", "csm_size_further", 0, 65536, 0))
+		local sizeReset = panel:Button("Reset cascade sizes to defaults")
+		sizeReset.DoClick = function()
+			RunConsoleCommand("csm_size_near",    "128")
+			RunConsoleCommand("csm_size_mid",     "1024")
+			RunConsoleCommand("csm_size_far",     "8192")
+			RunConsoleCommand("csm_size_further", "65536")
+		end
+		gate(sizeReset)
+
+		-- ── Frustum placement (sub-feature of masks) ────────────────────
+		panel:Help("Runtime frustum cascade placement (EXPERIMENTAL)")
+		panel:ControlHelp("Sizes/positions each cascade to tightly fit its view-frustum slice. Requires runtime masks. Incompatible with shadow spread.")
+		gate(panel:CheckBox("Enable runtime frustum placement", "csm_frustum_placement"))
+		gate(panel:NumSlider("Far cascade FOV scale", "csm_far_fov_scale", 0.3, 1.0, 2))
 		panel:ControlHelp("Tighten the outermost cascade for more shadow distance at the cost of peripheral coverage.")
-		panel:CheckBox("Asymmetric ortho (tighter, anisotropic)", "csm_asymmetric_ortho")
-		panel:ControlHelp("Non-square cascade boxes. Tighter fit for non-square view frustums but shadow texels become anisotropic.")
+		gate(panel:NumSlider("Shift forward (slack in front of camera)", "csm_shift_forward", 0, 1, 2))
+		panel:ControlHelp("Bias each cascade's pow2 slack along camera-forward (0 = centered, 1 = all slack ahead).")
+		gate(panel:NumSlider("Roll quantization (deg)", "csm_roll_step", 0, 360, 0))
+		panel:ControlHelp("Quantize lamp roll alignment to discrete steps. 0 = continuous (shimmer), 360 = effectively disabled.")
+		gate(panel:CheckBox("Asymmetric ortho (tighter, anisotropic)", "csm_asymmetric_ortho"))
+		panel:ControlHelp("Non-square cascade boxes. Tighter fit but shadow texels become anisotropic.")
+
+		local resetAll = panel:Button("Reset all Cascades settings to defaults")
+		resetAll.DoClick = function()
+			for cv, val in pairs(CascadeDefaults) do
+				RunConsoleCommand(cv, val)
+			end
+		end
+
+		-- ── Greyout logic ────────────────────────────────────────────────
+		local function refreshGate()
+			local on = GetConVar("csm_cascade_masks"):GetBool()
+			for _, c in ipairs(gated) do
+				if IsValid(c) then
+					c:SetEnabled(on)
+					c:SetAlpha(on and 255 or 110)
+				end
+			end
+		end
+		refreshGate()
+		-- Poll convar via Think (no per-convar callback we'd have to clean up).
+		panel.Think = function() refreshGate() end
 	end)
 
 	-- ── Culling ────────────────────────────────────────────────────────────────
