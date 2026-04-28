@@ -119,12 +119,11 @@ local function onPreDrawSkyBox()
 	end
 
 		-- Prefer the live texture over the static _tex3 string so that if
-		-- frustum masks have set an RT on this PT, we restore the RT, not
+		-- cascade masks have set an RT on this PT, we restore the RT, not
 		-- the stale static mask name (which would break the RT chain).
-		-- FM.GetActiveRT(ent, idx) returns the RT if frustum masks are active.
-		local fmRT = RealCSM.FrustumMasks and _ownerEnt
-			and RealCSM.FrustumMasks._activeRTs
-			and RealCSM.FrustumMasks._activeRTs[SKY_LAMP_IDX]
+		local fmRT = RealCSM.CascadeMasks and _ownerEnt
+			and RealCSM.CascadeMasks._activeRTs
+			and RealCSM.CascadeMasks._activeRTs[SKY_LAMP_IDX]
 	-- Save lamp 3 state only.
 	local _, l, r, t, b = pt:GetOrthographic()
 	_savedState = {

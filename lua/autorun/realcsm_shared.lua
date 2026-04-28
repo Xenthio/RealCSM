@@ -26,7 +26,8 @@ if SERVER then
 	util.AddNetworkString("RealCSMSkyCameraPos")        -- server→client: sky_camera world position
 
 	AddCSLuaFile("realcsm/spread.lua")
-	AddCSLuaFile("realcsm/frustummasks.lua")
+	AddCSLuaFile("realcsm/cascademasks.lua")
+	AddCSLuaFile("realcsm/frustumplacement.lua")
 end
 
 -- ── PlayerInitialSpawn full-load trick ─────────────────────────────────────

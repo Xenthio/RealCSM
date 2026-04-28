@@ -59,7 +59,13 @@ local clientDefs = {
 	-- mask_end) with runtime render targets painted to match the camera view
 	-- frustum projected into light space. Cascades tile without overlap and
 	-- without wasting texels on empty corners. MVP uses AABB cutouts.
-	{ "csm_frustum_masks",                    0,        true,  false },
+	-- Runtime frustum-matched cascade placement: each cascade's projected
+	-- texture is positioned/sized to tightly fit its view-frustum slab in
+	-- light space. Replaces the static circular-mask layout.
+	{ "csm_frustum_placement",                0,        true,  false },
+	-- Soft cutout masks for cascade overlap. Independent of placement: works
+	-- whether cascades are placed by frustum_placement or by the static path.
+	{ "csm_cascade_masks",                    0,        true,  false },
 	{ "csm_frustum_debug",                    0,        true,  false },
 	{ "csm_frustum_viz",                      0,        true,  false },
 	-- Auto depth-range: trace-based NearZ/FarZ calculation instead of hardcoded values.

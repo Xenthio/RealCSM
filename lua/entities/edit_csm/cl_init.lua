@@ -6,7 +6,8 @@ include("realcsm/util.lua")
 include("realcsm/rtt.lua")
 include("realcsm/skyboxfix.lua")
 include("realcsm/spread.lua")
-include("realcsm/frustummasks.lua")
+include("realcsm/cascademasks.lua")
+include("realcsm/frustumplacement.lua")
 include("realcsm/depthrange.lua")
 include("realcsm/skyboxlamp.lua")
 include("realcsm/skyvis.lua")
@@ -265,7 +266,7 @@ function ENT:_showFirstTimeSpawnUI()
 	RunConsoleCommand("r_flashlightdepthres", "1024")
 
 	local Frame = vgui.Create("DFrame")
-	Frame:SetSize(330, 410)
+	Frame:SetSize(330, 450)
 	Frame:Center()
 	Frame:SetTitle("CSM First Time Spawn!")
 	Frame:SetVisible(true)
@@ -335,7 +336,7 @@ function ENT:_showFirstTimeSpawnUI()
 	frustumCheck:SetPos(15, 281)
 	frustumCheck:SetSize(300, 24)
 	frustumCheck:SetTextColor(Color(255,255,255))
-	frustumCheck:SetConVar("csm_frustum_masks")
+	frustumCheck:SetConVar("csm_frustum_placement")
 
 	local frustumLbl = vgui.Create("DLabel", Frame)
 	frustumLbl:SetPos(39, 301)
@@ -349,9 +350,22 @@ function ENT:_showFirstTimeSpawnUI()
 	frustumLbl2:SetTextColor(Color(180,180,180))
 	frustumLbl2:SetText("Considerable quality improvement with little cost")
 
+	local masksCheck = vgui.Create("DCheckBoxLabel", Frame)
+	masksCheck:SetText("Soft cutout masks between cascades (EXPERIMENTAL)")
+	masksCheck:SetPos(15, 336)
+	masksCheck:SetSize(300, 24)
+	masksCheck:SetTextColor(Color(255,255,255))
+	masksCheck:SetConVar("csm_cascade_masks")
+
+	local masksLbl = vgui.Create("DLabel", Frame)
+	masksLbl:SetPos(39, 356)
+	masksLbl:SetSize(300, 20)
+	masksLbl:SetTextColor(Color(180,180,180))
+	masksLbl:SetText("Hides cascade overlap. Works with or without frustum placement.")
+
 	local continueBtn = vgui.Create("DButton", Frame)
 	continueBtn:SetText("Continue")
-	continueBtn:SetPos(175, 368)
+	continueBtn:SetPos(175, 408)
 	continueBtn.DoClick = function()
 		file.Write("realcsm.txt", "two")
 		Frame:Close()
@@ -359,7 +373,7 @@ function ENT:_showFirstTimeSpawnUI()
 
 	local cancelBtn = vgui.Create("DButton", Frame)
 	cancelBtn:SetText("Cancel")
-	cancelBtn:SetPos(95, 368)
+	cancelBtn:SetPos(95, 408)
 	cancelBtn.DoClick = function()
 		RunConsoleCommand("csm_enabled", "0")
 		Frame:Close()
@@ -623,8 +637,8 @@ function ENT:Think()
 				-- Recompute light offset table for the new lamp set, and restore
 				-- static textures if FM was active (FM skips when spread is on).
 				self:allocLights()
-				if RealCSM.FrustumMasks then
-					RealCSM.FrustumMasks._activeRTs = {}
+				if RealCSM.CascadeMasks then
+					RealCSM.CascadeMasks.ClearActive()
 				end
 			end
 		else
@@ -923,14 +937,14 @@ function ENT:Think()
 		stormfoxApp = Util.CalculateAppearance((pitch + -180) / 360)
 	end
 
-	-- ── Runtime frustum cutout masks + placement (experimental) ─────────────
-	-- When csm_frustum_masks is on, the FrustumMasks module OWNS per-cascade
-	-- SetPos / SetAngles / SetOrthographic, placing each PT at the center of
-	-- its view-frustum slice AABB in light space (proper CSM placement).
+	-- ── Runtime frustum cascade placement (experimental) ───────────────────
+	-- When csm_frustum_placement is on, FrustumPlacement OWNS per-cascade
+	-- SetPos / SetAngles / SetOrthographic, placing each PT at the center
+	-- of its view-frustum slice AABB in light space (proper CSM placement).
 	-- The base Think loop below skips those calls when this flag is set.
 	local frustumPlacementActive = false
-	if RealCSM.FrustumMasks
-		and GetConVar("csm_frustum_masks"):GetBool()
+	if RealCSM.FrustumPlacement
+		and GetConVar("csm_frustum_placement"):GetBool()
 		and GetConVar("csm_cascade_count"):GetInt() > 1
 		and not spreadEnabled then
 		local cascades, splits = {}, {}
@@ -941,35 +955,33 @@ function ENT:Think()
 			end
 		end
 
-		-- Proper cascade splits (PSSM-style, pure log distribution for
-		-- tight near cascade). Covers nearZ..maxViewDist along view.
-		-- Use a fixed reasonable far distance; don't use sizeFar which is
-		-- an ortho half-size, not a view-depth.
 		local maxViewDist = math.min(sizeFar > 0 and sizeFar or 4000, 4000)
-		splits = RealCSM.FrustumMasks.ComputeSplits(7, maxViewDist, #cascades, 1.0)
+		splits = RealCSM.FrustumPlacement.ComputeSplits(7, maxViewDist, #cascades, 1.0)
 
 		if #cascades > 1 then
-			-- GetViewEntity():GetPos() is reliable in Think; EyePos() isn't.
 			local viewEnt = GetViewEntity()
 			local realEyePos = IsValid(viewEnt) and (viewEnt:EyePos() or viewEnt:GetPos()) or vector_origin
 			local realEyeAng = IsValid(viewEnt) and (viewEnt:EyeAngles() or viewEnt:GetAngles()) or angle_zero
 			local realFov    = (IsValid(LocalPlayer()) and LocalPlayer():GetFOV()) or 75
-			frustumPlacementActive = RealCSM.FrustumMasks.UpdatePlacement(
+			frustumPlacementActive = RealCSM.FrustumPlacement.UpdatePlacement(
 				self, sunAngle, self:GetHeight(), splits, cascades,
 				realEyePos, realEyeAng, realFov
 			)
 		end
 	end
 
-	-- Track frustum-placement state transitions so we only restore default
-	-- textures once when turning OFF (not every frame).
-	local wasActive = self._frustumPlacementWas or false
-	local needsRestore = wasActive and not frustumPlacementActive
+	-- Track frustum-placement / cascade-mask state so we restore default
+	-- textures exactly once when whichever owned the cascade textures turns off.
+	local masksWanted = GetConVar("csm_cascade_masks"):GetBool() and not spreadEnabled
+	local masksOwning = masksWanted or frustumPlacementActive
+	local wasOwning   = self._cascadeMasksOwned or false
+	local needsRestore = wasOwning and not masksOwning
+	self._cascadeMasksOwned = masksOwning
 	self._frustumPlacementWas = frustumPlacementActive
-	-- Clear the active RT table when frustum masks go inactive so SkyboxLamp
-	-- falls back to static texture strings on restore.
-	if needsRestore and RealCSM.FrustumMasks then
-		RealCSM.FrustumMasks._activeRTs = {}
+	-- Clear the active RT table on full disable so SkyboxLamp falls back to
+	-- the static texture string path.
+	if needsRestore and RealCSM.CascadeMasks then
+		RealCSM.CascadeMasks.ClearActive()
 	end
 
 	-- ── Auto NearZ / FarZ ────────────────────────────────────────────────────
@@ -1187,6 +1199,33 @@ function ENT:Think()
 		pt:SetConstantAttenuation(1)
 
 		pt:Update()
+	end
+
+	-- ── Standalone cascade masks (no frustum placement) ────────────────────
+	-- If masks are enabled but the runtime placement path didn't claim the
+	-- cascades this frame, derive cx/cy/half from the static concentric
+	-- ortho boxes (all centered on `position`) and refresh masks.
+	if masksWanted and not frustumPlacementActive and RealCSM.CascadeMasks then
+		local sunRight = sunAngle:Right()
+		local sunUp    = sunAngle:Up()
+		local posCx = position:Dot(sunRight)
+		local posCy = position:Dot(sunUp)
+		local cmList = {}
+		for ci = 1, 4 do
+			local pt = self.ProjectedTextures[ci]
+			local sz = cascadeSize[ci]
+			if IsValid(pt) and sz then
+				cmList[#cmList + 1] = {
+					pt   = pt,
+					cx   = posCx,
+					cy   = posCy,
+					half = sz,
+				}
+			end
+		end
+		if #cmList > 0 then
+			RealCSM.CascadeMasks.Refresh(self, cmList)
+		end
 	end
 
 	-- ── NearZ/FarZ debug overlay ──────────────────────────────────────────────────────
