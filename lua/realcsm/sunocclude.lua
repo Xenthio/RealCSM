@@ -332,7 +332,6 @@ function M.Think(_ignoredViewPos, sunAngle, lampTable)
 					end
 					_savedShadows[i] = pt:GetEnableShadows()
 					pt:SetEnableShadows(false)
-					pt:SetOrthographic(true, 0.001, 0.001, 0.001, 0.001)
 					pt:Update()
 				end
 			end
@@ -361,7 +360,7 @@ function M.Restore(lampTable)
 		if IsValid(pt) then
 			if _savedOrthos[i] then
 				local s = _savedOrthos[i]
-				pt:SetOrthographic(true, s, s, s, s)
+				pt:SetEnableShadows(true)
 				_savedOrthos[i] = nil
 			end
 			-- Restore shadows; default true if we somehow lost the saved value.
