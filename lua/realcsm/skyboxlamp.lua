@@ -175,7 +175,7 @@ local function onPostDrawSkyBox()
 		for i, s in pairs(_savedOrthos) do
 			local lpt = _lampTable and _lampTable[i]
 			if IsValid(lpt) then
-				lpt:SetEnableShadows( true )
+				lpt:SetEnableShadows(true)
 				lpt:Update()
 			end
 		end
