@@ -774,7 +774,10 @@ function ENT:Think()
 				-- light_environment is absent from engine edict list.
 				local nikInfo = RealCSM.NikNaksSunInfo and RealCSM.NikNaksSunInfo.Get()
 				if nikInfo then
-					print("[Real CSM] - No env_sun; using NikNaks angles.")
+					if not self._warnedNikNaksFallback then
+						print("[Real CSM] - No env_sun; using NikNaks angles.")
+						self._warnedNikNaksFallback = true
+					end
 					local ang = nikInfo.angle
 					pitch = ang.p
 					yaw   = ang.y
@@ -782,7 +785,10 @@ function ENT:Think()
 				else
 					local shadowCtrl = ents.FindByClass("shadow_control")[1]
 					if shadowCtrl then
-						print("[Real CSM] - No env_sun and NikNaks not installed; using shadow_control angles.")
+						if not self._warnedShadowCtrlFallback then
+							print("[Real CSM] - No env_sun and NikNaks not installed; using shadow_control angles.")
+							self._warnedShadowCtrlFallback = true
+						end
 						local ang = shadowCtrl:GetAngles()
 						pitch = ang.pitch + 90
 						yaw   = ang.yaw
