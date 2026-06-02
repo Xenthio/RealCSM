@@ -361,6 +361,7 @@ function M.Restore(lampTable)
 		if IsValid(pt) then
 			if _savedOrthos[i] then
 				local s = _savedOrthos[i]
+				pt:SetEnableShadows(true)
 				pt:SetOrthographic(true, s, s, s, s)
 				_savedOrthos[i] = nil
 			end

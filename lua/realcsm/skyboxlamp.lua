@@ -113,6 +113,7 @@ local function onPreDrawSkyBox()
 				local _, l, r, t, b = lpt:GetOrthographic()
 				_savedOrthos[i] = (l + r + t + b) / 4
 				lpt:SetOrthographic(true, 0.001, 0.001, 0.001, 0.001)
+				lpt:SetEnableShadows(false)
 				lpt:Update()
 			end
 		end
@@ -176,6 +177,7 @@ local function onPostDrawSkyBox()
 			local lpt = _lampTable and _lampTable[i]
 			if IsValid(lpt) then
 				lpt:SetOrthographic(true, s, s, s, s)
+				lpt:SetEnableShadows(true)
 				lpt:Update()
 			end
 		end
