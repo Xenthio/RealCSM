@@ -933,15 +933,18 @@ function ENT:Think()
 			end
 		end
 	end
-	local stormfoxEnabled  = GetConVar("csm_stormfoxsupport"):GetInt() == 1
+	local _cv_sfSupport    = GetConVar("csm_stormfoxsupport")
+	local stormfoxEnabled  = _cv_sfSupport and _cv_sfSupport:GetInt() == 1 or false
 	local depthBias        = GetConVar("csm_depthbias"):GetFloat()
 	local slopeScaleBias   = GetConVar("csm_depthbias_slopescale"):GetFloat()
 	local distanceBias     = GetConVar("csm_depthbias_distancescale"):GetFloat()
 	local debugCascade     = GetConVar("csm_debug_cascade"):GetBool()
-	local colouredSun      = GetConVar("csm_stormfox_coloured_sun"):GetBool()
+	local _cv_sfColour     = GetConVar("csm_stormfox_coloured_sun")
+	local colouredSun      = _cv_sfColour and _cv_sfColour:GetBool() or false
 	local filterBase       = GetConVar("csm_filter"):GetFloat()
 	local filterDist       = GetConVar("csm_filter_distancescale"):GetBool()
-	local stormfoxBrMul    = GetConVar("csm_stormfox_brightness_multiplier"):GetFloat()
+	local _cv_sfBrMul      = GetConVar("csm_stormfox_brightness_multiplier")
+	local stormfoxBrMul    = _cv_sfBrMul and _cv_sfBrMul:GetFloat() or 1
 	local hdr              = GetConVar("csm_hashdr"):GetInt() == 1
 	local spreadSamples    = GetConVar("csm_spread_samples"):GetInt()
 

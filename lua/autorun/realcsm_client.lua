@@ -203,7 +203,7 @@ local ConVarsDefault = {
 	csm_furthershadows = "1",
 	csm_sizescale      = "1",
 	csm_perfmode       = "0",
-	csm_depthbias      = "0.000002",
+	csm_depthbias      = "0.000035",
 	csm_depthbias_slopescale = "2",
 	-- cascade tab convars included so the General preset resets everything
 	csm_cascade_masks   = "0",
@@ -343,6 +343,31 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Texel Snapping", "csm_texelsnap")
 		panel:ControlHelp("Snaps each cascade's position to its shadow-map texel grid in light space, eliminating shadow shimmer as the camera moves.")
+
+		local qualityDefaults = {
+			r_flashlightdepthres        = "0",
+			csm_depthresasmultiple      = "0",
+			csm_filter                  = "0.08",
+			csm_filter_distancescale    = "1",
+			csm_depthformat             = "16",
+			csm_depthbias               = "0.000035",
+			csm_depthbias_slopescale    = "2",
+			csm_propradiosity           = "4",
+			csm_wakeprops               = "1",
+			csm_blobbyao                = "0",
+			csm_spread                  = "0",
+			csm_spread_radius           = "0.5",
+			csm_spread_samples          = "7",
+			csm_spread_method           = "0",
+			csm_spread_layers           = "1",
+			csm_texelsnap               = "1",
+		}
+		local qualityReset = panel:Button("Reset Quality settings to defaults")
+		qualityReset.DoClick = function()
+			for cv, val in pairs(qualityDefaults) do
+				RunConsoleCommand(cv, val)
+			end
+		end
 	end)
 
 	-- ── Cascades ───────────────────────────────────────────────────────
@@ -483,6 +508,19 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("View frustum cull", "csm_sunocclude_frustum")
 		panel:ControlHelp("Also park lamps when sunlit areas are off-screen. Padded by 30% FOV to reduce edge pop. Works with both modes.")
+
+		local cullingDefaults = {
+			csm_auto_nearfarz       = "0",
+			csm_sunocclude          = "0",
+			csm_sunocclude_mode     = "0",
+			csm_sunocclude_frustum  = "1",
+		}
+		local cullingReset = panel:Button("Reset Culling settings to defaults")
+		cullingReset.DoClick = function()
+			for cv, val in pairs(cullingDefaults) do
+				RunConsoleCommand(cv, val)
+			end
+		end
 	end)
 
 	-- ── Debug ──────────────────────────────────────────────────────────────────
@@ -501,6 +539,20 @@ hook.Add("PopulateToolMenu", "RealCSMClient", function()
 
 		panel:CheckBox("Debug: Sun Occlusion overlay", "csm_occlude_debug")
 		panel:ControlHelp("Shows current leaf, mode, frustum state and culling decision on screen.")
+
+		local debugDefaults = {
+			csm_debug_cascade   = "0",
+			csm_frustum_debug   = "0",
+			csm_frustum_viz     = "0",
+			csm_debug_nearfarz  = "0",
+			csm_occlude_debug   = "0",
+		}
+		local debugReset = panel:Button("Reset Debug settings to defaults")
+		debugReset.DoClick = function()
+			for cv, val in pairs(debugDefaults) do
+				RunConsoleCommand(cv, val)
+			end
+		end
 	end)
 end)
 
